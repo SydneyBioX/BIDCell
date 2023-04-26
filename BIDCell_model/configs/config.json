@@ -1,0 +1,41 @@
+{
+    "data_params":{
+        "train_split_pct": 80,
+        "patch_size": 48,
+        "cell_types": ["B", "CD4Tconv/Treg", "CD8T/CD8Tex", "DC", "Endothelial", "Epithelial", "Fibrolasts", "Malignant", "Mast", "Mono/Macro", "Myofibrolasts", "NK", "Neutrophils", "Plasma", "SMC"],
+        "elongated": ["Endothelial", "Fibrolasts", "Myofibrolasts", "SMC"]
+    },
+    "training_params":{
+        "total_epochs": 1,
+        "learning_rate": 0.00001,
+        "beta1": 0.9,
+        "beta2": 0.999,
+        "l2_reg_alpha": 0.0001,
+        "optimizer": "adam",
+        "ne_weight": 1.0,
+        "os_weight": 1.0,
+        "cc_weight": 1.0,
+        "ov_weight": 1.0,
+        "pos_weight": 1.0,
+        "neg_weight": 1.0
+    },
+    "save_freqs":{
+        "model_freq": 1000,
+        "sample_freq": 100
+    },
+    "data_sources": {
+        "expr_fp": "../data/patches_",
+        "expr_fp_ext": ".hdf5",
+        "nuclei_fp": "../data/nuclei.tif",
+        "nuclei_types_fp": "../data/nuclei_cell_type.h5",
+        "pos_markers_fp": "../data/sc_breast_markers_pos_maxoverlap4.csv",
+        "neg_markers_fp": "../data/sc_breast_markers_neg.csv",
+        "atlas_fp": "../data/sc_breast.csv"
+    },
+    "experiment_dirs": {
+        "load_dir": "last",
+        "model_dir" : "models",
+        "test_output_dir" : "test_output",
+        "samples_dir": "samples"
+    }
+}

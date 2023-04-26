@@ -1,0 +1,4 @@
+**/__pycache__
+data/expr_maps
+BIDCell/experiments
+*.tif
