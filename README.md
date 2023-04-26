@@ -34,6 +34,7 @@ Currently, our repository provides the processed single cell reference for breas
 
 To train and run BIDCell, first download the dataset (Xenium Output Bundle In Situ Replicate 1) from https://www.10xgenomics.com/products/xenium-in-situ/preview-dataset-human-breast 
 
+Unzip ``data/nuclei.zip`` and place the image as such: ``data/nuclei.tif``
 
 
 ### Process the transcript data
