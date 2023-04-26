@@ -11,7 +11,7 @@ TODO: Add fig 1a
 
 1. Clone repository:
     
-        git clone TODO: add to github 
+        git clone https://github.com/SydneyBioX/BIDCell.git
 
 2. Create virtual environment:
     
