@@ -32,14 +32,14 @@ TODO: Add fig 1a
 
 Currently, our repository provides the processed single cell reference for breast cancer, with the positive and negative markers. We also provide the nuclei segmentation and nuclei cell-type classifications for a public dataset. We will be including instructions for performing these preprocessing tasks for other datasets shortly.
 
-To train and run BIDCell, first download the dataset (Xenium Output Bundle In Situ Replicate 1) from https://www.10xgenomics.com/products/xenium-in-situ/preview-dataset-human-breast 
+Unzip the provided nuclei segmentation ``data/nuclei.zip`` and place the image as such: ``data/nuclei.tif``
 
-Unzip ``data/nuclei.zip`` and place the image as such: ``data/nuclei.tif``
+To train and run BIDCell, download the dataset (Xenium Output Bundle In Situ Replicate 1) from https://www.10xgenomics.com/products/xenium-in-situ/preview-dataset-human-breast 
 
 
 ### Process the transcript data
 
-1. Put ``transcripts.csv.gz`` into the ``/preprocess`` folder, or note its path.
+1. Put ``transcripts.csv.gz`` from the Xenium Output Bundle into the ``/preprocess`` folder, or note its path.
 
 2. Convert detected transcripts to image maps of gene expressions:
 
@@ -110,7 +110,7 @@ For example,
 	
     If you receive the error: ``pickle.UnpicklingError: pickle data was truncated``, try reducing NUM_CPUS
 
-    
+
 ## Citation
 
 If BIDCell has assisted you with your work, please kindly cite our paper:
