@@ -91,7 +91,7 @@ Specify ``--test_epoch`` and ``--test_step`` of the saved model to generate pred
 
     python postprocess_predictions.py --dir_id last --epoch 1 --step 4000 --nucleus_fp ../data/nuclei.tif
 
-    or, specify name of directory under /BIDCell/experiments/, e.g.: 
+or, specify name of directory under /BIDCell/experiments/, e.g.: 
 
     python postprocess_predictions.py --dir_id 2023_April_18_19_31_46 --epoch 1 --step 4000 --nucleus_fp ../data/nuclei.tif
 
@@ -108,7 +108,7 @@ For example,
 	
     python extract_cell_expressions.py --fp_seg ../BIDCell_model/experiments/2023_April_18_19_31_46/test_output/epoch_1_step_4000_connected.tif --fp_transcripts ../preprocess/transcripts.csv.gz --output_dir cell_gene_matrices/2023_April_18_19_31_46
 	
-    If you receive the error: ``pickle.UnpicklingError: pickle data was truncated``, try reducing NUM_CPUS
+If you receive the error: ``pickle.UnpicklingError: pickle data was truncated``, try reducing NUM_CPUS
 
 
 ## Citation
