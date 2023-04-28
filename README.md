@@ -108,7 +108,9 @@ For example,
 	
     python extract_cell_expressions.py --fp_seg ../BIDCell_model/experiments/2023_April_18_19_31_46/test_output/epoch_1_step_4000_connected.tif --fp_transcripts ../preprocess/transcripts.csv.gz --output_dir cell_gene_matrices/2023_April_18_19_31_46
 	
+    If you receive the error: ``pickle.UnpicklingError: pickle data was truncated``, try reducing NUM_CPUS
 
+    
 ## Citation
 
 If BIDCell has assisted you with your work, please kindly cite our paper:
