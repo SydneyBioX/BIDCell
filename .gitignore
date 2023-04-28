@@ -2,3 +2,6 @@
 data/expr_maps
 BIDCell/experiments
 *.tif
+*.pbs
+transcripts*.csv
+*.csv.gz

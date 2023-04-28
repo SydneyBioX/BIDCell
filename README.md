@@ -53,6 +53,8 @@ Unzip ``data/nuclei.zip`` and place the image as such: ``data/nuclei.tif``
 
         python generate_expr_maps.py --fp_transcripts /PATH/TO/transcripts.csv.gz --n_processes NUM_CPUS
 
+    If you receive the error: ``pickle.UnpicklingError: pickle data was truncated``, try reducing NUM_CPUS
+
     By default, the maps will be stored in ``/data/expr_maps``
 
 3. Split expression maps to patches for the deep learning model:
