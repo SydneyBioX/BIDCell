@@ -9,6 +9,8 @@ TODO: Add fig 1a
 
 ## Installation
 
+A GPU is strongly recommended for this code due to the deep learning component.
+
 1. Clone repository:
     
         git clone https://github.com/SydneyBioX/BIDCell.git
