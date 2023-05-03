@@ -9,7 +9,8 @@ TODO: Add fig 1a
 
 ## Installation
 
-A GPU is strongly recommended for this code due to the deep learning component, and 32GB RAM for data processing. We ran BIDCell on a Linux system with a 12GB NVIDIA GTX Titan V GPU, Intel(R) Core(TM) i9-9900K CPU @ 3.60GHz with 16 threads, and 64GB RAM.
+> **Note**: A GPU is strongly recommended for this code due to the deep learning component, and 32GB RAM for data processing.
+We ran BIDCell on a Linux system with a 12GB NVIDIA GTX Titan V GPU, Intel(R) Core(TM) i9-9900K CPU @ 3.60GHz with 16 threads, and 64GB RAM.
 
 1. Clone repository:
     
