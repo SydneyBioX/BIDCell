@@ -1,4 +1,5 @@
 **/__pycache__
+**/cell_gene_matrices
 data/expr_maps
 BIDCell/experiments
 *.tif
