@@ -1,11 +1,10 @@
 # BIDCell: Biologically-informed deep learning for cell segmentation of subcelluar spatial transcriptomics data 
 
-TODO: add abstract
+Recent advances in subcellular imaging transcriptomics platforms have enabled spatial mapping of the expression of hundreds of genes at subcellular resolution and provide topographic context to the data. This has created a new data analytics challenge to correctly identify cells and accurately assign transcripts, ensuring that all available data can be utilised. To this end, we introduce BIDCell, a self-supervised deep learning-based framework that incorporates cell type and morphology information via novel biologically-informed loss functions. We also introduce CellSPA, a comprehensive evaluation framework consisting of metrics in five complementary categories for cell segmentation performance. We demonstrate that BIDCell outperforms other state-of-the-art methods according to many CellSPA metrics across a variety of tissue types of technology platforms, including 10x Genomics Xenium. Taken together, we find that BIDCell can facilitate single-cell spatial expression analyses, including cell-cell interactions, enabling great potential in biological discovery.
+
+![alt text](Figure1.png)
 
 For more details, please refer to our paper (TODO: link to paper).
-
-TODO: Add fig 1a
-
 
 ## Installation
 
