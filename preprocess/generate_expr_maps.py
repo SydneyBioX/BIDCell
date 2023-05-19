@@ -69,7 +69,6 @@ def main(config):
     print('%d unique genes' %len(gene_names))
 
     gene_names = natsort.natsorted(gene_names)
-    gene_names = gene_names
 
     with open(dir_output+'/'+config.fp_out_gene_names, 'w') as f:
         for line in gene_names:
