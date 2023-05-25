@@ -9,6 +9,7 @@ import cv2
 from scipy import ndimage as ndi
 import glob 
 import multiprocessing as mp
+from collections import Counter
 
 def sorted_alphanumeric(data):
     convert = lambda text: int(text) if text.isdigit() else text.lower()
@@ -32,7 +33,6 @@ def postprocess_connect(img, nuclei):
     cell_ids = np.unique(img)
     cell_ids = cell_ids[1:]
 
-    # Random order
     random.shuffle(cell_ids)
 
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5))
@@ -94,7 +94,6 @@ def remove_islands(img, nuclei):
     cell_ids = np.unique(img)
     cell_ids = cell_ids[1:]
 
-    # Random order
     random.shuffle(cell_ids)
 
     # Touch diagonally = same object
@@ -198,7 +197,7 @@ def process_chunk(chunk, patch_size, img_whole, nuclei_img, output_dir):
 
 
 
-def combine(config, dir_id):
+def combine(config, dir_id, patch_size, nuclei_img):
     """
     Combine the patches previously output by the connect function
     """
@@ -219,16 +218,97 @@ def combine(config, dir_id):
     patch_h = sample.shape[0]
     patch_w = sample.shape[1]
 
+    cell_ids = []
+
     for fp in fp_seg:
         patch = tifffile.imread(fp)
+
+        patch_ids = np.unique(patch)
+        patch_ids = patch_ids[patch_ids != 0]
+        cell_ids.extend(patch_ids)
+
         fp_coords = os.path.basename(fp).split('.')[0]
         fp_x = int(fp_coords.split('_')[0])
         fp_y = int(fp_coords.split('_')[1])
+
+        # Place into appropriate location
         seg_final[fp_x:fp_x+patch_h, fp_y:fp_y+patch_w] = patch[:]
 
-    tifffile.imwrite(fp_output_seg, seg_final.astype(np.uint32), photometric='minisblack')
+    # If cell is split by windowing, keep component with nucleus 
+    count_ids = Counter(cell_ids)
+    windowed_ids = [k for k, v in count_ids.items() if v > 1]
+
+    # Check along borders
+    h_starts = list(np.arange(0, height-patch_size, patch_size))
+    w_starts = list(np.arange(0, width-patch_size, patch_size))
+    h_starts.append(height-patch_size)
+    w_starts.append(width-patch_size)
+
+    # Mask along grid
+    h_starts_wide = []
+    w_starts_wide = []
+    for i in range(-10,11):
+        h_starts_wide.extend([x+i for x in h_starts])
+        w_starts_wide.extend([x+i for x in w_starts])
+
+    mask = np.zeros(seg_final.shape)
+    mask[h_starts_wide,:] = 1
+    mask[:,w_starts_wide] = 1
+
+    masked = mask*seg_final
+    masked_ids = np.unique(masked)[1:]
+
+    # IDs to check for split bodies
+    to_check_ids = list(set(masked_ids) & set(windowed_ids))
+
+    return seg_final, to_check_ids
     
+
+
+def process_check_splits(config, dir_id, nuclei_img, seg_final, chunk_ids):
+    """
+    Check and fix cells split by windowing
+    """
+
+    chunk_seg = np.zeros(seg_final.shape, dtype=np.uint32)
     
+    # Touch diagonally = same object
+    s = ndi.generate_binary_structure(2,2)
+
+    for i in chunk_ids:
+        i_mask = np.where(seg_final == i, 1, 0).astype(np.uint8)
+
+        # Number of blobs belonging to cell
+        unique_ids, num_blobs = ndi.label(i_mask, structure=s)
+
+        # Bounding box
+        bb = np.argwhere(unique_ids)
+        (ystart, xstart), (ystop, xstop) = bb.min(0), bb.max(0) + 1 
+        unique_ids_crop = unique_ids[ystart:ystop, xstart:xstop]
+
+        nucleus_mask = np.where(nuclei_img == i, 1, 0).astype(np.uint8)
+        nucleus_mask = nucleus_mask[ystart:ystop, xstart:xstop]
+
+        if num_blobs > 1:
+
+            # Keep the blob with max overlap to nucleus 
+            amount_overlap = np.zeros(num_blobs)
+
+            for i_blob in range(1,num_blobs+1):
+                blob = np.where(unique_ids_crop == i_blob, 1, 0)
+                amount_overlap[i_blob-1] = np.sum(blob*nucleus_mask)
+            blob_keep = np.argmax(amount_overlap) + 1
+            
+            # Put into final segmentation
+            final_mask = np.where(unique_ids_crop == blob_keep, 1, 0)
+            # seg_final = np.where(seg_final == i, 0, seg_final)
+            chunk_seg[ystart:ystop, xstart:xstop] = np.where(final_mask == 1, i, chunk_seg[ystart:ystop, xstart:xstop])
+        
+        else:
+            chunk_seg = np.where(i_mask == 1, i, chunk_seg)
+
+    tifffile.imwrite(dir_id + '/' + str(chunk_ids[0]) + '_checked_splits.tif', chunk_seg, photometric='minisblack')
+
 
 
 if __name__ == '__main__':
@@ -264,9 +344,9 @@ if __name__ == '__main__':
     print('%d patches available' %len(coords_starts))
 
     num_processes = mp.cpu_count()
-    
+    print('Num multiprocessing splits: %d' %num_processes)
+
     coords_splits = np.array_split(coords_starts, num_processes)
-    print('Num multiprocessing splits: %d' %len(coords_splits))
     processes = []
 
     for chunk in coords_splits:
@@ -277,5 +357,35 @@ if __name__ == '__main__':
     for p in processes:
         p.join()
 
+    print('Combining results')
+    seg_final, to_check_ids = combine(config, dir_id, config.patch_size, nuclei_img)
+    # print(len(np.unique(seg_final)), len(to_check_ids))
 
-    combine(config, dir_id)
+    ids_splits = np.array_split(to_check_ids, num_processes)
+    processes = []
+
+    for chunk_ids in ids_splits:
+        p = mp.Process(target=process_check_splits, args=(config, dir_id, 
+                                                          nuclei_img, seg_final, 
+                                                          chunk_ids))
+        processes.append(p)
+        p.start()
+
+    for p in processes:
+        p.join()
+
+    check_mask = np.isin(seg_final, to_check_ids)
+    seg_final = np.where(check_mask==1, 0, seg_final)
+
+    fp_checked_splits = glob.glob(dir_id+'/*_checked_splits.tif', recursive=True)
+    for fp in fp_checked_splits:
+        checked_split = tifffile.imread(fp)
+        seg_final = np.where(checked_split > 0, checked_split, seg_final)
+        os.remove(fp)
+
+    # print(len(np.unique(seg_final)))
+
+    fp_dir = dir_id + 'epoch_%d_step_%d_connected' %(config.epoch, config.step)
+    fp_output_seg = fp_dir + '.tif'
+    print('Saved segmentation to %s' %fp_output_seg)
+    tifffile.imwrite(fp_output_seg, seg_final.astype(np.uint32), photometric='minisblack')
