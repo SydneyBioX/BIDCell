@@ -6,3 +6,5 @@ BIDCell_model/experiments
 *.pbs
 transcripts*.csv
 *.csv.gz
+BIDCell_model/check_cells.py
+BIDCell_model/show_cells_by_id.py

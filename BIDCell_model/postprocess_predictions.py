@@ -301,7 +301,16 @@ def process_check_splits(config, dir_id, nuclei_img, seg_final, chunk_ids):
             
             # Put into final segmentation
             final_mask = np.where(unique_ids_crop == blob_keep, 1, 0)
+
             # seg_final = np.where(seg_final == i, 0, seg_final)
+            
+            # # Double check the few outliers 
+            # unique_ids_2, num_blobs_2 = ndi.label(final_mask, structure=s)
+            # if num_blobs_2 > 1:
+            #     # Keep largest
+            #     blob_keep_2 = np.argmax(np.bincount(unique_ids_2)[1:]) + 1
+            #     final_mask = np.where(unique_ids_2 == blob_keep_2, 1, 0)
+
             chunk_seg[ystart:ystop, xstart:xstop] = np.where(final_mask == 1, i, chunk_seg[ystart:ystop, xstart:xstop])
         
         else:

@@ -1,10 +1,10 @@
 # BIDCell: Biologically-informed deep learning for cell segmentation of subcelluar spatial transcriptomics data 
 
+For more details, please refer to our paper: https://doi.org/10.1101/2023.06.13.544733
+
 Recent advances in subcellular imaging transcriptomics platforms have enabled spatial mapping of the expression of hundreds of genes at subcellular resolution and provide topographic context to the data. This has created a new data analytics challenge to correctly identify cells and accurately assign transcripts, ensuring that all available data can be utilised. To this end, we introduce BIDCell, a self-supervised deep learning-based framework that incorporates cell type and morphology information via novel biologically-informed loss functions. We also introduce CellSPA, a comprehensive evaluation framework consisting of metrics in five complementary categories for cell segmentation performance. We demonstrate that BIDCell outperforms other state-of-the-art methods according to many CellSPA metrics across a variety of tissue types of technology platforms, including 10x Genomics Xenium. Taken together, we find that BIDCell can facilitate single-cell spatial expression analyses, including cell-cell interactions, enabling great potential in biological discovery.
 
 ![alt text](Figure1.png)
-
-For more details, please refer to our paper (TODO: link to paper).
 
 ## Installation
 
@@ -119,4 +119,4 @@ If you receive the error: ``pickle.UnpicklingError: pickle data was truncated``,
 
 If BIDCell has assisted you with your work, please kindly cite our paper:
 
-- TODO: add citation
+Fu, X., Lin, Y., Lin, D., Mechtersheimer, D., Wang, C., Ameen, F., Ghazanfar, S., Patrick, E., Kim, J., & Yang, J. Y. H. (2023). Biologically-informed self-supervised learning for segmentation of subcellular spatial transcriptomics data. bioRxiv, 2023.2006.2013.544733. https://doi.org/10.1101/2023.06.13.544733
