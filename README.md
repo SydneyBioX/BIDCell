@@ -1,4 +1,4 @@
-# BIDCell: Biologically-informed deep learning for cell segmentation of subcelluar spatial transcriptomics data 
+# BIDCell: Biologically-informed self-supervised learning for segmentation of subcellular spatial transcriptomics data
 
 For more details, please refer to our paper: https://doi.org/10.1101/2023.06.13.544733
 
