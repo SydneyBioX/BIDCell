@@ -29,6 +29,8 @@ We ran BIDCell on a Linux system with a 12GB NVIDIA GTX Titan V GPU, Intel(R) Co
 
         pip install torch==1.5.0 torchvision==0.6.0 -f https://download.pytorch.org/whl/torch_stable.html
 
+    Installation of dependencies typically requires a few minutes. 
+
 
 ## Datasets and Preprocessing
 
@@ -113,6 +115,18 @@ For example,
     python extract_cell_expressions.py --fp_seg ../BIDCell_model/experiments/2023_April_18_19_31_46/test_output/epoch_1_step_4000_connected.tif --fp_transcripts ../preprocess/transcripts.csv.gz --output_dir cell_gene_matrices/2023_April_18_19_31_46
 	
 If you receive the error: ``pickle.UnpicklingError: pickle data was truncated``, try reducing NUM_CPUS
+
+
+### Additional information
+
+Expected outputs:
+- .tif file of segmented cells, where the value corresponds to cell IDs
+- .csv file of gene expressions of segmented cells
+
+Expected runtime (based on our system):
+- Training: ~10 mins for 4,000 steps
+- Inference: ~ 50 mins
+- Postprocessing: ~ 30 mins
 
 
 ## Citation
