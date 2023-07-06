@@ -6,3 +6,4 @@ tqdm==4.64.1
 h5py==2.9.0
 natsort==8.2.0
 glob2==0.7
+cellpose==2.1.1

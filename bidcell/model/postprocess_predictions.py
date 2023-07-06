@@ -326,7 +326,7 @@ if __name__ == '__main__':
     parser.add_argument('--dir_id', default='last', type=str)
     parser.add_argument('--epoch', default=1, type=int)
     parser.add_argument('--step', default=4000, type=int)
-    parser.add_argument('--nucleus_fp', default='../data/nuclei.tif', type=str)
+    parser.add_argument('--nucleus_fp', default='../../data/dataset_merscope_melanoma2/nuclei.tif', type=str)
     parser.add_argument('--patch_size', default=1024, type=int)
 
     config = parser.parse_args()
@@ -357,6 +357,8 @@ if __name__ == '__main__':
 
     coords_splits = np.array_split(coords_starts, num_processes)
     processes = []
+    
+    print('Processing...')
 
     for chunk in coords_splits:
         p = mp.Process(target=process_chunk, args=(chunk, patch_size, img_whole, nuclei_img, output_dir))

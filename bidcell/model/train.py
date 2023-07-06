@@ -116,7 +116,7 @@ def main(config):
             in enumerate(train_loader):
 
             # Permute channels axis to batch axis
-            # torch.Size([1, 48, 48, 313, n_cells]) to [n_cells, 313, 48, 48]
+            # torch.Size([1, patch_size, patch_size, 313, n_cells]) to [n_cells, 313, patch_size, patch_size]
             batch_x313 = batch_x313[0,:,:,:,:].permute(3,2,0,1)
             batch_sa = batch_sa.permute(3,0,1,2)
             batch_pos = batch_pos.permute(3,0,1,2)

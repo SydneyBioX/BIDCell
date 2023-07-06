@@ -13,6 +13,9 @@ import cv2
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 from scipy.ndimage import rotate 
+import re
+import glob 
+import natsort
 
 np.warnings.filterwarnings('ignore', category=np.VisibleDeprecationWarning)
 
@@ -24,10 +27,10 @@ class DataProcessing(data.Dataset):
         self.patch_size = data_params.patch_size 
         self.isTraining = isTraining
         
-        if shift_patches == 0:
-            self.expr_fp = data_sources.expr_fp + str(self.patch_size) + 'x' + str(self.patch_size)
-        else:
-            self.expr_fp = data_sources.expr_fp + str(self.patch_size) + 'x' + str(self.patch_size) + '_shift_' + str(shift_patches)
+        # if shift_patches == 0:
+            # self.expr_fp = data_sources.expr_fp + str(self.patch_size) + 'x' + str(self.patch_size)
+        # else:
+        self.expr_fp = data_sources.expr_fp + str(self.patch_size) + 'x' + str(self.patch_size) + '_shift_' + str(shift_patches)
 
         self.expr_fp_ext = data_sources.expr_fp_ext
 
@@ -50,36 +53,50 @@ class DataProcessing(data.Dataset):
         self.nuclei = self.nuclei.astype(np.int32)
         print('Loaded nuclei')
         print(self.nuclei.shape)
+        
+        expr_fp_ext = data_sources.expr_fp_ext
+        fp_patches_all = glob.glob(self.expr_fp + '/*' + expr_fp_ext)
+        fp_patches_all = natsort.natsorted(fp_patches_all)
 
-        # Get coordinates of non-overlapping patches
-        if shift_patches == 0:
-            h_starts = list(np.arange(0, self.nuclei.shape[0]-self.patch_size, self.patch_size))
-            w_starts = list(np.arange(0, self.nuclei.shape[1]-self.patch_size, self.patch_size))
+        # # Get coordinates of non-overlapping patches
+        # if shift_patches == 0:
+            # h_starts = list(np.arange(0, self.nuclei.shape[0]-self.patch_size, self.patch_size))
+            # w_starts = list(np.arange(0, self.nuclei.shape[1]-self.patch_size, self.patch_size))
             
-            # Include remainder patches on 
-            h_starts.append(self.nuclei.shape[0]-self.patch_size)
-            w_starts.append(self.nuclei.shape[1]-self.patch_size)
-        else:
-            h_starts = list(np.arange(shift_patches, self.nuclei.shape[0]-self.patch_size, self.patch_size))
-            w_starts = list(np.arange(shift_patches, self.nuclei.shape[1]-self.patch_size, self.patch_size))    
+            # # Include remainder patches on 
+            # h_starts.append(self.nuclei.shape[0]-self.patch_size)
+            # w_starts.append(self.nuclei.shape[1]-self.patch_size)
+        # else:
+            # h_starts = list(np.arange(shift_patches, self.nuclei.shape[0]-self.patch_size, self.patch_size))
+            # w_starts = list(np.arange(shift_patches, self.nuclei.shape[1]-self.patch_size, self.patch_size))    
 
-        coords_starts = [(x, y) for x in h_starts for y in w_starts]
+        # coords_starts = [(x, y) for x in h_starts for y in w_starts]
         
         # Randomly select train/test samples
         random.seed(1234)
-        n_coords = len(coords_starts)
+        n_coords = len(fp_patches_all)
         sample_ids = range(n_coords)
         sample_k = int(data_params.train_split_pct*n_coords/100)
         train_ids = random.sample(sample_ids, k=sample_k)
-        
+
         if self.isTraining:
-            self.coords_starts = [coords_starts[x] for x in train_ids] 
-            self.coords_starts = self.coords_starts
+            self.fp_patches = [fp_patches_all[x] for x in train_ids] 
         elif all_patches == True:
-            self.coords_starts = coords_starts
+            self.fp_patches = fp_patches_all
         else:
             test_ids = [x for x in sample_ids if x not in train_ids]
-            self.coords_starts = [coords_starts[x] for x in test_ids]
+            self.fp_patches = [fp_patches_all[x] for x in test_ids]
+
+        print('%d patches available' %len(self.fp_patches))
+        
+        # if self.isTraining:
+            # self.coords_starts = [coords_starts[x] for x in train_ids] 
+            # self.coords_starts = self.coords_starts
+        # elif all_patches == True:
+            # self.coords_starts = coords_starts
+        # else:
+            # test_ids = [x for x in sample_ids if x not in train_ids]
+            # self.coords_starts = [coords_starts[x] for x in test_ids]
 
         # Nuclei IDs with cell types and elongated nuclei
         h5f = h5py.File(self.nuclei_types_fp, 'r')
@@ -92,7 +109,7 @@ class DataProcessing(data.Dataset):
         nuclei_types_elong = [1 if x in idx_elong else 0 for x in self.nuclei_types_idx]
         self.nuclei_ids_elong = [x for i, x in enumerate(self.nuclei_types_ids) if nuclei_types_elong[i] == 1]
 
-        print('%d patches available' %len(self.coords_starts))
+        # print('%d patches available' %len(self.coords_starts))
 
         df_pos_markers = pd.read_csv(data_sources.pos_markers_fp, index_col=0)
         df_neg_markers = pd.read_csv(data_sources.neg_markers_fp, index_col=0)
@@ -136,22 +153,34 @@ class DataProcessing(data.Dataset):
 
     def __len__(self):
             'Denotes the total number of samples'
-            return len(self.coords_starts)
+            return len(self.fp_patches)
 
 
     def __getitem__(self, index):
             'Generates one sample of data'
-            coords = self.coords_starts[index]
-            coords_h1 = coords[0]
-            coords_w1 = coords[1]
-            coords_h2 = coords_h1 + self.patch_size
-            coords_w2 = coords_w1 + self.patch_size
+            # coords = self.coords_starts[index]
+            # coords_h1 = coords[0]
+            # coords_w1 = coords[1]
+            # coords_h2 = coords_h1 + self.patch_size
+            # coords_w2 = coords_w1 + self.patch_size
 
-            expr_fp = self.expr_fp + '/' + str(coords_h1) + 'x' + str(coords_w1) + self.expr_fp_ext
-            h5f = h5py.File(expr_fp, 'r')
+            # expr_fp = self.expr_fp + '/' + str(coords_h1) + 'x' + str(coords_w1) + self.expr_fp_ext
+            # h5f = h5py.File(expr_fp, 'r')
+            # expr = h5f['data'][:].astype(np.float64)
+            # h5f.close()
+
+            patch_fp = self.fp_patches[index]
+            h5f = h5py.File(patch_fp, 'r')
             expr = h5f['data'][:].astype(np.float64)
             h5f.close()
-    
+            
+            # Global coordinates 
+            expr_fp_g = re.findall(r'\d+', os.path.basename(patch_fp))
+            coords_h1 = int(expr_fp_g[0])
+            coords_w1 = int(expr_fp_g[1])
+            coords_h2 = coords_h1 + self.patch_size
+            coords_w2 = coords_w1 + self.patch_size
+            
             nucl = self.nuclei[coords_h1:coords_h2, coords_w1:coords_w2]
                         
             assert(expr.shape[0] == self.patch_size), print(expr.shape[0])
@@ -251,4 +280,4 @@ class DataProcessing(data.Dataset):
             if self.isTraining:
                 return expr_torch, nucl_torch, search_areas_torch, search_pos_torch, search_neg_torch, coords_h1, coords_w1, nucl_aug, expr_aug_sum
             else:
-                return expr_torch, nucl_torch, search_areas_torch, search_pos_torch, search_neg_torch, coords_h1, coords_w1, nucl_aug, expr_aug_sum, self.nuclei.shape[0], self.nuclei.shape[1]
+                return expr_torch, nucl_torch, search_areas_torch, search_pos_torch, search_neg_torch, coords_h1, coords_w1, nucl_aug, expr_aug_sum, self.nuclei.shape[0], self.nuclei.shape[1], self.expr_fp

@@ -8,6 +8,10 @@ from torch.utils.data import DataLoader
 import numpy as np
 import tifffile
 import pandas as pd 
+import glob
+import natsort
+import re
+import bisect
 
 from dataio.dataset_input import DataProcessing
 from model.model import UNet3Plus as Network
@@ -94,7 +98,7 @@ def main(config):
 
             model = model.eval()
 
-            for batch_idx, (batch_x313, batch_n, batch_sa, batch_pos, batch_neg, coords_h1, coords_w1, nucl_aug, expr_aug_sum, whole_h, whole_w) in enumerate(test_loader):
+            for batch_idx, (batch_x313, batch_n, batch_sa, batch_pos, batch_neg, coords_h1, coords_w1, nucl_aug, expr_aug_sum, whole_h, whole_w, expr_fp) in enumerate(test_loader):
             
                 if batch_idx == 0:
                     whole_seg = np.zeros((whole_h, whole_w), dtype=np.uint32)
@@ -136,17 +140,28 @@ def main(config):
                 whole_seg[coords_h1:coords_h1+json_opts.data_params.patch_size, 
                         coords_w1:coords_w1+json_opts.data_params.patch_size] = seg_patch.copy()
                     
-            # if shift_patches == 0:
-                # seg_fp = test_output_dir + '/' + "epoch_%d_step_%d_seg.tif" %(test_epoch, test_step)
-            # else:
             seg_fp = test_output_dir + '/' + "epoch_%d_step_%d_seg_shift%d.tif" %(test_epoch, test_step, shift_patches)
             
             tifffile.imwrite(seg_fp, whole_seg.astype(np.uint32), photometric='minisblack')
 
     logging.info("Testing finished")
 
-    return test_output_dir 
+    return test_output_dir
 
+
+def gap_coords(coords, patcsize):
+    """If gap larger than patcsize -> remove all corresponding locations"""
+    starts_diff = np.diff(coords)
+    gap_idx = np.where(starts_diff > patcsize)[0] + 1
+    # print(gap_idx.shape)
+    gap_end = [coords[x] for x in gap_idx]
+    gap_start = [coords[bisect.bisect(coords, x-1)-1] for x in gap_end]
+    # print(gap_start, gap_end)
+    gap = []
+    for gs, ge in zip(gap_start, gap_end):
+        gap.extend(list(range(gs, ge)))
+    # print(len(gap))
+    return gap
 
 
 def fill_grid(config, dir_id):
@@ -154,11 +169,17 @@ def fill_grid(config, dir_id):
     Combine predictions from unshifted and shifted patches to remove 
     border effects
     """
+    
+    print("Combining predictions")
 
     json_opts = json_file_to_pyobj(config.config_file)
     patch_size = json_opts.data_params.patch_size
     shift = int(patch_size/2)
-
+    
+    expr_fp = json_opts.data_sources.expr_fp + str(json_opts.data_params.patch_size) + \
+              'x' + str(json_opts.data_params.patch_size) + '_shift_' + str(shift)
+    expr_fp_ext = json_opts.data_sources.expr_fp_ext
+    
     pred_fp = '%s/epoch_%d_step_%d_seg_shift0.tif' \
                    %(dir_id, config.test_epoch, config.test_step)
     pred_fp_sf = '%s/epoch_%d_step_%d_seg_shift%d.tif' \
@@ -169,34 +190,35 @@ def fill_grid(config, dir_id):
     pred = tifffile.imread(pred_fp)
     pred_sf = tifffile.imread(pred_fp_sf)
 
-    # Get coordinates of non-overlapping patches
-    h_starts = list(np.arange(0, pred.shape[0]-patch_size, patch_size))
-    w_starts = list(np.arange(0, pred.shape[1]-patch_size, patch_size))
+    fp_patches_sf = glob.glob(expr_fp + '/*' + expr_fp_ext)
+    fp_patches_sf = natsort.natsorted(fp_patches_sf)
 
-    h_starts.append(pred.shape[0]-patch_size)
-    w_starts.append(pred.shape[1]-patch_size)
-
+    coords_patches = [re.findall(r'\d+', os.path.basename(x)) for x in fp_patches_sf]
+    coords_h1 = [int(x[0]) for x in coords_patches]
+    coords_w1 = [int(x[1]) for x in coords_patches]
+    
     # Fill along grid
     h_starts_wide = []
     w_starts_wide = []
 
-    for i in range(-8,9):
-        h_starts_wide.extend([x+i for x in h_starts])
-        w_starts_wide.extend([x+i for x in w_starts])
+    # Middle section of shifted patches
+    for i in range(int(patch_size*0.35), int(patch_size*0.65)):
+        h_starts_wide.extend([x+i for x in coords_h1])
+        w_starts_wide.extend([x+i for x in coords_w1])
 
+    # Gap larger than patch_size -> remove all corresponding locations
+    h_gap = gap_coords(coords_h1, patch_size)
+    w_gap = gap_coords(coords_w1, patch_size)
+            
     fill = np.zeros(pred.shape)
     fill[h_starts_wide,:] = 1
     fill[:,w_starts_wide] = 1
 
-    # border
-    fill[:patch_size,:] = 0
-    fill[-patch_size:,:] = 0
-    fill[:,:patch_size] = 0
-    fill[:,-patch_size:] = 0
+    # Gaps
+    fill[h_gap,:] = 0
+    fill[:,w_gap] = 0
 
-    #plt.figure()
-    #plt.imshow(fill)
-    #plt.show()
+    tifffile.imwrite(dir_id + '/' +'fill.tif', fill.astype(np.uint16), photometric='minisblack')    
 
     result = np.zeros(pred.shape, dtype=np.uint32)
     result = np.where(fill > 0, pred_sf, pred)
@@ -219,6 +241,6 @@ if __name__ == '__main__':
 
     test_output_dir = main(config)
     
-    # test_output_dir = 'experiments/2023_April_18_19_31_46/test_output'
+    # test_output_dir = 'experiments/2023_July_06_09_41_41/test_output'
     
     fill_grid(config, test_output_dir)
