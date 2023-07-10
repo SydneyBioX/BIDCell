@@ -9,6 +9,7 @@ from scipy.stats import spearmanr
 import pandas as pd
 import multiprocessing as mp
 import glob
+from utils import get_patches_coords
 
 def process_chunk(chunk, output_dir, cell_ids_unique, col_names, seg_map,
                   x_col, y_col, gene_col):
@@ -71,7 +72,22 @@ def get_n_processes(n_processes):
         return mp.cpu_count()
     else:
         return n_processes if n_processes <= mp.cpu_count() else mp.cpu_count()
-        
+
+
+def transform_locations(df_expr, col, scale, shift=0):
+    """Scale transcripts to pixel resolution of the platform"""
+    print(f"Transforming {col}")
+    df_expr[col] = df_expr[col].div(scale).round().astype(int).sub(shift)
+    return df_expr 
+    
+
+def read_expr_csv(fp):
+    try:
+        print('Reading filtered transcripts')
+        return pd.read_csv(fp)
+    except:
+        sys.exit(f"Cannot read {fp}")
+    
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -103,6 +119,8 @@ if __name__ == '__main__':
                         # help='conversion between pixel size and microns for x dimension')  
     # parser.add_argument('--scale_factor_y', default=0.2125, type=float,
                         # help='conversion between pixel size and microns for y dimension')  
+    parser.add_argument('--max_sum_hw', default=50000, type=int,
+                        help='max h+w for resized segmentation')  
     parser.add_argument('--n_processes', default=None, type=int)
 
     # Names of columns
@@ -150,8 +168,10 @@ if __name__ == '__main__':
         # n_processes = mp.cpu_count()
     # else:
         # n_processes = config.n_processes if config.n_processes <= mp.cpu_count() else mp.cpu_count()
-    n_processes = int(get_n_processes(config.n_processes) // 4)
-            
+    # n_processes = int(get_n_processes(config.n_processes) // 4)
+    n_processes = get_n_processes(config.n_processes)
+    print(f'Number of splits for multiprocessing: {n_processes}')
+
     # Scale factor to pixel resolution of platform 
     # read in affine 
     # extract scale_x and scale_y 
@@ -167,98 +187,145 @@ if __name__ == '__main__':
         height_pix = np.round(height/config.scale_factor_y).astype(int)
         width_pix = np.round(width/config.scale_factor_x).astype(int)
 
-        # TO DO: DIVIDE INTO PATCHES IF SEGMENTATION IS TOO LARGE
-
         seg_map = cv2.resize(seg_map_mi.astype(np.int32), (width_pix, height_pix), interpolation = cv2.INTER_NEAREST)
         print('Segmentation map pixel size: ', seg_map.shape)
-        # tifffile.imwrite(output_dir+'/rescaled.tif', seg_map.astype(np.uint32), photometric='minisblack')
-
-        # if not os.path.exists(config.fp_transcripts_processed):
-            # # Get transcripts data
-            # df_expr = pd.read_csv(config.fp_transcripts, compression='gzip')
-            # print('Filtering transcripts')
-
-            # df_expr = df_expr[(df_expr["qv"] >= config.min_qv) &
-                                # (~df_expr["feature_name"].str.startswith("NegControlProbe_")) &
-                                # (~df_expr["feature_name"].str.startswith("antisense_")) &
-                                # (~df_expr["feature_name"].str.startswith("NegControlCodeword_")) &
-                                # (~df_expr["feature_name"].str.startswith("BLANK_"))]
-
-            # df_expr = df_expr.assign(x_location = df_expr["x_location"]/config.scaling_factor)
-            # df_expr = df_expr.assign(y_location = df_expr["y_location"]/config.scaling_factor)
-            
-            # df_expr["x_location"] = df_expr["x_location"].round(0).astype(int)
-            # df_expr["y_location"] = df_expr["y_location"].round(0).astype(int)
-            
-            # df_expr = df_expr[(df_expr["x_location"] >= 0) &
-                                # (df_expr["x_location"] < width_pix) &
-                                # (df_expr["y_location"] >= 0) &
-                                # (df_expr["y_location"] < height_pix)]
-            
-            # df_expr.to_csv(config.fp_transcripts_processed, index=None)
-            # print('Filtered transcripts')
-
-        # else:
-            # df_expr = pd.read_csv(config.fp_transcripts_processed)
-            # print('Read filtered transcripts')
-
-        try:
-            print('Reading filtered transcripts')
-            df_expr = pd.read_csv(fp_transcripts_processed)
-        except:
-            sys.exit(f"Cannot read {fp_transcripts_processed}")
-            
-        # Scale transcripts to pixel resolution of the platform 
-        df_expr[x_col] = df_expr[x_col].div(scale_pix_x).round().astype(int)
-        df_expr[y_col] = df_expr[y_col].div(scale_pix_y).round().astype(int)
-        # print(df_expr[x_col].min(), df_expr[x_col].max(), df_expr[y_col].min(), df_expr[y_col].max())
-        
-        df_expr.reset_index(drop=True, inplace=True)
-        
-        df_expr_splits = np.array_split(df_expr, n_processes)
-        print(f'Number of splits for multiprocessing: {len(df_expr_splits)}')
-        print('Extracting cell expressions')
-        processes = []
-
-        for chunk in df_expr_splits:
-            p = mp.Process(target=process_chunk, args=(chunk, output_dir, 
-                                                        cell_ids_unique, col_names,
-                                                        seg_map, x_col, y_col, gene_col))
-            processes.append(p)
-            p.start()
-
-        for p in processes:
-            p.join()
-
-        print('Obtained cell-gene matrix chunks')
+        fp_rescaled_seg = output_dir+'/rescaled.tif'
+        print('Saving temporary resized segmentation')
+        # tifffile.imwrite(fp_rescaled_seg, seg_map.astype(np.uint32), photometric='minisblack')
 
         df_out = pd.DataFrame(0, index=cell_ids_unique, columns=col_names)
         df_out["cell_id"] = cell_ids_unique.copy()
-
-        print('Combining cell-gene matrix chunks')
-
-        fp_chunks = glob.glob(output_dir + '/chunk_*.csv')
-        for fpc in fp_chunks:
-            df_i = pd.read_csv(fpc, index_col=0)
-            df_out.iloc[:,1:] = df_out.iloc[:,1:].add(df_i.iloc[:,1:])
             
-        print('Obtained cell-gene matrix')
-
-        df_out.to_csv(output_dir + '/' + config.fp_output_expr)
+        # Divide into patches for large datasets that exceed memory capacity
+        if (height_pix + width_pix) > config.max_sum_hw:
+            patch_h = int(config.max_sum_hw/2)
+            patch_w = config.max_sum_hw - patch_h
+        else:
+            patch_h = height_pix
+            patch_w = width_pix
+            
+        h_coords, _ = get_patches_coords(height_pix, patch_h)
+        w_coords, _ = get_patches_coords(width_pix, patch_w)
+        hw_coords = [(hs, he, ws, we) for (hs, he) in h_coords for (ws, we) in w_coords]
         
-        # Clean up
-        for fpc in fp_chunks:
-            os.remove(fpc)
-        # os.remove(output_dir+'/rescaled.tif')
+        print('Extracting cell expressions')
+        for (hs, he, ws, we) in tqdm(hw_coords):
+            print(f"Patch H {hs}:{he}, W {ws}:{we}")
+            seg_map = tifffile.imread(fp_rescaled_seg)[hs:he, ws:we]
+            print(seg_map.shape)
+            
+            df_expr = read_expr_csv(fp_transcripts_processed)
 
+            df_expr = transform_locations(df_expr, x_col, scale_pix_x)
+            df_expr = transform_locations(df_expr, y_col, scale_pix_y)
+                                  
+            df_expr = df_expr[(df_expr[x_col].between(ws, we-1)) & (df_expr[y_col].between(hs, he-1))]
+            print(df_expr[x_col].min(), df_expr[x_col].max(), df_expr[y_col].min(), df_expr[y_col].max())
+      
+            df_expr = transform_locations(df_expr, x_col, 1, ws)
+            df_expr = transform_locations(df_expr, y_col, 1, hs)
+            print(df_expr[x_col].min(), df_expr[x_col].max(), df_expr[y_col].min(), df_expr[y_col].max())
+
+            df_expr.reset_index(drop=True, inplace=True)
+
+            df_expr_splits = np.array_split(df_expr, n_processes)
+            processes = []
+            
+            print('Extracting cell-gene matrix chunks')
+            for chunk in df_expr_splits:
+                p = mp.Process(target=process_chunk, args=(chunk, output_dir, 
+                                                            cell_ids_unique, col_names,
+                                                            seg_map, x_col, y_col, gene_col))
+                processes.append(p)
+                p.start()
+
+            for p in processes:
+                p.join()
+
+            # print('Obtained cell-gene matrix chunks')
+
+            print('Combining cell-gene matrix chunks')
+
+            fp_chunks = glob.glob(output_dir + '/chunk_*.csv')
+            for fpc in fp_chunks:
+                df_i = pd.read_csv(fpc, index_col=0)
+                df_out.iloc[:,1:] = df_out.iloc[:,1:].add(df_i.iloc[:,1:])
+                
+            # print('Obtained cell-gene matrix')
+
+            df_out.to_csv(output_dir + '/' + config.fp_output_expr)
+            
+            # Clean up
+            for fpc in fp_chunks:
+                os.remove(fpc)
+            # os.remove(fp_rescaled_seg)
+            
+                
+        
+        # else:
+            # # try:
+                # # print('Reading filtered transcripts')
+                # # df_expr = pd.read_csv(fp_transcripts_processed)
+            # # except:
+                # # sys.exit(f"Cannot read {fp_transcripts_processed}")
+            # df_expr = read_expr_csv(fp_transcripts_processed)
+                
+            # # # Scale transcripts to pixel resolution of the platform 
+            # # df_expr[x_col] = df_expr[x_col].div(scale_pix_x).round().astype(int)
+            # # df_expr[y_col] = df_expr[y_col].div(scale_pix_y).round().astype(int)
+            # # # print(df_expr[x_col].min(), df_expr[x_col].max(), df_expr[y_col].min(), df_expr[y_col].max())
+            
+            # df_expr = transform_locations(df_expr, x_col, scale_pix_x)
+            # df_expr = transform_locations(df_expr, y_col, scale_pix_y)
+            # df_expr.reset_index(drop=True, inplace=True)
+            
+            # df_expr_splits = np.array_split(df_expr, n_processes)
+            # print(f'Number of splits for multiprocessing: {len(df_expr_splits)}')
+            # print('Extracting cell expressions')
+            # processes = []
+
+            # for chunk in df_expr_splits:
+                # p = mp.Process(target=process_chunk, args=(chunk, output_dir, 
+                                                            # cell_ids_unique, col_names,
+                                                            # seg_map, x_col, y_col, gene_col))
+                # processes.append(p)
+                # p.start()
+
+            # for p in processes:
+                # p.join()
+
+            # print('Obtained cell-gene matrix chunks')
+
+            # # df_out = pd.DataFrame(0, index=cell_ids_unique, columns=col_names)
+            # # df_out["cell_id"] = cell_ids_unique.copy()
+
+            # print('Combining cell-gene matrix chunks')
+
+            # fp_chunks = glob.glob(output_dir + '/chunk_*.csv')
+            # for fpc in fp_chunks:
+                # df_i = pd.read_csv(fpc, index_col=0)
+                # df_out.iloc[:,1:] = df_out.iloc[:,1:].add(df_i.iloc[:,1:])
+                
+            # print('Obtained cell-gene matrix')
+
+            # df_out.to_csv(output_dir + '/' + config.fp_output_expr)
+            
+            # # Clean up
+            # for fpc in fp_chunks:
+                # os.remove(fpc)
+            # # os.remove(fp_rescaled_seg)
+        
+        print('Obtained cell-gene matrix')
+        # os.remove(fp_rescaled_seg)
         del seg_map 
+        del df_expr
     
     else:
         df_out = pd.read_csv(output_dir + '/' + config.fp_output_expr, index_col=0)
    
-    print('Computing locations and sizes')
+    print('Computing cell locations and sizes')
 
-    n_processes = get_n_processes(config.n_processes)
+    # n_processes = get_n_processes(config.n_processes)
 
     matrix_all = df_out.to_numpy().astype(np.float32)
     matrix_all_splits = np.array_split(matrix_all, n_processes)
