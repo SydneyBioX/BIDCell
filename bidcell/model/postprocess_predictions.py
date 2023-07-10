@@ -10,6 +10,7 @@ from scipy import ndimage as ndi
 import glob 
 import multiprocessing as mp
 from collections import Counter
+from utils import get_patches_coords, get_n_processes
 
 def sorted_alphanumeric(data):
     convert = lambda text: int(text) if text.isdigit() else text.lower()
@@ -328,6 +329,7 @@ if __name__ == '__main__':
     parser.add_argument('--step', default=4000, type=int)
     parser.add_argument('--nucleus_fp', default='../../data/dataset_merscope_melanoma2/nuclei.tif', type=str)
     parser.add_argument('--patch_size', default=1024, type=int)
+    parser.add_argument('--n_processes', default=None, type=int)
 
     config = parser.parse_args()
     
@@ -352,7 +354,8 @@ if __name__ == '__main__':
     coords_starts = [(x, y) for x in h_starts for y in w_starts]
     print('%d patches available' %len(coords_starts))
 
-    num_processes = mp.cpu_count()
+    # num_processes = mp.cpu_count()
+    num_processes = get_n_processes(config.n_processes)
     print('Num multiprocessing splits: %d' %num_processes)
 
     coords_splits = np.array_split(coords_starts, num_processes)

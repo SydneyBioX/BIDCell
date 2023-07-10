@@ -13,7 +13,7 @@ import re
 import warnings
 import sys
 import csv
-from utils import get_patches_coords
+from utils import get_patches_coords, get_n_processes
 
 def process_gene_chunk(gene_chunk, df_patch, img_height, img_width, dir_output, hs, ws,
                        gene_col, x_col, y_col):
@@ -197,10 +197,11 @@ def main(config):
     
     print('Converting to maps')
 
-    if config.n_processes == None:
-        n_processes = mp.cpu_count()
-    else:
-        n_processes = config.n_processes if config.n_processes <= mp.cpu_count() else mp.cpu_count()
+    # if config.n_processes == None:
+    #     n_processes = mp.cpu_count()
+    # else:
+    #     n_processes = config.n_processes if config.n_processes <= mp.cpu_count() else mp.cpu_count()
+    n_processes = get_n_processes(config.n_processes)
     gene_names_chunks = np.array_split(gene_names, n_processes)
 
     for (hs, he, ws, we) in tqdm(hw_coords):

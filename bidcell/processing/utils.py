@@ -1,7 +1,8 @@
 import numpy as np
+import multiprocessing as mp
 
 def get_patches_coords(size, size_patch):
-    """ Get start and end locations of patches in a large image given the image patch sizes """
+    """Get start and end locations of patches in a large image given the image patch sizes"""
 
     if size <= size_patch:
         max_size = size
@@ -14,3 +15,10 @@ def get_patches_coords(size, size_patch):
     
     return coords, max_size
     
+
+def get_n_processes(n_processes):
+    """Number of CPUs for multiprocessing"""
+    if n_processes == None:
+        return mp.cpu_count()
+    else:
+        return n_processes if n_processes <= mp.cpu_count() else mp.cpu_count()
