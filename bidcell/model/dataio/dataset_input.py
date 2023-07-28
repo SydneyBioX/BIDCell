@@ -254,12 +254,16 @@ class DataProcessing(data.Dataset):
                 ct_pos[ct_pos > 0] = 1
                 ct_pos[ct_pos < 0] = 0
                 search_pos[:,:,i_cell] = search_areas[:,:,i_cell]*cv2.dilate(ct_pos, kernel_posneg, iterations=1)
+                search_pos[search_pos > 0] = 1
+                search_pos[search_pos < 0] = 0
 
                 ct_neg = np.expand_dims(np.expand_dims(self.neg_markers[ct_nucleus,:], 0),0)*expr_aug
                 ct_neg = np.sum(ct_neg,-1)
                 ct_neg[ct_neg > 0] = 1
                 ct_neg[ct_neg < 0] = 0
                 search_neg[:,:,i_cell] = search_areas[:,:,i_cell]*cv2.dilate(ct_neg, kernel_posneg, iterations=1)
+                search_neg[search_neg > 0] = 1
+                search_neg[search_neg < 0] = 0 
 
             search_areas[search_areas > 0] = 1  
             search_areas[search_areas < 0] = 0 
