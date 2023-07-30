@@ -74,7 +74,6 @@ class DataProcessing(data.Dataset):
         
         if self.isTraining:
             self.coords_starts = [coords_starts[x] for x in train_ids] 
-            self.coords_starts = self.coords_starts
         elif all_patches == True:
             self.coords_starts = coords_starts
         else:
