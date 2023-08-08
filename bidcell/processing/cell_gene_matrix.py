@@ -108,7 +108,7 @@ if __name__ == '__main__':
     parser.add_argument('--scale_factor_y', default=1/9.259462356567382812, type=float,
                         help='conversion between pixel size and microns for y dimension')   
     parser.add_argument('--max_sum_hw', default=50000, type=int,
-                        help='max h+w for resized segmentation')  
+                        help='max h+w for resized segmentation to extract expressions from')  
     parser.add_argument('--n_processes', default=None, type=int)
 
     # Names of columns

@@ -274,7 +274,7 @@ if __name__ == '__main__':
 
     parser.add_argument('--fp_nuclei', default='nuclei.tif', type=str, help="None = auto compute dimensions")
     parser.add_argument('--fp_affine', default='affine.csv', type=str)
-    
+
     # Shift to origin, making min(x) and min(y) (0,0)
     parser.add_argument('--shift_to_origin', action='store_true')
     parser.set_defaults(shift_to_origin=False)

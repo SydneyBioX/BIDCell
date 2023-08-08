@@ -61,7 +61,7 @@ if __name__ == '__main__':
     parser.add_argument('--expr_dir', default='cell_gene_matrices/nuclei', type=str)
     parser.add_argument('--fp_expr', default='cell_expr.csv', type=str)
     parser.add_argument('--fp_output', default='nuclei_cell_type.h5', type=str)
-    parser.add_argument('--config_file', default='../model/configs/config.json', type=str,
+    parser.add_argument('--config_file', default='../model/configs/config_xenium_breast1.json', type=str,
                         help='config file path to ensure the same order of cell types')
     parser.add_argument('--fp_ref', default='../data/sc_references/sc_breast.csv', type=str,
                         help='single cell reference')
@@ -76,6 +76,7 @@ if __name__ == '__main__':
     cell_types = json_opts.data_params.cell_types
 
     df_cells = pd.read_csv(os.path.join(expr_dir, config.fp_expr), index_col=0)
+    print(f"Number of cells: {df_cells.shape[0]}")
 
     # Reference data
     df_ref = pd.read_csv(config.fp_ref, index_col=0)
@@ -83,6 +84,7 @@ if __name__ == '__main__':
     # Ensure the order of genes match 
     genes_cells = df_cells.columns[1:]
     genes_ref = df_cells.columns[:-3]
+    assert(genes_cells == genes_ref)
 
     sc_expr = df_ref.iloc[:,:-3].to_numpy()
     n_atlas_types = sc_expr.shape[0]
@@ -117,6 +119,7 @@ if __name__ == '__main__':
 
     cell_type_col = cell_df["cell_type"].to_numpy()
     cell_id_col = cell_df["cell_id"].to_numpy()
+    print(cell_type_col.shape, cell_id_col.shape)
 
     h5f = h5py.File(dir_dataset + '/' + config.fp_output, 'w')
     h5f.create_dataset('data', data=cell_type_col)
