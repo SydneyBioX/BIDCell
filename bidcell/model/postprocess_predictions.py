@@ -10,8 +10,16 @@ from scipy import ndimage as ndi
 import glob 
 import multiprocessing as mp
 from collections import Counter
-from utils import get_patches_coords, get_n_processes
+# from bidcell.processing.utils import get_n_processes
 
+def get_n_processes(n_processes):
+    """Number of CPUs for multiprocessing"""
+    if n_processes == None:
+        return mp.cpu_count()
+    else:
+        return n_processes if n_processes <= mp.cpu_count() else mp.cpu_count()
+        
+        
 def sorted_alphanumeric(data):
     convert = lambda text: int(text) if text.isdigit() else text.lower()
     alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ] 
