@@ -131,24 +131,17 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--data_dir', default='../../data/', type=str)
-    # parser.add_argument('--dataset', default='dataset_cosmx_nsclc', type=str)
     parser.add_argument('--dataset', default='dataset_merscope_melanoma2', type=str)
 
-    # parser.add_argument('--fp_dapi', default='dapi_preprocessed.tif', type=str)
     parser.add_argument('--fp_dapi', default='HumanMelanomaPatient2_images_mosaic_DAPI_z0.tif', type=str)
     parser.add_argument('--fp_nuclei', default='nuclei.tif', type=str)
     parser.add_argument('--fp_rdapi', default='dapi_resized.tif', type=str)
 
     # Size of the images - divide into sections if too large
-    parser.add_argument('--scale_x', default=1/9.259333610534667969, type=float)
-    # parser.add_argument('--scale_x', default=0.36, type=float)
-    parser.add_argument('--scale_y', default=1/9.259462356567382812, type=float)
-    # parser.add_argument('--scale_y', default=0.36, type=float)
-
-    # parser.add_argument('--max_height', default=3648, type=int)
-    # parser.add_argument('--max_width', default=5472, type=int)
-    parser.add_argument('--max_height', default=24000, type=int)
-    parser.add_argument('--max_width', default=32000, type=int)
+    parser.add_argument('--scale_x', default=1/9.259333610534667969, type=float, help='original pixel resolution to target pixel resolution (e.g., microns) along image width')
+    parser.add_argument('--scale_y', default=1/9.259462356567382812, type=float, help='original pixel resolution to target pixel resolution (e.g., microns) along image height')
+    parser.add_argument('--max_height', default=24000, type=int, help='maximum height of patches to process in original resolution')
+    parser.add_argument('--max_width', default=32000, type=int, help='maximum width of patches to process in original resolution')
     
     # Cellpose parameters
     parser.add_argument('--diameter', default=None, type=int)

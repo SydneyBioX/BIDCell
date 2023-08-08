@@ -56,7 +56,6 @@ def stitch_patches(dir_patches, fp_pattern):
     width = np.max(coords[:,2]) + width_patch
     
     whole = np.zeros((height, width), dtype=np.uint16)
-    print(whole.shape)
     
     for i, fp in enumerate(fp_patches):
         hs, he, ws, we = coords[i,0], coords[i,1], coords[i,2], coords[i,3]
@@ -66,7 +65,8 @@ def stitch_patches(dir_patches, fp_pattern):
     width_trim = np.max(coords[:,3])
     
     whole = whole[:height_trim, :width_trim]
-    
+    print(whole.shape)
+
     tifffile.imwrite(dir_patches+"/all_genes_sum.tif", whole, photometric='minisblack')
 
 
@@ -267,8 +267,8 @@ if __name__ == '__main__':
     parser.add_argument('--fp_out_gene_names', default='all_gene_names.txt', type=str)
 
     # Size of the images - divide into sections if too large
-    parser.add_argument('--scale_x', default=1.0, type=float)
-    parser.add_argument('--scale_y', default=1.0, type=float)
+    parser.add_argument('--scale_x', default=1.0, type=float, help="conversion between transcript location values and target pixel resolution along width")
+    parser.add_argument('--scale_y', default=1.0, type=float, help="conversion between transcript location values and target pixel resolution along height")
     parser.add_argument('--max_height', default=3500, type=int, help="Height of patches")
     parser.add_argument('--max_width', default=4000, type=int, help="Width of patches")
 

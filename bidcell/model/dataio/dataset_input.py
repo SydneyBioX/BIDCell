@@ -22,7 +22,7 @@ np.warnings.filterwarnings('ignore', category=np.VisibleDeprecationWarning)
 
 class DataProcessing(data.Dataset):
     def __init__(self, data_sources, data_params,
-                 isTraining=True, all_patches=True, shift_patches=0):
+                 isTraining=True, all_patches=True, shift_patches=0, total_steps=None):
 
         self.patch_size = data_params.patch_size 
         self.isTraining = isTraining
@@ -81,6 +81,8 @@ class DataProcessing(data.Dataset):
 
         if self.isTraining:
             self.fp_patches = [fp_patches_all[x] for x in train_ids] 
+            if total_steps != None:
+                self.fp_patches = self.fp_patches[:total_steps]
         elif all_patches == True:
             self.fp_patches = fp_patches_all
         else:

@@ -185,32 +185,32 @@ if __name__ == '__main__':
     parser.add_argument('--dir_dapi', default='Lung5_Rep1-RawMorphologyImages', type=str)
     parser.add_argument('--ext_dapi', default='tif', type=str)
 
-    parser.add_argument('--pattern_z', default='Z###', type=str, help="None for no z component")
-    parser.add_argument('--pattern_f', default='F###', type=str)
+    parser.add_argument('--pattern_z', default='Z###', type=str, help="String pattern to find in the file names for the Z number, or None for no Z component")
+    parser.add_argument('--pattern_f', default='F###', type=str, help="String pattern to find in file names for the FOV number")
 
-    parser.add_argument('--channel_first', action='store_true')
-    parser.set_defaults(channel_first=True)
-    parser.add_argument('--channel_dapi', default='-1', type=int)
+    parser.add_argument('--channel_first', action='store_true', help="channel axis first or last in image volumes")
+    parser.set_defaults(channel_first=False)
+    parser.add_argument('--channel_dapi', default='-1', type=int, help="channel index DAPI image is in")
 
     parser.add_argument('--fp_dapi_stitched', default='dapi_preprocessed.tif', type=str)
     
-    parser.add_argument('--n_fov', default=30, type=int)        
-    parser.add_argument('--min_fov', default=1, type=int)        
-    parser.add_argument('--n_fov_h', default=6, type=int)        
-    parser.add_argument('--n_fov_w', default=5, type=int)        
+    parser.add_argument('--n_fov', default=30, type=int, help="total number of FOVs")        
+    parser.add_argument('--min_fov', default=1, type=int, help="smallest FOV number - usually 0 or 1")        
+    parser.add_argument('--n_fov_h', default=6, type=int, help="number of FOVs tiled along vertical axis")        
+    parser.add_argument('--n_fov_w', default=5, type=int, help="number of FOVs tiled along horizontal axis")        
         
-    parser.add_argument('--start_corner', default='ul', type=str, help="Choose from ul, ur, bl, br")
+    parser.add_argument('--start_corner', default='ul', type=str, help="location of first FOV - choose from ul, ur, bl, br")
 
-    parser.add_argument('--row_major', action='store_true')
-    parser.set_defaults(row_major=True)
+    parser.add_argument('--row_major', action='store_true', help="row major ordering of FOVs")
+    parser.set_defaults(row_major=False)
 
-    parser.add_argument('--z_level', default=1, type=int)        
+    parser.add_argument('--z_level', default=1, type=int, help="which z slice to use, or --mip to use MIP")        
 
-    parser.add_argument('--mip', action='store_true')
+    parser.add_argument('--mip', action='store_true', help="take the maximum intensity projection across all Z")
     parser.set_defaults(mip=False)
     
-    parser.add_argument('--flip_ud', action='store_true')
-    parser.set_defaults(flip_ud=True)
+    parser.add_argument('--flip_ud', action='store_true', help="flip images up/down before stitching")
+    parser.set_defaults(flip_ud=False)
     
     config = parser.parse_args()
     main(config)

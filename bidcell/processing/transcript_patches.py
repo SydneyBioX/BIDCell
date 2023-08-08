@@ -84,7 +84,6 @@ if __name__ == '__main__':
     
     parser.add_argument('--data_dir', default='../../data/', type=str)
     parser.add_argument('--dataset', default='dataset_merscope_melanoma2', type=str)
-    # parser.add_argument('--dataset', default='dataset_cosmx_nsclc', type=str)
     parser.add_argument('--dir_out_maps', default='expr_maps', type=str)
     parser.add_argument('--dir_out', default='expr_maps_input', type=str)
     parser.add_argument('--patch_size', default=64, type=int)

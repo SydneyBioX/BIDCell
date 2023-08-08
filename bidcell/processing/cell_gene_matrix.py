@@ -66,14 +66,6 @@ def process_chunk_meta(matrix, fp_output, seg_map_mi, col_names_coords,
     df_split.to_csv(fp_output + '%d.csv' %chunk_id, index=False)
 
 
-# def get_n_processes(n_processes):
-#     """Number of CPUs for multiprocessing"""
-#     if n_processes == None:
-#         return mp.cpu_count()
-#     else:
-#         return n_processes if n_processes <= mp.cpu_count() else mp.cpu_count()
-
-
 def transform_locations(df_expr, col, scale, shift=0):
     """Scale transcripts to pixel resolution of the platform"""
     print(f"Transforming {col}")
@@ -114,11 +106,7 @@ if __name__ == '__main__':
     parser.add_argument('--scale_factor_x', default=1/9.259333610534667969, type=float,
                         help='conversion between pixel size and microns for x dimension')  
     parser.add_argument('--scale_factor_y', default=1/9.259462356567382812, type=float,
-                        help='conversion between pixel size and microns for y dimension')  
-    # parser.add_argument('--scale_factor_x', default=0.2125, type=float,
-                        # help='conversion between pixel size and microns for x dimension')  
-    # parser.add_argument('--scale_factor_y', default=0.2125, type=float,
-                        # help='conversion between pixel size and microns for y dimension')  
+                        help='conversion between pixel size and microns for y dimension')   
     parser.add_argument('--max_sum_hw', default=50000, type=int,
                         help='max h+w for resized segmentation')  
     parser.add_argument('--n_processes', default=None, type=int)
@@ -128,7 +116,11 @@ if __name__ == '__main__':
     parser.add_argument('--y_col', default='global_y', type=str)
     parser.add_argument('--gene_col', default='gene', type=str)
     
+    parser.add_argument('--only_expr', action='store_true', help="only get cell expressions, no additional info")
+    parser.set_defaults(only_expr=False)
+    
     config = parser.parse_args()
+    
    
     dir_dataset = os.path.join(config.data_dir, config.dataset)
     output_dir = os.path.join(dir_dataset, config.output_dir)
@@ -258,23 +250,25 @@ if __name__ == '__main__':
     else:
         df_out = pd.read_csv(output_dir + '/' + config.fp_output_expr, index_col=0)
    
-    print('Computing cell locations and sizes')
+    if not config.only_expr:
+    
+        print('Computing cell locations and sizes')
 
-    matrix_all = df_out.to_numpy().astype(np.float32)
-    matrix_all_splits = np.array_split(matrix_all, n_processes)
-    processes = []
+        matrix_all = df_out.to_numpy().astype(np.float32)
+        matrix_all_splits = np.array_split(matrix_all, n_processes)
+        processes = []
 
-    fp_output = output_dir + '/' + config.fp_output_full 
-    col_names_coords = ["cell_id", "cell_centroid_x", "cell_centroid_y", "cell_size"] + gene_names
+        fp_output = output_dir + '/' + config.fp_output_full 
+        col_names_coords = ["cell_id", "cell_centroid_x", "cell_centroid_y", "cell_size"] + gene_names
 
-    for chunk in matrix_all_splits:
-        p = mp.Process(target=process_chunk_meta, args=(chunk, fp_output, 
-                                                        seg_map_mi, col_names_coords,
-                                                        scale_pix_x, scale_pix_y))
-        processes.append(p)
-        p.start()
+        for chunk in matrix_all_splits:
+            p = mp.Process(target=process_chunk_meta, args=(chunk, fp_output, 
+                                                            seg_map_mi, col_names_coords,
+                                                            scale_pix_x, scale_pix_y))
+            processes.append(p)
+            p.start()
 
-    for p in processes:
-        p.join()
+        for p in processes:
+            p.join()
 
-    print('Done')
+        print('Done')

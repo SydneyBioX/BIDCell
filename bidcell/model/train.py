@@ -51,7 +51,8 @@ def main(config):
 
     train_dataset = DataProcessing(json_opts.data_sources,
                                    json_opts.data_params,
-                                   isTraining=True)
+                                   isTraining=True,
+                                   total_steps=config.total_steps)
     train_loader = DataLoader(dataset=train_dataset, 
                               batch_size=1, 
                               shuffle=True, num_workers=0, drop_last=True)
@@ -229,6 +230,8 @@ if __name__ == '__main__':
                         help='resume training from this epoch, set to None for new training')
     parser.add_argument('--resume_step', default=0, type=int,
                         help='resume training from this step')
-
+    parser.add_argument('--total_steps', default=6000, type=int,
+                        help='total number of steps to train')
+                        
     config = parser.parse_args()
     main(config)
