@@ -7,7 +7,17 @@ import pandas as pd
 import multiprocessing as mp
 import glob
 from utils import get_n_processes
+import json 
+import collections
 
+def json_file_to_pyobj(filename):
+    """
+    Read json config file
+    """
+    def _json_object_hook(d): return collections.namedtuple('X', d.keys())(*d.values())
+    def json2obj(data): return json.loads(data, object_hook=_json_object_hook)
+    return json2obj(open(filename).read())
+    
 
 def normalise_matrix(matrix):
     x_sums = np.sum(matrix, axis=1)
@@ -37,7 +47,7 @@ def process_chunk_corr(matrix, dir_output, sc_expr, sc_labels, n_atlas_types):
     predicted_cell_type = [x if y == False else -1 for (x,y) in zip(predicted_cell_type, nan_true)]
 
     # cell ID
-    matrix_out[:,1] = matrix[:,0].copy()
+    matrix_out[:,0] = matrix[:,0].copy()
 
     # cell type
     matrix_out[:,1] = predicted_cell_type.copy()
@@ -49,8 +59,8 @@ def process_chunk_corr(matrix, dir_output, sc_expr, sc_labels, n_atlas_types):
     matrix_out[:,3] = best_i_type.copy()
 
     # Save as csv
-    df_split = pd.DataFrame(matrix, index=list(range(matrix_out.shape[0])), columns=col_names)
-    df_split.to_csv(dir_output + '/preannotations_%d.csv' %chunk_id, index=False)
+    df_split = pd.DataFrame(matrix_out, index=list(range(matrix_out.shape[0])), columns=col_names)
+    df_split.to_csv(dir_output + '/preannotations_%d.csv' %matrix_out[0,0], index=False)
     
 
 if __name__ == '__main__':
@@ -63,7 +73,7 @@ if __name__ == '__main__':
     parser.add_argument('--fp_output', default='nuclei_cell_type.h5', type=str)
     parser.add_argument('--config_file', default='../model/configs/config_xenium_breast1.json', type=str,
                         help='config file path to ensure the same order of cell types')
-    parser.add_argument('--fp_ref', default='../data/sc_references/sc_breast.csv', type=str,
+    parser.add_argument('--fp_ref', default='../../data/sc_references/sc_breast.csv', type=str,
                         help='single cell reference')
     parser.add_argument('--n_processes', default=None, type=int)
 
@@ -83,8 +93,8 @@ if __name__ == '__main__':
 
     # Ensure the order of genes match 
     genes_cells = df_cells.columns[1:]
-    genes_ref = df_cells.columns[:-3]
-    assert(genes_cells == genes_ref)
+    genes_ref = df_ref.columns[:-3]
+    assert(list(genes_cells) == list(genes_ref))
 
     sc_expr = df_ref.iloc[:,:-3].to_numpy()
     n_atlas_types = sc_expr.shape[0]
@@ -110,8 +120,8 @@ if __name__ == '__main__':
         p.join()
 
     fp_chunks = glob.glob(dir_dataset + '/preannotations_*.csv')
-    for fp_i, fpc in fp_chunks:
-        df_i = pd.read_csv(fpc, index_col=0)
+    for fp_i, fpc in enumerate(fp_chunks):
+        df_i = pd.read_csv(fpc)
         if fp_i == 0:
             cell_df = df_i.copy()
         else:
@@ -119,7 +129,6 @@ if __name__ == '__main__':
 
     cell_type_col = cell_df["cell_type"].to_numpy()
     cell_id_col = cell_df["cell_id"].to_numpy()
-    print(cell_type_col.shape, cell_id_col.shape)
 
     h5f = h5py.File(dir_dataset + '/' + config.fp_output, 'w')
     h5f.create_dataset('data', data=cell_type_col)
