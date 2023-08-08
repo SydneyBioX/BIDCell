@@ -120,8 +120,10 @@ def main(config):
             df = df[(~df[gene_col].str.startswith(tuple(transcripts_to_filter)))]
 
         # Scale
-        df[x_col] = df[x_col].div(config.scale_x)
-        df[y_col] = df[y_col].div(config.scale_y)
+        print(df[x_col].min(), df[x_col].max(), df[y_col].min(), df[y_col].max())
+        df[x_col] = df[x_col].mul(config.scale_ts_x)
+        df[y_col] = df[y_col].mul(config.scale_ts_y)
+        print(df[x_col].min(), df[x_col].max(), df[y_col].min(), df[y_col].max())
 
         # Shift
         min_x = df[x_col].min()
@@ -133,8 +135,8 @@ def main(config):
                 
         # Write transform parameters to file
         fp_affine = os.path.join(dir_dataset, config.fp_affine)
-        params = ["scale_x", "scale_y", "min_x", "min_y", "global_shift_x", "global_shift_y", "origin"]
-        vals = [config.scale_x, config.scale_y, 
+        params = ["scale_ts_x", "scale_ts_y", "min_x", "min_y", "global_shift_x", "global_shift_y", "origin"]
+        vals = [config.scale_ts_x, config.scale_ts_y, 
                 min_x, min_y,
                 config.global_shift_x, config.global_shift_y,
                 config.shift_to_origin]
@@ -182,7 +184,7 @@ def main(config):
             total_height = nuclei_h
             total_width = nuclei_w
         else:
-            sys.exit(f"Dimensions of transcript map [{total_height_t},{total_width_t}] exceeds those of nuclei image [{nuclei_h},{nuclei_w}]. Consider specifying --global_shift_x and --global_shift_y, or padding nuclei")
+            sys.exit(f"Dimensions of transcript map [{total_height_t},{total_width_t}] exceeds those of nuclei image [{nuclei_h},{nuclei_w}]. Check scale_ts_x and scale_ts_y values. Then consider specifying --global_shift_x and --global_shift_y, or padding nuclei")
     else:
         warnings.warn("Computing dimensions from transcript locations - check dimensions are the same as nuclei image. It is highly advised to provide nuclei file name via --fp_nuclei to ensure dimensions are identical")
         total_height = total_height_t
@@ -267,8 +269,8 @@ if __name__ == '__main__':
     parser.add_argument('--fp_out_gene_names', default='all_gene_names.txt', type=str)
 
     # Size of the images - divide into sections if too large
-    parser.add_argument('--scale_x', default=1.0, type=float, help="conversion between transcript location values and target pixel resolution along width")
-    parser.add_argument('--scale_y', default=1.0, type=float, help="conversion between transcript location values and target pixel resolution along height")
+    parser.add_argument('--scale_ts_x', default=1.0, type=float, help="conversion between transcript location values and target pixel resolution along width")
+    parser.add_argument('--scale_ts_y', default=1.0, type=float, help="conversion between transcript location values and target pixel resolution along height")
     parser.add_argument('--max_height', default=3500, type=int, help="Height of patches")
     parser.add_argument('--max_width', default=4000, type=int, help="Width of patches")
 

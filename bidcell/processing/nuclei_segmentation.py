@@ -52,7 +52,7 @@ def main(config):
 
     # Process patch-wise if too large 
     if dapi_h > config.max_height or dapi_w > config.max_width \
-       or config.scale_x != 1.0 or config.scale_y != 1.0: 
+       or config.scale_pix_x != 1.0 or config.scale_pix_y != 1.0: 
     
         if config.max_height == None:
             max_height = dapi_h 
@@ -75,8 +75,8 @@ def main(config):
         w_patch_sizes = [we-ws for (ws, we) in w_coords]
 
         # Determine the resized patch sizes
-        rh_patch_sizes = [round(y*config.scale_y) for y in h_patch_sizes]
-        rw_patch_sizes = [round(x*config.scale_x) for x in w_patch_sizes]
+        rh_patch_sizes = [round(y*config.scale_pix_y) for y in h_patch_sizes]
+        rw_patch_sizes = [round(x*config.scale_pix_x) for x in w_patch_sizes]
         rhw_patch_sizes = [(hsize, wsize) for hsize in rh_patch_sizes for wsize in rw_patch_sizes]
         
         # Determine the resized patch starting coordinates
@@ -138,8 +138,8 @@ if __name__ == '__main__':
     parser.add_argument('--fp_rdapi', default='dapi_resized.tif', type=str)
 
     # Size of the images - divide into sections if too large
-    parser.add_argument('--scale_x', default=1/9.259333610534667969, type=float, help='original pixel resolution to target pixel resolution (e.g., microns) along image width')
-    parser.add_argument('--scale_y', default=1/9.259462356567382812, type=float, help='original pixel resolution to target pixel resolution (e.g., microns) along image height')
+    parser.add_argument('--scale_pix_x', default=1/9.259333610534667969, type=float, help='original pixel resolution to target pixel resolution (e.g., microns) along image width')
+    parser.add_argument('--scale_pix_y', default=1/9.259462356567382812, type=float, help='original pixel resolution to target pixel resolution (e.g., microns) along image height')
     parser.add_argument('--max_height', default=24000, type=int, help='maximum height of patches to process in original resolution')
     parser.add_argument('--max_width', default=32000, type=int, help='maximum width of patches to process in original resolution')
     

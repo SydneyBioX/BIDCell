@@ -55,7 +55,7 @@ def process_chunk_meta(matrix, fp_output, seg_map_mi, col_names_coords,
                 output[cur_i,2] = centroid_y*scale_pix_y
 
                 # cell_size
-                output[cur_i,3] = len(coords[0])*(1/scale_pix_x)*(1/scale_pix_y)
+                output[cur_i,3] = len(coords[0])/(scale_pix_x*scale_pix_y)
             except:
                 output[cur_i,1] = -1
                 output[cur_i,2] = -1
@@ -163,12 +163,14 @@ if __name__ == '__main__':
     # read in affine 
     # extract scale_x and scale_y 
     # divide by (scale_x*pixel resolution) (microns per pixel) 
-    affine = pd.read_csv(fp_affine, index_col=0, header=None, sep='\t')
-    scale_x_tr = float(affine.loc["scale_x"].item())
-    scale_y_tr = float(affine.loc["scale_y"].item())
-    scale_pix_x = (scale_x_tr*config.scale_factor_x)
-    scale_pix_y = (scale_y_tr*config.scale_factor_y)
-    
+    # affine = pd.read_csv(fp_affine, index_col=0, header=None, sep='\t')
+    # scale_x_tr = float(affine.loc["scale_x"].item())
+    # scale_y_tr = float(affine.loc["scale_y"].item())
+    # scale_pix_x = (scale_x_tr*config.scale_factor_x)
+    # scale_pix_y = (scale_y_tr*config.scale_factor_y)
+    scale_pix_x = (config.scale_factor_x)
+    scale_pix_y = (config.scale_factor_y)
+
     if not os.path.exists(output_dir + '/' + config.fp_output_expr):
         # Rescale to pixel size
         height_pix = np.round(height/config.scale_factor_y).astype(int)
@@ -202,6 +204,7 @@ if __name__ == '__main__':
             print(seg_map.shape)
             
             df_expr = read_expr_csv(fp_transcripts_processed)
+            print(df_expr[x_col].min(), df_expr[x_col].max(), df_expr[y_col].min(), df_expr[y_col].max())
 
             df_expr = transform_locations(df_expr, x_col, scale_pix_x)
             df_expr = transform_locations(df_expr, y_col, scale_pix_y)
