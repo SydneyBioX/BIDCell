@@ -11,6 +11,8 @@ import multiprocessing as mp
 import glob
 from utils import get_patches_coords, get_n_processes
 
+np.seterr(divide='ignore', invalid='ignore')
+
 def process_chunk(chunk, output_dir, cell_ids_unique, col_names, seg_map,
                   x_col, y_col, gene_col):
     """Extract cell expression profiles"""
