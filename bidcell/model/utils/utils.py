@@ -74,7 +74,7 @@ def get_experiment_id(make_new, load_dir):
         else:
             timestamp = load_dir
     else:
-        timestamp = dt.datetime.now().strftime("%Y_%B_%d_%H_%M_%S")
+        timestamp = dt.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
     
     return timestamp
 
