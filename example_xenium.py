@@ -29,7 +29,7 @@ scale_ts_y = base_ts_y/target_pix_um
 
 os.chdir("bidcell/processing")
 
-# os.system(f"python nuclei_segmentation.py --dataset {dataset} --fp_dapi morphology_mip.ome.tif --scale_pix_x {scale_pix_x} --scale_pix_y {scale_pix_y} --max_height 40000 --max_width 40000")
+os.system(f"python nuclei_segmentation.py --dataset {dataset} --fp_dapi morphology_mip.ome.tif --scale_pix_x {scale_pix_x} --scale_pix_y {scale_pix_y} --max_height 40000 --max_width 40000")
 
 os.system(f"python transcripts.py --dataset {dataset} --n_processes {n_processes} --fp_transcripts transcripts.csv.gz --scale_ts_x {scale_ts_x} --scale_ts_y {scale_ts_y} --max_height 3500 --max_width 4000 --global_shift_x 0 --global_shift_y 0 --x_col {x_col} --y_col {y_col} --gene_col {gene_col}")
 

@@ -303,8 +303,8 @@ if __name__ == '__main__':
     parser.set_defaults(shift_to_origin=False)
 
     # Additional adjustment to align to DAPI
-    parser.add_argument('--global_shift_x', default=12, type=int)
-    parser.add_argument('--global_shift_y', default=10, type=int)
+    parser.add_argument('--global_shift_x', default=0, type=int)
+    parser.add_argument('--global_shift_y', default=0, type=int)
 
     # Names of columns
     parser.add_argument('--x_col', default='global_x', type=str)

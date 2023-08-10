@@ -46,7 +46,7 @@ def main(config):
         affine = pd.read_csv(fp_affine, index_col=0, header=None, sep='\t')
         
         min_x = int(float(affine.loc["min_x"].item()))
-        min_y = int(float(affine.loc["min_x"].item()))
+        min_y = int(float(affine.loc["min_y"].item()))
         size_x = int(float(affine.loc["size_x"].item()))
         size_y = int(float(affine.loc["size_y"].item()))
                 

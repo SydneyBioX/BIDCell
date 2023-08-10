@@ -9,6 +9,10 @@ import glob
 from utils import get_n_processes
 import json 
 import collections
+import sys
+from natsort import natsorted
+
+np.seterr(divide='ignore', invalid='ignore')
 
 def json_file_to_pyobj(filename):
     """
@@ -86,15 +90,20 @@ if __name__ == '__main__':
     cell_types = json_opts.data_params.cell_types
 
     df_cells = pd.read_csv(os.path.join(expr_dir, config.fp_expr), index_col=0)
+    # df_cells.iloc[:,1:] = df_cells.iloc[:,1:].reindex(natsorted(df_cells.iloc[:,1:].columns), axis=1)
     print(f"Number of cells: {df_cells.shape[0]}")
 
     # Reference data
     df_ref = pd.read_csv(config.fp_ref, index_col=0)
+    # df_ref.iloc[:,:-3] = df_ref.iloc[:,:-3].reindex(natsorted(df_ref.iloc[:,:-3].columns), axis=1)
 
     # Ensure the order of genes match 
     genes_cells = df_cells.columns[1:]
     genes_ref = df_ref.columns[:-3]
-    assert(list(genes_cells) == list(genes_ref))
+    if list(genes_cells) != list(genes_ref):
+        print("Genes in transcripts but not reference: ", list(set(genes_cells) - set(genes_ref)))
+        print("Genes in reference but not transcripts: ", list(set(genes_ref) - set(genes_cells)))
+        sys.exit()
 
     sc_expr = df_ref.iloc[:,:-3].to_numpy()
     n_atlas_types = sc_expr.shape[0]
