@@ -1,21 +1,23 @@
 import os 
 import natsort 
 
-# "transcript_id","cell_id","overlaps_nucleus","feature_name","x_location","y_location","z_location","qv"
+# geneID, x, y, MIDCounts
 
-dataset = "dataset_xenium_breast1"
+dataset = "dataset_stereoseq_mousebrain"
 n_processes = 16
-x_col = "x_location"
-y_col = "y_location"
-gene_col = "feature_name"
+x_col = "y"
+y_col = "x"
+gene_col = "geneID"
+counts_col = "MIDCounts"
+fp_selected_genes = "selected_genes.txt"
 epoch = 1 
 steps = 4000
-config = "config_xenium_breast1.json"
+config = "config_stereoseq_mousebrain.json"
 
-# All in microns
-target_pix_um = 1.0 # microns per pixel
-base_pix_x = 0.2125
-base_pix_y = 0.2125
+# Resolution unknown, can leave as 1:1
+target_pix_um = 1.0
+base_pix_x = 1.0
+base_pix_y = 1.0
 base_ts_x = 1.0
 base_ts_y = 1.0
 
@@ -29,11 +31,11 @@ scale_ts_y = base_ts_y/target_pix_um
 
 os.chdir("bidcell/processing")
 
-# os.system(f"python nuclei_segmentation.py --dataset {dataset} --fp_dapi morphology_mip.ome.tif --scale_pix_x {scale_pix_x} --scale_pix_y {scale_pix_y} --max_height 40000 --max_width 40000")
+os.system(f"python transcripts.py --dataset {dataset} --n_processes {n_processes} --fp_transcripts Mouse_brain_Adult_GEM_bin1.tsv.gz --scale_ts_x {scale_ts_x} --scale_ts_y {scale_ts_y} --max_height 4000 --max_width 5000 --global_shift_x 0 --global_shift_y 0 --x_col {x_col} --y_col {y_col} --gene_col {gene_col} --shift_to_origin --fp_selected_genes {fp_selected_genes} --counts {counts_col} --fp_nuclei none --delimiter tab") 
 
-os.system(f"python transcripts.py --dataset {dataset} --n_processes {n_processes} --fp_transcripts transcripts.csv.gz --scale_ts_x {scale_ts_x} --scale_ts_y {scale_ts_y} --max_height 3500 --max_width 4000 --global_shift_x 0 --global_shift_y 0 --x_col {x_col} --y_col {y_col} --gene_col {gene_col}")
+os.system(f"python nuclei_segmentation.py --dataset {dataset} --fp_dapi Mouse_brain_Adult.tif --scale_pix_x {scale_pix_x} --scale_pix_y {scale_pix_y} --max_height 4000 --max_width 4000 --crop_to_ts")
 
-os.system(f"python transcript_patches.py --dataset {dataset} --patch_size 48")
+os.system(f"python transcript_patches.py --dataset {dataset} --patch_size 64")
 
 os.system(f"python cell_gene_matrix.py --dataset {dataset} --fp_seg ../../data/{dataset}/nuclei.tif --output_dir cell_gene_matrices/nuclei --scale_factor_x {scale_pix_x} --scale_factor_y {scale_pix_y} --n_processes {n_processes} --x_col {x_col} --y_col {y_col} --gene_col {gene_col} --only_expr")
 
