@@ -63,9 +63,9 @@ def read_dapi(fp, channel_first, channel_dapi):
     return dapi
 
 
-def main(config):
+def stitch_nuclei(config):
     dir_dataset = os.path.join(config.data_dir, config.dataset)
-    
+
     if config.dir_dapi == None:
         dir_dapi = dir_dataset
     else:
@@ -77,7 +77,7 @@ def main(config):
 
     sample = tifffile.imread(fp_dapi_list[0])
     fov_shape = sample.shape
-    
+
     # Error if multi-channel image and channel is not specified 
     if len(fov_shape) > 2:
         if config.channel_first:
@@ -94,7 +94,7 @@ def main(config):
     # Error if patterns in file path names not found
     found_f = [check_pattern(s, config.pattern_f) for s in fp_dapi_list]
     check_images_meet_criteria(fp_dapi_list, found_f, "FOV string pattern not found in")
-    
+
     if config.pattern_z != None:
         found_z = [check_pattern(s, config.pattern_z) for s in fp_dapi_list]
         check_images_meet_criteria(fp_dapi_list, found_z, "Z slice string pattern not found in")
@@ -116,15 +116,16 @@ def main(config):
     elif config.start_corner == "bl":
         order = np.flip(order, 0)
     elif config.start_corner == "br":
-        order = np.flip(order, (0,1))
-    
+        order = np.flip(order, (0, 1))
+
     print("FOV ordering")
     print(order)
 
-    stitched = np.zeros((fov_h*config.n_fov_h, fov_w*config.n_fov_w), dtype=fov_dtype)
+    stitched = np.zeros(
+        (fov_h*config.n_fov_h, fov_w*config.n_fov_w), dtype=fov_dtype)
 
     for i_fov in range(n_fov):
-        coord = np.where(order==i_fov)
+        coord = np.where(order == i_fov)
         h_idx = coord[0][0]
         w_idx = coord[1][0]
         h_start = h_idx*fov_h
@@ -133,13 +134,13 @@ def main(config):
         w_end = w_start + fov_w
 
         fov_num = i_fov + config.min_fov
-        
+
         # All files for FOV 
         pattern_fov = get_string_with_pattern(fov_num, config.pattern_f)
         print(pattern_fov)
         found_fov = [check_pattern(s, pattern_fov) for s in fp_dapi_list]
         fp_stack_fov = [fp_dapi_list[i] for i,x in enumerate(found_fov) if x]
-       
+
         # Take MIP - or z level 
         if config.mip:
             dapi_stack = np.zeros((len(fp_stack_fov), fov_h, fov_w), dtype=fov_dtype)
@@ -158,20 +159,20 @@ def main(config):
             found_slice_idx = [i for i, x in enumerate(found_slice) if x]
             if len(found_slice_idx) > 1:
                 sys.exit(f"Found {len(found_slice_idx)} files with {pattern_slice} for FOV {fov_num}")
-            
+
             print(fp_stack_fov[found_slice_idx[0]])
             fov_img = read_dapi(fp_stack_fov[found_slice_idx[0]],
                                 config.channel_first,
                                 config.channel_dapi)
-            
+
         # Flip
         if config.flip_ud:
             fov_img = np.flip(fov_img, 0)
-                
+
         # Place into appropriate location in stitched image 
         stitched[h_start:h_end, w_start:w_end] = fov_img.copy()
-        
-    # Save 
+
+    # Save
     fp_output = dir_dataset+'/'+config.fp_dapi_stitched
     tifffile.imwrite(fp_output, stitched, photometric='minisblack')
     print(f"Saved {fp_output}")
@@ -213,4 +214,4 @@ if __name__ == '__main__':
     parser.set_defaults(flip_ud=False)
     
     config = parser.parse_args()
-    main(config)
+    stitch_nuclei(config)

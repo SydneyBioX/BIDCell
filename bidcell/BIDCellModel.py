@@ -1,10 +1,11 @@
 """BIDCellModel class module"""
+from typing import Optional
 
 
 class BIDCellModel:
 
-    def __init__(self) -> None:
-        pass
+    def __init__(self, n_processes: Optional[int] = None) -> None:
+        self.n_processes = n_processes
 
     def preprocess() -> None:
         pass
