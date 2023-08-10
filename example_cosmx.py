@@ -19,6 +19,9 @@ base_pix_y = 0.18
 base_ts_x = 0.18
 base_ts_y = 0.18
 
+global_shift_x = 0
+global_shift_y = 0
+
 # Scaling images
 scale_pix_x = base_pix_x/target_pix_um
 scale_pix_y = base_pix_y/target_pix_um
@@ -33,7 +36,7 @@ os.system(f"python nuclei_stitch_fov.py --dataset {dataset} --dir_dapi Lung5_Rep
 
 os.system(f"python nuclei_segmentation.py --dataset {dataset} --fp_dapi dapi_preprocessed.tif --scale_pix_x {scale_pix_x} --scale_pix_y {scale_pix_y} --max_height 3648 --max_width 5472")
 
-os.system(f"python transcripts.py --dataset {dataset} --n_processes {n_processes} --fp_transcripts Lung5_Rep1_tx_file.csv --scale_ts_x {scale_ts_x} --scale_ts_y {scale_ts_y} --max_height 4000 --max_width 5000 --global_shift_x 0 --global_shift_y 0 --x_col {x_col} --y_col {y_col} --gene_col {gene_col} --shift_to_origin")
+os.system(f"python transcripts.py --dataset {dataset} --n_processes {n_processes} --fp_transcripts Lung5_Rep1_tx_file.csv --scale_ts_x {scale_ts_x} --scale_ts_y {scale_ts_y} --max_height 4000 --max_width 5000 --global_shift_x {global_shift_x} --global_shift_y {global_shift_y} --x_col {x_col} --y_col {y_col} --gene_col {gene_col} --shift_to_origin")
 
 os.system(f"python transcript_patches.py --dataset {dataset} --patch_size 64")
 

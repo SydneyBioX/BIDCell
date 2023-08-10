@@ -19,6 +19,9 @@ base_pix_y = 0.2125
 base_ts_x = 1.0
 base_ts_y = 1.0
 
+global_shift_x = 0
+global_shift_y = 0
+
 # Scaling images
 scale_pix_x = base_pix_x/target_pix_um
 scale_pix_y = base_pix_y/target_pix_um
@@ -31,7 +34,7 @@ os.chdir("bidcell/processing")
 
 os.system(f"python nuclei_segmentation.py --dataset {dataset} --fp_dapi morphology_mip.ome.tif --scale_pix_x {scale_pix_x} --scale_pix_y {scale_pix_y} --max_height 40000 --max_width 40000")
 
-os.system(f"python transcripts.py --dataset {dataset} --n_processes {n_processes} --fp_transcripts transcripts.csv.gz --scale_ts_x {scale_ts_x} --scale_ts_y {scale_ts_y} --max_height 3500 --max_width 4000 --global_shift_x 0 --global_shift_y 0 --x_col {x_col} --y_col {y_col} --gene_col {gene_col}")
+os.system(f"python transcripts.py --dataset {dataset} --n_processes {n_processes} --fp_transcripts transcripts.csv.gz --scale_ts_x {scale_ts_x} --scale_ts_y {scale_ts_y} --max_height 3500 --max_width 4000 --global_shift_x {global_shift_x} --global_shift_y {global_shift_y} --x_col {x_col} --y_col {y_col} --gene_col {gene_col}")
 
 os.system(f"python transcript_patches.py --dataset {dataset} --patch_size 48")
 
