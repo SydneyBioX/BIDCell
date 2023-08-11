@@ -1,6 +1,5 @@
 {
     "data_params":{
-        "train_split_pct": 80,
         "patch_size": 64,
         "cell_types": ["Astro", "CA1", "CA2", "CA3", "CR", "CT SUB", "Car3", "DG", "Endo", "IT HATA", "L2 IT APr", "L2 IT ENTl", "L2 IT ENTm", "L2 IT RSP-ACA", "L2 IT RSPv-POST-PRE", "L2/3 IT AI", "L2/3 IT CTX", "L2/3 IT ENTl", "L2/3 IT PAR", "L2/3 IT POST-PRE", "L2/3 IT ProS", "L3 IT ENTl", "L3 IT ENTm", "L4 IT CTX", "L4 RSP-ACA", "L4/5 IT CTX", "L5 IT CTX", "L5 IT RSP-ACA", "L5 PPP", "L5 PT CTX", "L5/6 IT CTX", "L5/6 IT PFC", "L5/6 IT TPE-ENT", "L5/6 NP CT CTX", "L5/6 NP CTX", "L6 CT CTX", "L6 CT ENT", "L6 IT CTX", "L6 IT ENTl", "L6b CTX", "L6b ENT", "L6b RHP", "Lamp5", "Meis2", "Micro-PVM", "Mossy", "NP PPP", "NP SUB", "Ntng1 HPF", "Oligo", "Pax6", "ProS", "Pvalb", "SMC-Peri", "SUB", "Sncg", "Sst", "VLMC", "Vip"],
         "elongated": ["Astro", "CA1", "CA2", "CA3", "CR", "CT SUB", "Car3", "DG", "Endo", "IT HATA", "L2 IT APr", "L2 IT ENTl", "L2 IT ENTm", "L2 IT RSP-ACA", "L2 IT RSPv-POST-PRE", "L2/3 IT AI", "L2/3 IT CTX", "L2/3 IT ENTl", "L2/3 IT PAR", "L2/3 IT POST-PRE", "L2/3 IT ProS", "L3 IT ENTl", "L3 IT ENTm", "L4 IT CTX", "L4 RSP-ACA", "L4/5 IT CTX", "L5 IT CTX", "L5 IT RSP-ACA", "L5 PPP", "L5 PT CTX", "L5/6 IT CTX", "L5/6 IT PFC", "L5/6 IT TPE-ENT", "L5/6 NP CT CTX", "L5/6 NP CTX", "L6 CT CTX", "L6 CT ENT", "L6 IT CTX", "L6 IT ENTl", "L6b CTX", "L6b ENT", "L6b RHP", "Lamp5", "Meis2", "Micro-PVM", "Mossy", "NP PPP", "NP SUB", "Ntng1 HPF", "Oligo", "Pax6", "ProS", "Pvalb", "SMC-Peri", "SUB", "Sncg", "Sst", "VLMC", "Vip"]
@@ -28,7 +27,7 @@
         "expr_fp_ext": ".hdf5",
         "nuclei_fp": "../../data/dataset_stereoseq_mousebrain/nuclei.tif",
         "nuclei_types_fp": "../../data/dataset_stereoseq_mousebrain/nuclei_cell_type.h5",
-        "pos_markers_fp": "../../data/sc_references/sc_mousebrain_markers_pos_maxoverlap19.csv",
+        "pos_markers_fp": "../../data/sc_references/sc_mousebrain_markers_pos.csv",
         "neg_markers_fp": "../../data/sc_references/sc_mousebrain_markers_neg.csv",
         "atlas_fp": "../../data/sc_references/sc_mousebrain.csv"
     },

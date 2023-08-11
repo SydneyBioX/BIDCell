@@ -116,12 +116,16 @@ def main(config):
         print('Loading transcripts file')
         fp_transcripts =  dir_dataset + '/' + config.fp_transcripts
         if pathlib.Path(fp_transcripts).suffixes[-1] == '.gz':
-            if config.delimiter == "tab":
+            # if config.delimiter == "tab":
+            if ".tsv" in fp_transcripts:
                 df = pd.read_csv(fp_transcripts, sep='\t', compression='gzip')
             else:
                 df = pd.read_csv(fp_transcripts, compression='gzip')
         else:
-            df = pd.read_csv(fp_transcripts)
+            if ".tsv" in fp_transcripts:
+                df = pd.read_csv(fp_transcripts, sep='\t')
+            else:
+                df = pd.read_csv(fp_transcripts)
         print(df.head())
     
         print('Filtering transcripts')
@@ -314,7 +318,7 @@ if __name__ == '__main__':
     # BGI Stereo-seq
     parser.add_argument('--fp_selected_genes', default=None, type=str) # selected_genes.txt
     parser.add_argument('--counts_col', default=None, type=str) # MIDCounts
-    parser.add_argument('--delimiter', default=None, type=str)
+    # parser.add_argument('--delimiter', default=None, type=str)
 
 
     config = parser.parse_args()

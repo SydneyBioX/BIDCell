@@ -1,6 +1,5 @@
 {
     "data_params":{
-        "train_split_pct": 80,
         "patch_size": 48,
         "cell_types": ["B", "CD4Tconv/Treg", "CD8T/CD8Tex", "DC", "Endothelial", "Epithelial", "Fibrolasts", "Malignant", "Mast", "Mono/Macro", "Myofibrolasts", "NK", "Neutrophils", "Plasma", "SMC"],                
 		"elongated": ["Endothelial", "Fibrolasts", "Myofibrolasts", "SMC"]
@@ -28,7 +27,7 @@
         "expr_fp_ext": ".hdf5",
         "nuclei_fp": "../../data/dataset_xenium_breast1/nuclei.tif",
         "nuclei_types_fp": "../../data/dataset_xenium_breast1/nuclei_cell_type.h5",
-        "pos_markers_fp": "../../data/sc_references/sc_breast_markers_pos_maxoverlap4.csv",
+        "pos_markers_fp": "../../data/sc_references/sc_breast_markers_pos.csv",
         "neg_markers_fp": "../../data/sc_references/sc_breast_markers_neg.csv",
         "atlas_fp": "../../data/sc_references/sc_breast.csv"
     },

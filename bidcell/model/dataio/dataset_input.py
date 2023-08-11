@@ -76,7 +76,7 @@ class DataProcessing(data.Dataset):
         random.seed(1234)
         n_coords = len(fp_patches_all)
         sample_ids = range(n_coords)
-        sample_k = int(data_params.train_split_pct*n_coords/100)
+        sample_k = int(80*n_coords/100)
         train_ids = random.sample(sample_ids, k=sample_k)
 
         if self.isTraining:
