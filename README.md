@@ -120,6 +120,11 @@ Expected runtime (based on our system for the Xenium breast cancer dataset):
 - Postprocessing: ~ 30 mins
 
 
+## Contact us
+
+If you have any enquiries, especially about using BIDCell to segment cells in your data, please contact xiaohang.fu@sydney.edu.au. We are also happy to receive any suggestions and comments.
+
+
 ## Citation
 
 If BIDCell has assisted you with your work, please kindly cite our paper:
