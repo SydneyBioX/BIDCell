@@ -51,7 +51,7 @@ if __name__ == '__main__':
 
     parser.add_argument('--fp_transcripts', default='Mouse_brain_Adult_GEM_bin1.tsv.gz', type=str, help="name of transcripts file")
 
-    parser.add_argument('--fp_selected_genes', default='selected_genes.txt', type=str, help="name of transcripts file")
+    parser.add_argument('--fp_selected_genes', default='selected_genes.txt', type=str, help="name of file containing genes to use")
 
     # geneID, x, y, MIDCounts
     parser.add_argument('--x_col', default='y', type=str)

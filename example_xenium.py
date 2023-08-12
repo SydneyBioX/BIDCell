@@ -16,7 +16,7 @@ def main(args):
 
     os.system(f"python nuclei_segmentation.py --dataset {args.dataset} --fp_dapi {args.fp_dapi} --scale_pix_x {scale_pix_x} --scale_pix_y {scale_pix_y} --max_height 10000 --max_width 10000")
 
-    os.system(f"python transcripts.py --dataset {args.dataset} --n_processes {args.n_processes} --fp_transcripts {args.fp_transcripts} --scale_ts_x {scale_ts_x} --scale_ts_y {scale_ts_y} --max_height 3500 --max_width 4000 --global_shift_x {args.global_shift_x} --global_shift_y {args.global_shift_y} --x_col {args.x_col} --y_col {args.y_col} --gene_col {args.gene_col}")
+    os.system(f"python transcripts.py --dataset {args.dataset} --n_processes {args.n_processes} --fp_transcripts {args.fp_transcripts} --scale_ts_x {scale_ts_x} --scale_ts_y {scale_ts_y} --max_height 3500 --max_width 4000 --global_shift_x {args.global_shift_x} --global_shift_y {args.global_shift_y} --x_col {args.x_col} --y_col {args.y_col} --gene_col {args.gene_col} --fp_selected_genes {args.fp_selected_genes}")
 
     os.system(f"python transcript_patches.py --dataset {args.dataset} --patch_size {args.patch_size}")
 
@@ -48,6 +48,8 @@ if __name__ == '__main__':
     parser.add_argument('--fp_dapi', default='morphology_mip.ome.tif', type=str, help="name of DAPI image")
 
     parser.add_argument('--fp_transcripts', default='transcripts.csv.gz', type=str, help="name of transcripts file")
+
+    parser.add_argument('--fp_selected_genes', default=None, type=str, help="name of file containing genes to use")
 
     # "transcript_id","cell_id","overlaps_nucleus","feature_name","x_location","y_location","z_location","qv"
     parser.add_argument('--x_col', default='x_location', type=str)

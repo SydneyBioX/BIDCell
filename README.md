@@ -79,7 +79,8 @@ The reference csv file contains average expressions for all of the genes in the 
 
 The positive and negative markers files contain the respective marker genes for each cell type. The positive and negative markers were those with expressions in the highest and lowest 10 percentile for each cell type of a tissue sample. We found that removing positive markers that were common to at least a third of cell types in each dataset was appropriate across various datasets. Using a larger number of positive markers tends to increase the size of predicted cells. Manual curation and alternative approaches to determine the marker genes can also be used.
 
-check ORDERING and SELECTED GENES 
+Only <1,000 genes are needed to perform segmentation. Specify a selection of genes in a file `selected_genes.txt` and place in the dataset folder (see Stero-seq example).
+
 
 ## Running example dataset
 
