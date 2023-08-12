@@ -1,60 +1,76 @@
 import os 
 import natsort 
+import argparse
+from bidcell.model.utils.utils import get_newest_id
 
-# ,barcode_id,global_x,global_y,global_z,x,y,fov,gene,transcript_id
+def main(args):
 
-dataset = "dataset_merscope_melanoma2"
-n_processes = 16
-x_col = "global_x"
-y_col = "global_y"
-gene_col = "gene"
-epoch = 1 
-steps = 4000
-config = "config_merscope_melanoma2.json"
+    # Scaling images
+    scale_pix_x = args.base_pix_x/args.target_pix_um
+    scale_pix_y = args.base_pix_y/args.target_pix_um
+    # Scaling transcript locations
+    scale_ts_x = args.base_ts_x/args.target_pix_um
+    scale_ts_y = args.base_ts_y/args.target_pix_um
 
-# All in microns
-target_pix_um = 1.0 # microns per pixel
-base_pix_x = 0.107999132774 # 1/9.259333610534667969
-base_pix_y = 0.107997631125 # 1/9.259462356567382812
-base_ts_x = 1.0
-base_ts_y = 1.0
+    os.chdir("bidcell/processing")
 
-global_shift_x = 12
-global_shift_y = 10
+    os.system(f"python nuclei_segmentation.py --dataset {args.dataset} --fp_dapi {args.fp_dapi} --scale_pix_x {scale_pix_x} --scale_pix_y {scale_pix_y} --max_height 10000 --max_width 10000")
 
-# Scaling images
-scale_pix_x = base_pix_x/target_pix_um
-scale_pix_y = base_pix_y/target_pix_um
-# Scaling transcript locations
-scale_ts_x = base_ts_x/target_pix_um
-scale_ts_y = base_ts_y/target_pix_um
+    os.system(f"python transcripts.py --dataset {args.dataset} --n_processes {args.n_processes} --fp_transcripts {args.fp_transcripts} --scale_ts_x {scale_ts_x} --scale_ts_y {scale_ts_y} --max_height 3500 --max_width 4000 --global_shift_x {args.global_shift_x} --global_shift_y {args.global_shift_y} --x_col {args.x_col} --y_col {args.y_col} --gene_col {args.gene_col}")
+
+    os.system(f"python transcript_patches.py --dataset {args.dataset} --patch_size {args.patch_size}")
+
+    os.system(f"python cell_gene_matrix.py --dataset {args.dataset} --fp_seg ../../data/{args.dataset}/nuclei.tif --output_dir cell_gene_matrices/nuclei --scale_factor_x {scale_pix_x} --scale_factor_y {scale_pix_y} --n_processes {args.n_processes} --x_col {args.x_col} --y_col {args.y_col} --gene_col {args.gene_col} --only_expr")
+
+    os.system(f"python preannotate.py --dataset {args.dataset} --fp_ref {args.fp_ref} --n_processes {args.n_processes}")
+
+    os.chdir("../model")
+
+    os.system(f"python train.py --config_file configs/{args.fp_config} --total_steps {args.steps+100}")
+
+    os.system(f"python predict.py --config_file configs/{args.fp_config} --test_epoch {args.epoch} --test_step {args.steps}")
+
+    os.system(f"python postprocess_predictions.py --epoch {args.epoch} --step {args.steps} --nucleus_fp ../../data/{args.dataset}/nuclei.tif --n_processes {args.n_processes}")
+
+    exp_id = get_newest_id()
+
+    os.chdir("../processing")
+
+    os.system(f"python cell_gene_matrix.py --dataset {args.dataset} --fp_seg ../model/experiments/{exp_id}/test_output/epoch_{args.epoch}_step_{args.steps}_connected.tif --output_dir cell_gene_matrices/{exp_id} --scale_factor_x {scale_pix_x} --scale_factor_y {scale_pix_y} --n_processes {args.n_processes} --x_col {args.x_col} --y_col {args.y_col} --gene_col {args.gene_col}")
 
 
-os.chdir("bidcell/processing")
 
-os.system(f"python nuclei_segmentation.py --dataset {dataset} --fp_dapi HumanMelanomaPatient2_images_mosaic_DAPI_z0.tif --scale_pix_x {scale_pix_x} --scale_pix_y {scale_pix_y} --max_height 20000 --max_width 20000")
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
 
-os.system(f"python transcripts.py --dataset {dataset} --n_processes {n_processes} --fp_transcripts HumanMelanomaPatient2_detected_transcripts.csv --scale_ts_x {scale_ts_x} --scale_ts_y {scale_ts_y} --max_height 3500 --max_width 4000 --global_shift_x {global_shift_x} --global_shift_y {global_shift_y} --x_col {x_col} --y_col {y_col} --gene_col {gene_col} --shift_to_origin")
+    parser.add_argument('--dataset', default='dataset_merscope_melanoma2', type=str, help="name of dataset")
 
-os.system(f"python transcript_patches.py --dataset {dataset} --patch_size 64")
+    parser.add_argument('--fp_dapi', default='HumanMelanomaPatient2_images_mosaic_DAPI_z0.tif', type=str, help="name of DAPI image")
 
-os.system(f"python cell_gene_matrix.py --dataset {dataset} --fp_seg ../../data/{dataset}/nuclei.tif --output_dir cell_gene_matrices/nuclei --scale_factor_x {scale_pix_x} --scale_factor_y {scale_pix_y} --n_processes {n_processes} --x_col {x_col} --y_col {y_col} --gene_col {gene_col} --only_expr")
+    parser.add_argument('--fp_transcripts', default='HumanMelanomaPatient2_detected_transcripts.csv', type=str, help="name of transcripts file")
 
-os.system(f"python preannotate.py --dataset {dataset} --config_file ../model/configs/{config} --fp_ref ../../data/sc_references/sc_melanoma.csv --n_processes {n_processes}")
+    parser.add_argument('--fp_ref', default='../../data/sc_references/sc_melanoma.csv', type=str, help="name of single-cell reference")
 
-os.chdir("../model")
+    # ,barcode_id,global_x,global_y,global_z,x,y,fov,gene,transcript_id
+    parser.add_argument('--x_col', default='global_x', type=str)
+    parser.add_argument('--y_col', default='global_y', type=str)
+    parser.add_argument('--gene_col', default='gene', type=str)
+    
+    parser.add_argument('--target_pix_um', default=1.0, type=float, help="microns per pixel to perform segmentation")
+    parser.add_argument('--base_pix_x', default=0.107999132774, type=float, help="convert to microns along width by multiplying the original pixels by base_pix_x microns per pixel")
+    parser.add_argument('--base_pix_y', default=0.107997631125, type=float, help="convert to microns along height by multiplying the original pixels by base_pix_y microns per pixel")
+    parser.add_argument('--base_ts_x', default=1.0, type=float, help="convert between transcript locations and target pixels along width")
+    parser.add_argument('--base_ts_y', default=1.0, type=float, help="convert between transcript locations and target pixels along height")
+    parser.add_argument('--global_shift_x', default=12, type=int, help="additional adjustment to align transcripts to DAPI in target pixels along image width")
+    parser.add_argument('--global_shift_y', default=10, type=int, help="additional adjustment to align transcripts to DAPI in target pixels along image height")
 
-os.system(f"python train.py --config_file configs/{config} --total_steps {steps+100}")
+    parser.add_argument('--fp_config', default='"config_merscope_melanoma2.json', type=str)
 
-os.system(f"python predict.py --config_file configs/{config} --test_epoch {epoch} --test_step {steps}")
+    parser.add_argument('--epoch', default=1, type=int)
+    parser.add_argument('--steps', default=4000, type=int, help="number of training steps")
+    parser.add_argument('--patch_size', default=64, type=int, help="size of input patches to segmentation model")
 
-os.system(f"python postprocess_predictions.py --epoch {epoch} --step {steps} --nucleus_fp ../../data/{dataset}/nuclei.tif --n_processes {n_processes}")
+    parser.add_argument('--n_processes', default=16, type=int, help="number of CPUs")
 
-folders = next(os.walk('experiments'))[1]
-folders = natsort.natsorted(folders)
-folder_last = folders[-1]
-exp_id = folder_last.replace('\\','/')
-
-os.chdir("../processing")
-
-os.system(f"python cell_gene_matrix.py --dataset {dataset} --fp_seg ../model/experiments/{exp_id}/test_output/epoch_{epoch}_step_{steps}_connected.tif --output_dir cell_gene_matrices/{exp_id} --scale_factor_x {scale_pix_x} --scale_factor_y {scale_pix_y} --n_processes {n_processes} --x_col {x_col} --y_col {y_col} --gene_col {gene_col}")
+    args = parser.parse_args()
+    main(args)

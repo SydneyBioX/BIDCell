@@ -24,7 +24,7 @@ def main(args):
 
     os.system(f"python cell_gene_matrix.py --dataset {args.dataset} --fp_seg ../../data/{args.dataset}/nuclei.tif --output_dir cell_gene_matrices/nuclei --scale_factor_x {scale_pix_x} --scale_factor_y {scale_pix_y} --n_processes {args.n_processes} --x_col {args.x_col} --y_col {args.y_col} --gene_col {args.gene_col} --only_expr")
 
-    os.system(f"python preannotate.py --dataset {args.dataset} --fp_ref ../../data/sc_references/sc_mousebrain.csv --n_processes {args.n_processes}")
+    os.system(f"python preannotate.py --dataset {args.dataset} --fp_ref {args.fp_ref} --n_processes {args.n_processes}")
 
     os.chdir("../model")
 
@@ -52,6 +52,8 @@ if __name__ == '__main__':
     parser.add_argument('--fp_transcripts', default='Mouse_brain_Adult_GEM_bin1.tsv.gz', type=str, help="name of transcripts file")
 
     parser.add_argument('--fp_selected_genes', default='selected_genes.txt', type=str, help="name of file containing genes to use")
+
+    parser.add_argument('--fp_ref', default='../../data/sc_references/sc_mousebrain_rand.csv', type=str, help="name of single-cell reference")
 
     # geneID, x, y, MIDCounts
     parser.add_argument('--x_col', default='y', type=str)
