@@ -106,7 +106,6 @@ Several steps are involved in the entire pipeline to generate segmentations and 
 
 In `bidcell/model/configs` create a config file, e.g., `config_cosmx_nsclc.json`
 - Update `data_sources` for current dataset
-- Specify `cell_types`
 - Specify `elongated` cell types
 - The weights of losses typically can all be left at 1.0, but if cells are too small or big, try adjusting `cc_weight` to 0.5 (to reduce size) or 2.0 (to increase size)
 

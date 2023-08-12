@@ -274,7 +274,8 @@ class DataProcessing(data.Dataset):
 
                 # Markers with dilation
                 # ct_pos = np.expand_dims(np.expand_dims(self.pos_markers[ct_nucleus,:], 0),0)*expr_aug
-                ct_pos = np.expand_dims(np.expand_dims(self.pos_markers.loc[ct_nucleus_name,self.gene_names], 0),0)*expr_aug
+                pos_vals = self.pos_markers.loc[ct_nucleus_name,self.gene_names].to_numpy()
+                ct_pos = np.expand_dims(np.expand_dims(pos_vals, 0),0)*expr_aug
                 ct_pos = np.sum(ct_pos,-1)
                 ct_pos[ct_pos > 0] = 1
                 ct_pos[ct_pos < 0] = 0
@@ -283,7 +284,8 @@ class DataProcessing(data.Dataset):
                 search_pos[search_pos < 0] = 0
 
                 # ct_neg = np.expand_dims(np.expand_dims(self.neg_markers[ct_nucleus,:], 0),0)*expr_aug
-                ct_neg = np.expand_dims(np.expand_dims(self.neg_markers.loc[ct_nucleus_name,self.gene_names], 0),0)*expr_aug
+                neg_vals =self.neg_markers.loc[ct_nucleus_name,self.gene_names]to_numpy()
+                ct_neg = np.expand_dims(np.expand_dims(neg_vals, 0),0)*expr_aug
                 ct_neg = np.sum(ct_neg,-1)
                 ct_neg[ct_neg > 0] = 1
                 ct_neg[ct_neg < 0] = 0
