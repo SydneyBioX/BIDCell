@@ -29,7 +29,8 @@
         "nuclei_types_fp": "../../data/dataset_merscope_melanoma2/nuclei_cell_type.h5",
         "pos_markers_fp": "../../data/sc_references/sc_melanoma_markers_pos.csv",
         "neg_markers_fp": "../../data/sc_references/sc_melanoma_markers_neg.csv",
-        "atlas_fp": "../../data/sc_references/sc_melanoma.csv"
+        "atlas_fp": "../../data/sc_references/sc_melanoma.csv",
+        "gene_names": "../../data/dataset_merscope_melanoma2/all_gene_names.txt"
     },
     "experiment_dirs": {
         "load_dir": "last",

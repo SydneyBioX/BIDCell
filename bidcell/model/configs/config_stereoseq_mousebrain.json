@@ -29,7 +29,8 @@
         "nuclei_types_fp": "../../data/dataset_stereoseq_mousebrain/nuclei_cell_type.h5",
         "pos_markers_fp": "../../data/sc_references/sc_mousebrain_markers_pos.csv",
         "neg_markers_fp": "../../data/sc_references/sc_mousebrain_markers_neg.csv",
-        "atlas_fp": "../../data/sc_references/sc_mousebrain.csv"
+        "atlas_fp": "../../data/sc_references/sc_mousebrain.csv",
+        "gene_names": "../../data/dataset_stereoseq_mousebrain/all_gene_names.txt"
     },
     "experiment_dirs": {
         "load_dir": "last",
