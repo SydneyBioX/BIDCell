@@ -1,6 +1,6 @@
 # BIDCell: Biologically-informed self-supervised learning for segmentation of subcellular spatial transcriptomics data
 
-> **Note**: This version of the code was implemented to work across 4 major platforms, including Xenium, CosMx, MERSCOPE, and Stereo-seq. Please take care with the appropriate arguments that need to be provided. Also, we are in the the process of making a Python package for BIDCell.
+> **Note**: This version of the code was tested across 4 major platforms, including Xenium, CosMx, MERSCOPE, and Stereo-seq. Please take care with the appropriate arguments that need to be provided. Also, we are in the the process of making a Python package for BIDCell.
 
 For more details of our method, please refer to: https://doi.org/10.1101/2023.06.13.544733
 
@@ -56,6 +56,7 @@ Example folder structure and files for different datasets/platforms:
 │   │   ├── dataset_stereoseq_mousebrain
 |   │   │   ├── Mouse_brain_Adult.tif
 |   │   │   ├── Mouse_brain_Adult_GEM_bin1.tsv.gz
+|   │   │   ├── selected_genes.txt
 │   │   ├── sc_references
 |   │   │   ├── sc_breast.csv
 |   │   │   ├── sc_breast_markers_pos.csv
@@ -78,8 +79,16 @@ The reference csv file contains average expressions for all of the genes in the 
 
 The positive and negative markers files contain the respective marker genes for each cell type. The positive and negative markers were those with expressions in the highest and lowest 10 percentile for each cell type of a tissue sample. We found that removing positive markers that were common to at least a third of cell types in each dataset was appropriate across various datasets. Using a larger number of positive markers tends to increase the size of predicted cells. Manual curation and alternative approaches to determine the marker genes can also be used.
 
+check ORDERING and SELECTED GENES 
 
-## Running BIDCell
+## Running example dataset
+
+After installation, downloading the Xenium breast cancer dataset and placing the transcripts and DAPI files in appropriate locations (see [Datasets](#datasets)), run the example dataset:
+
+        python example_xenium.py
+
+
+## Running BIDCell for your dataset
 
 Several steps are involved in the entire pipeline to generate segmentations and cell-gene matrices from DAPI images and detected transcripts. These steps can be grouped into:
 
@@ -92,7 +101,7 @@ Several steps are involved in the entire pipeline to generate segmentations and 
 
 ### Config files
 
-In `bidcell/model/configs` create a config file, e.g., `config_xenium_breast1.json`
+In `bidcell/model/configs` create a config file, e.g., `config_cosmx_nsclc.json`
 - Update `data_sources` for current dataset
 - Specify `cell_types`
 - Specify `elongated` cell types
@@ -100,12 +109,30 @@ In `bidcell/model/configs` create a config file, e.g., `config_xenium_breast1.js
 
 ### Setting up the script to run all steps
 
-Example scripts are provided for different datasets/platforms to run all steps. The format of different dataset varies. Please take note of the arguments:
+Example scripts are provided for different datasets/platforms to run all steps. BIDCell may also be applied to data from other technologies such as MERFISH. The format of different datasets varies. Please take note of the arguments:
 
-- todo
-- todo
+- `dataset`: name of dataset
+- `fp_dapi`: name of DAPI image
+- `fp_transcripts`: name of transcripts file
+- `x_col`: name of x location column in transcripts file
+- `y_col`: name of y location column in transcripts file
+- `gene_col`: name of genes column in transcripts file
+- `fp_config`: name of config file under `bidcell/model/configs`
+- `n_processes`: number of CPUs for multiprocessing
 
 If you receive the error: ``pickle.UnpicklingError: pickle data was truncated``, try reducing `--n_processes`
+
+Scaling and alignment arguments:
+- `target_pix_um`: microns per pixel to perform segmentation 
+- `base_pix_x`: convert to microns along width by multiplying the original pixels by base_pix_x microns per pixel
+- `base_pix_y`: convert to microns along height by multiplying the original pixels by base_pix_y microns per pixel
+- `base_ts_x`: convert between transcript locations and target pixels along width
+- `base_ts_y`: convert between transcript locations and target pixels along height
+- `global_shift_x`: additional adjustment to align transcripts to DAPI in target pixels along image width
+- `global_shift_y`: additional adjustment to align transcripts to DAPI in target pixels along image height
+- `patch_size`: size of input patches to segmentation model
+
+Performing segmentation at a higher resolution requires a larger patch size, thus more GPU memory. 
 
 
 ### Additional information
