@@ -45,6 +45,10 @@ class DataProcessing(data.Dataset):
             sys.exit("Invalid file path %s" %data_sources.pos_markers_fp)
         if not os.path.exists(data_sources.neg_markers_fp):
             sys.exit("Invalid file path %s" %data_sources.neg_markers_fp)
+        if not os.path.exists(data_sources.atlas_fp):
+            sys.exit("Invalid file path %s" %data_sources.atlas_fp)
+        if not os.path.exists(data_sources.gene_names):
+            sys.exit("Invalid file path %s" %data_sources.gene_names)
 
         self.nuclei_fp = data_sources.nuclei_fp
         self.nuclei_types_fp = data_sources.nuclei_types_fp
@@ -105,9 +109,21 @@ class DataProcessing(data.Dataset):
         self.nuclei_types_idx = list(h5f['data'][:])
         self.nuclei_types_ids = list(h5f['ids'][:])
         h5f.close()
-        type_names = data_params.cell_types
+        
+        # type_names = data_params.cell_types
+
+        # Get order of cell-types from sc reference
+        atlas_exprs = pd.read_csv(data_sources.atlas_fp, index_col=0)
+        ct_idx_ref = atlas_exprs["ct_idx"].tolist()
+        ct_ref = atlas_exprs["cell_type"].tolist()
+        name_index_dict = {}
+        for name, index in zip(ct_ref, ct_idx_ref):
+            name_index_dict[index] = name
+        self.type_names = [name_index_dict[index] for index in sorted(indices)]
+        print(f"Cell types: {self.type_names}")
+
         types_elong = data_params.elongated
-        idx_elong = [type_names.index(x) for x in types_elong]
+        idx_elong = [self.type_names.index(x) for x in types_elong]
         nuclei_types_elong = [1 if x in idx_elong else 0 for x in self.nuclei_types_idx]
         self.nuclei_ids_elong = [x for i, x in enumerate(self.nuclei_types_ids) if nuclei_types_elong[i] == 1]
 
@@ -116,9 +132,14 @@ class DataProcessing(data.Dataset):
         df_pos_markers = pd.read_csv(data_sources.pos_markers_fp, index_col=0)
         df_neg_markers = pd.read_csv(data_sources.neg_markers_fp, index_col=0)
 
-        self.pos_markers = df_pos_markers.to_numpy()
-        self.neg_markers = df_neg_markers.to_numpy()
-        
+        # self.pos_markers = df_pos_markers.to_numpy()
+        # self.neg_markers = df_neg_markers.to_numpy()
+        self.pos_markers = df_pos_markers
+        self.neg_markers = df_neg_markers
+
+        with open(data_sources.gene_names) as file:
+            self.gene_names = [line.rstrip() for line in file]
+
 
     def augment_data(self, batch_raw):
         batch_raw = np.expand_dims(batch_raw, 0)
@@ -249,9 +270,11 @@ class DataProcessing(data.Dataset):
                         search_areas[:,:,i_cell] = cv2.dilate(nucl_split[:,:,i_cell], kernel, iterations=1)
 
                 ct_nucleus = int(self.nuclei_types_idx[self.nuclei_types_ids.index(c_id)])
+                ct_nucleus_name = self.type_names[ct_nucleus]
 
                 # Markers with dilation
-                ct_pos = np.expand_dims(np.expand_dims(self.pos_markers[ct_nucleus,:], 0),0)*expr_aug
+                # ct_pos = np.expand_dims(np.expand_dims(self.pos_markers[ct_nucleus,:], 0),0)*expr_aug
+                ct_pos = np.expand_dims(np.expand_dims(self.pos_markers.loc[ct_nucleus_name,self.gene_names], 0),0)*expr_aug
                 ct_pos = np.sum(ct_pos,-1)
                 ct_pos[ct_pos > 0] = 1
                 ct_pos[ct_pos < 0] = 0
@@ -259,7 +282,8 @@ class DataProcessing(data.Dataset):
                 search_pos[search_pos > 0] = 1
                 search_pos[search_pos < 0] = 0
 
-                ct_neg = np.expand_dims(np.expand_dims(self.neg_markers[ct_nucleus,:], 0),0)*expr_aug
+                # ct_neg = np.expand_dims(np.expand_dims(self.neg_markers[ct_nucleus,:], 0),0)*expr_aug
+                ct_neg = np.expand_dims(np.expand_dims(self.neg_markers.loc[ct_nucleus_name,self.gene_names], 0),0)*expr_aug
                 ct_neg = np.sum(ct_neg,-1)
                 ct_neg[ct_neg > 0] = 1
                 ct_neg[ct_neg < 0] = 0

@@ -10,3 +10,4 @@ transcripts*.csv
 **/show_cells_by_id.py
 **/sc_references
 !**sc_breast*.csv
+check.py

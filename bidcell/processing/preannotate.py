@@ -75,8 +75,6 @@ if __name__ == '__main__':
     parser.add_argument('--expr_dir', default='cell_gene_matrices/nuclei', type=str)
     parser.add_argument('--fp_expr', default='cell_expr.csv', type=str)
     parser.add_argument('--fp_output', default='nuclei_cell_type.h5', type=str)
-    parser.add_argument('--config_file', default='../model/configs/config_xenium_breast1.json', type=str,
-                        help='config file path to ensure the same order of cell types')
     parser.add_argument('--fp_ref', default='../../data/sc_references/sc_breast.csv', type=str,
                         help='single cell reference')
     parser.add_argument('--n_processes', default=None, type=int)
@@ -86,23 +84,23 @@ if __name__ == '__main__':
     dir_dataset = os.path.join(config.data_dir, config.dataset)
     expr_dir = os.path.join(dir_dataset, config.expr_dir)
 
-    json_opts = json_file_to_pyobj(config.config_file)
-    cell_types = json_opts.data_params.cell_types
-
+    # Cell expressions - order of gene names (columns) will be in same order as all_gene_names.txt
     df_cells = pd.read_csv(os.path.join(expr_dir, config.fp_expr), index_col=0)
-    # df_cells.iloc[:,1:] = df_cells.iloc[:,1:].reindex(natsorted(df_cells.iloc[:,1:].columns), axis=1)
     print(f"Number of cells: {df_cells.shape[0]}")
 
-    # Reference data
-    df_ref = pd.read_csv(config.fp_ref, index_col=0)
-    # df_ref.iloc[:,:-3] = df_ref.iloc[:,:-3].reindex(natsorted(df_ref.iloc[:,:-3].columns), axis=1)
-
+    # Reference data - no requirement of column orders - ensure same order as df_cells
+    df_ref_orig = pd.read_csv(config.fp_ref, index_col=0)
+    
     # Ensure the order of genes match 
-    genes_cells = df_cells.columns[1:]
+    genes_cells = df_cells.columns[1:].tolist()
+    ct_columns = df_ref_orig.columns[-3:].tolist()
+    df_ref = df_ref_orig[genes_cells + ct_columns]
+
     genes_ref = df_ref.columns[:-3]
     if list(genes_cells) != list(genes_ref):
         print("Genes in transcripts but not reference: ", list(set(genes_cells) - set(genes_ref)))
         print("Genes in reference but not transcripts: ", list(set(genes_ref) - set(genes_cells)))
+        print("Check names of genes")
         sys.exit()
 
     sc_expr = df_ref.iloc[:,:-3].to_numpy()
