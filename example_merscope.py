@@ -64,7 +64,7 @@ if __name__ == '__main__':
     parser.add_argument('--global_shift_x', default=12, type=int, help="additional adjustment to align transcripts to DAPI in target pixels along image width")
     parser.add_argument('--global_shift_y', default=10, type=int, help="additional adjustment to align transcripts to DAPI in target pixels along image height")
 
-    parser.add_argument('--fp_config', default='"config_merscope_melanoma2.json', type=str)
+    parser.add_argument('--fp_config', default='config_merscope_melanoma2.json', type=str)
 
     parser.add_argument('--epoch', default=1, type=int)
     parser.add_argument('--steps', default=4000, type=int, help="number of training steps")

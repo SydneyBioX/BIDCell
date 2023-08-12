@@ -40,7 +40,7 @@ def main(args):
 
     os.chdir("../processing")
 
-    os.system(f"python cell_gene_matrix.py --dataset {args.dataset} --fp_seg ../model/experiments/{args.exp_id}/test_output/epoch_{args.epoch}_step_{args.steps}_connected.tif --output_dir cell_gene_matrices/{args.exp_id} --scale_factor_x {scale_pix_x} --scale_factor_y {scale_pix_y} --n_processes {args.n_processes} --x_col {args.x_col} --y_col {args.y_col} --gene_col {args.gene_col}")
+    os.system(f"python cell_gene_matrix.py --dataset {args.dataset} --fp_seg ../model/experiments/{exp_id}/test_output/epoch_{args.epoch}_step_{args.steps}_connected.tif --output_dir cell_gene_matrices/{args.exp_id} --scale_factor_x {scale_pix_x} --scale_factor_y {scale_pix_y} --n_processes {args.n_processes} --x_col {args.x_col} --y_col {args.y_col} --gene_col {args.gene_col}")
 
 
 
@@ -73,7 +73,7 @@ if __name__ == '__main__':
     parser.add_argument('--global_shift_x', default=0, type=int, help="additional adjustment to align transcripts to DAPI in target pixels along image width")
     parser.add_argument('--global_shift_y', default=0, type=int, help="additional adjustment to align transcripts to DAPI in target pixels along image height")
 
-    parser.add_argument('--fp_config', default='"config_cosmx_nsclc.json', type=str)
+    parser.add_argument('--fp_config', default='config_cosmx_nsclc.json', type=str)
 
     parser.add_argument('--epoch', default=1, type=int)
     parser.add_argument('--steps', default=4000, type=int, help="number of training steps")

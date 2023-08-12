@@ -69,11 +69,11 @@ if __name__ == '__main__':
     parser.add_argument('--global_shift_x', default=0, type=int, help="additional adjustment to align transcripts to DAPI in target pixels along image width")
     parser.add_argument('--global_shift_y', default=0, type=int, help="additional adjustment to align transcripts to DAPI in target pixels along image height")
 
-    parser.add_argument('--fp_config', default='"config_stereoseq_mousebrain.json', type=str)
+    parser.add_argument('--fp_config', default='config_stereoseq_mousebrain.json', type=str)
 
     parser.add_argument('--epoch', default=1, type=int)
     parser.add_argument('--steps', default=4000, type=int, help="number of training steps")
-    parser.add_argument('--patch_size', default=48, type=int, help="size of input patches to segmentation model")
+    parser.add_argument('--patch_size', default=64, type=int, help="size of input patches to segmentation model")
 
     parser.add_argument('--n_processes', default=16, type=int, help="number of CPUs")
 
