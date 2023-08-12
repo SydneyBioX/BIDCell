@@ -19,7 +19,7 @@ We ran BIDCell on a Linux system with a 12GB NVIDIA GTX Titan V GPU, Intel(R) Co
 
 2. Create virtual environment:
     
-        conda create --name BIDCell python=3.8
+        conda create --name BIDCell python=3.7
     
 3. Activate virtual environment:
     
@@ -29,7 +29,7 @@ We ran BIDCell on a Linux system with a 12GB NVIDIA GTX Titan V GPU, Intel(R) Co
     
         pip install -r requirements.txt
 
-        conda install pytorch==1.12.1 torchvision==0.13.1 torchaudio==0.12.1 cudatoolkit=11.3 -c pytorch
+        conda install pytorch==1.11.0 torchvision==0.12.0 torchaudio==0.11.0 cudatoolkit=11.3 -c pytorch
 
     Installation of dependencies typically requires a few minutes. 
 

@@ -119,7 +119,8 @@ class DataProcessing(data.Dataset):
         name_index_dict = {}
         for name, index in zip(ct_ref, ct_idx_ref):
             name_index_dict[index] = name
-        self.type_names = [name_index_dict[index] for index in sorted(indices)]
+        type_names = [name_index_dict[index] for index in sorted(ct_idx_ref)]
+        self.type_names = list(dict.fromkeys(type_names))
         print(f"Cell types: {self.type_names}")
 
         types_elong = data_params.elongated
@@ -284,7 +285,7 @@ class DataProcessing(data.Dataset):
                 search_pos[search_pos < 0] = 0
 
                 # ct_neg = np.expand_dims(np.expand_dims(self.neg_markers[ct_nucleus,:], 0),0)*expr_aug
-                neg_vals =self.neg_markers.loc[ct_nucleus_name,self.gene_names]to_numpy()
+                neg_vals = self.neg_markers.loc[ct_nucleus_name,self.gene_names].to_numpy()
                 ct_neg = np.expand_dims(np.expand_dims(neg_vals, 0),0)*expr_aug
                 ct_neg = np.sum(ct_neg,-1)
                 ct_neg[ct_neg > 0] = 1

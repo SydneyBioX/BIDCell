@@ -93,7 +93,7 @@ if __name__ == '__main__':
     
     # Ensure the order of genes match 
     genes_cells = df_cells.columns[1:].tolist()
-    ct_columns = df_ref_orig.columns[:-3].tolist()
+    ct_columns = df_ref_orig.columns[-3:].tolist()
     df_ref = df_ref_orig[genes_cells + ct_columns]
 
     genes_ref = df_ref.columns[:-3]
