@@ -8,6 +8,7 @@ from scipy.special import softmax
 import numpy as np
 import random 
 import matplotlib.pyplot as plt
+import natsort
 
 def sorted_alphanumeric(data):
     """
