@@ -1,8 +1,7 @@
 {
     "data_params":{
         "patch_size": 64,
-        "cell_types": ["Alveolar", "B", "Basal", "CD4Tconv.Treg", "CD8T.CD8Tex", "Ciliated", "Club", "DC", "Endothelial", "Epithelial", "Fibroblasts", "Malignant", "Mast", "Mono.Macro", "Myofibroblasts", "NK", "Neutrophils", "Pericytes", "Plasma", "Tprolif"],
-        "elongated": ["Endothelial", "Fibroblasts", "Myofibroblasts", "Pericytes"]
+        "elongated": ["Adventitial fibroblasts", "Alveolar fibroblasts", "Peribronchial fibroblasts", "Subpleural fibroblasts", "Myofibroblasts", "Fibromyocytes"]
     },
     "training_params":{
         "total_epochs": 1,

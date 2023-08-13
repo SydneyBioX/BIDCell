@@ -22,17 +22,17 @@ def main(args):
 
     os.system(f"python transcripts.py --dataset {args.dataset} --n_processes {args.n_processes} --fp_transcripts {args.fp_transcripts} --scale_ts_x {scale_ts_x} --scale_ts_y {scale_ts_y} --max_height 4000 --max_width 5000 --global_shift_x {args.global_shift_x} --global_shift_y {args.global_shift_y} --x_col {args.x_col} --y_col {args.y_col} --gene_col {args.gene_col} --shift_to_origin")
 
-    os.system(f"python transcript_patches.py --dataset {args.dataset} --patch_size {args.args.patch_size}")
+    os.system(f"python transcript_patches.py --dataset {args.dataset} --patch_size {args.patch_size}")
 
     os.system(f"python cell_gene_matrix.py --dataset {args.dataset} --fp_seg ../../data/{args.dataset}/nuclei.tif --output_dir cell_gene_matrices/nuclei --scale_factor_x {scale_pix_x} --scale_factor_y {scale_pix_y} --n_processes {args.n_processes} --x_col {args.x_col} --y_col {args.y_col} --gene_col {args.gene_col} --only_expr")
 
-    os.system(f"python preannotate.py --dataset {args.dataset} --config_file ../model/configs/{args.config} --fp_ref {args.fp_ref} --n_processes {args.n_processes}")
+    os.system(f"python preannotate.py --dataset {args.dataset} --fp_ref {args.fp_ref} --n_processes {args.n_processes}")
 
     os.chdir("../model")
 
-    os.system(f"python train.py --config_file configs/{args.config} --total_steps {args.steps+100}")
+    os.system(f"python train.py --config_file configs/{args.fp_config} --total_steps {args.steps+100}")
 
-    os.system(f"python predict.py --config_file configs/{args.config} --test_epoch {args.epoch} --test_step {args.steps}")
+    os.system(f"python predict.py --config_file configs/{args.fp_config} --test_epoch {args.epoch} --test_step {args.steps}")
 
     os.system(f"python postprocess_predictions.py --epoch {args.epoch} --step {args.steps} --nucleus_fp ../../data/{args.dataset}/nuclei.tif --n_processes {args.n_processes}")
 
