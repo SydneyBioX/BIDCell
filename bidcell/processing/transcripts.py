@@ -265,7 +265,7 @@ def main(config):
 
         # Sum across all markers
         fp_out_map_sum = f"all_genes_sum_{hs}_{he}_{ws}_{we}.tif"
-        tifffile.imwrite(dir_out_maps+'/'+fp_out_map_sum, np.sum(map_all_genes, -1).astype(np.uint16), photometric='minisblack')
+        tifffile.imwrite(dir_out_maps+'/'+fp_out_map_sum, np.sum(map_all_genes, -1).astype(np.uint8), photometric='minisblack')
 
         # Save to hdf5
         fp_out_map = f"all_genes_{hs}_{he}_{ws}_{we}.hdf5"
