@@ -9,3 +9,4 @@ natsort==8.2.0
 glob2==0.7
 cellpose==2.1.1
 imgaug==0.4.0
+segmentation-models-pytorch==0.3.3

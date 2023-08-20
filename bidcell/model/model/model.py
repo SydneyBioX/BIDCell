@@ -8,11 +8,11 @@ from .layers import unetConv2
 from .intialisation import init_weights
 
 
-class UNet3Plus(nn.Module):
+class SegmentationModel(nn.Module):
     def __init__(self, n_channels=313,
                  bilinear=True, feature_scale=4,
                  is_deconv=True, is_batchnorm=True):
-        super(UNet3Plus, self).__init__()
+        super(SegmentationModel, self).__init__()
         self.n_channels = n_channels
         self.bilinear = bilinear
         self.feature_scale = feature_scale

@@ -3,6 +3,9 @@
         "patch_size": 64,
         "elongated": ["Adventitial fibroblasts", "Alveolar fibroblasts", "Peribronchial fibroblasts", "Subpleural fibroblasts", "Myofibroblasts", "Fibromyocytes"]
     },
+    "model_params":{
+        "name": "custom"
+    },
     "training_params":{
         "total_epochs": 1,
         "learning_rate": 0.00001,

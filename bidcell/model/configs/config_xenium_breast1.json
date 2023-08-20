@@ -1,8 +1,10 @@
 {
     "data_params":{
         "patch_size": 48,
-        "cell_types": ["B", "CD4Tconv/Treg", "CD8T/CD8Tex", "DC", "Endothelial", "Epithelial", "Fibroblasts", "Malignant", "Mast", "Mono/Macro", "Myofibroblasts", "NK", "Neutrophils", "Plasma", "SMC"],                
 		"elongated": ["Endothelial", "Fibroblasts", "Myofibroblasts", "SMC"]
+    },
+    "model_params":{
+        "name": "custom"
     },
     "training_params":{
         "total_epochs": 1,

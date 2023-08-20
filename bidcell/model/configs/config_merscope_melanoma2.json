@@ -4,6 +4,9 @@
         "cell_types": ["B", "CD4Tconv.Treg", "CD8T.CD8Tex", "DC", "Endothelial", "Fibroblasts", "Keratinocytes", "Malignant", "Mast", "Mono.Macro", "Myofibroblasts", "NK", "Plasma", "SMC", "Tprolif"],
         "elongated": ["Endothelial", "Fibroblasts", "Myofibroblasts", "SMC"]
     },
+    "model_params":{
+        "name": "custom"
+    },
     "training_params":{
         "total_epochs": 1,
         "learning_rate": 0.00001,

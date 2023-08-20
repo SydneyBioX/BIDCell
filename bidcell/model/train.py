@@ -11,9 +11,11 @@ import matplotlib.pyplot as plt
 import pandas as pd 
 
 from dataio.dataset_input import DataProcessing
-from model.model import UNet3Plus as Network
+from model.model import SegmentationModel as Network
 from model.losses import *
 from utils.utils import *
+
+import segmentation_models_pytorch as smp
 
 def main(config):
 
@@ -43,7 +45,16 @@ def main(config):
     n_genes = atlas_exprs.shape[1] - 3
     print('Number of genes: %d' %n_genes)
 
-    model = Network(n_channels=n_genes)
+    if json_opts.model_params.name != 'custom':
+        model = smp.Unet(
+            encoder_name=json_opts.model_params.name,      
+            encoder_weights=None,     
+            in_channels=n_genes,           
+            classes=2,             
+        )    
+    else:
+        model = Network(n_channels=n_genes)
+
     model = model.to(device)
 
     # Dataloader

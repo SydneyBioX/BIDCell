@@ -109,6 +109,12 @@ In `bidcell/model/configs` create a config file, e.g., `config_cosmx_nsclc.json`
 - Specify `elongated` cell types
 - The weights of losses typically can all be left at 1.0, but if cells are too small or big, try adjusting `cc_weight` to 0.5 (to reduce size) or 2.0 (to increase size)
 
+Segmentation architectures:
+- The default is UNet3+ https://arxiv.org/abs/2004.08790, and we have found it to perform well across different technologies and tissue types
+- To use a different architecture, select from a list of popular backbones or define your own:
+  - Set `model_params.name` in the config file with an encoder from https://segmentation-modelspytorch.readthedocs.io/en/latest/index.html
+  - Or, modify `SegmentationModel` class in [`model.py`](bidcell/model/model.py)
+
 ### Setting up the script to run all steps
 
 Example scripts are provided for different datasets/platforms to run all steps. BIDCell may also be applied to data from other technologies such as MERFISH. The format of different datasets varies. Please take note of the arguments:
