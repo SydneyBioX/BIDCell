@@ -14,9 +14,11 @@ def main(args):
 
     os.chdir("bidcell/processing")
 
-    os.system(f"python nuclei_segmentation.py --dataset {args.dataset} --fp_dapi {args.fp_dapi} --scale_pix_x {scale_pix_x} --scale_pix_y {scale_pix_y} --max_height 10000 --max_width 10000")
+    # An example where the images are cropped to the area of the detected gene expressions
 
-    os.system(f"python transcripts.py --dataset {args.dataset} --n_processes {args.n_processes} --fp_transcripts {args.fp_transcripts} --scale_ts_x {scale_ts_x} --scale_ts_y {scale_ts_y} --max_height 3500 --max_width 4000 --global_shift_x {args.global_shift_x} --global_shift_y {args.global_shift_y} --x_col {args.x_col} --y_col {args.y_col} --gene_col {args.gene_col}")
+    os.system(f"python transcripts.py --dataset {args.dataset} --n_processes {args.n_processes} --fp_transcripts {args.fp_transcripts} --scale_ts_x {scale_ts_x} --scale_ts_y {scale_ts_y} --max_height 4000 --max_width 5000 --global_shift_x {args.global_shift_x} --global_shift_y {args.global_shift_y} --x_col {args.x_col} --y_col {args.y_col} --gene_col {args.gene_col} --shift_to_origin --fp_selected_genes {args.fp_selected_genes} --counts {args.counts_col} --fp_nuclei none") 
+
+    os.system(f"python nuclei_segmentation.py --dataset {args.dataset} --fp_dapi {args.fp_dapi} --scale_pix_x {scale_pix_x} --scale_pix_y {scale_pix_y} --max_height 4000 --max_width 4000 --crop_to_ts --diameter 30")
 
     os.system(f"python transcript_patches.py --dataset {args.dataset} --patch_size {args.patch_size}")
 
@@ -43,28 +45,31 @@ def main(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--dataset', default='dataset_merscope_melanoma2', type=str, help="name of dataset")
+    parser.add_argument('--dataset', default='dataset_stereoseq_mousebrain', type=str, help="name of dataset")
 
-    parser.add_argument('--fp_dapi', default='HumanMelanomaPatient2_images_mosaic_DAPI_z0.tif', type=str, help="name of DAPI image")
+    parser.add_argument('--fp_dapi', default='Mouse_brain_Adult.tif', type=str, help="name of DAPI image")
 
-    parser.add_argument('--fp_transcripts', default='HumanMelanomaPatient2_detected_transcripts.csv', type=str, help="name of transcripts file")
+    parser.add_argument('--fp_transcripts', default='Mouse_brain_Adult_GEM_bin1.tsv.gz', type=str, help="name of transcripts file")
 
-    parser.add_argument('--fp_ref', default='../../data/sc_references/sc_melanoma.csv', type=str, help="name of single-cell reference")
+    parser.add_argument('--fp_selected_genes', default='selected_genes.txt', type=str, help="name of file containing genes to use")
 
-    # ,barcode_id,global_x,global_y,global_z,x,y,fov,gene,transcript_id
-    parser.add_argument('--x_col', default='global_x', type=str)
-    parser.add_argument('--y_col', default='global_y', type=str)
-    parser.add_argument('--gene_col', default='gene', type=str)
+    parser.add_argument('--fp_ref', default='../../data/sc_references/sc_mousebrain_rand.csv', type=str, help="name of single-cell reference")
+
+    # geneID, x, y, MIDCounts
+    parser.add_argument('--x_col', default='y', type=str)
+    parser.add_argument('--y_col', default='x', type=str)
+    parser.add_argument('--gene_col', default='geneID', type=str)
+    parser.add_argument('--counts_col', default='MIDCounts', type=str)
     
     parser.add_argument('--target_pix_um', default=1.0, type=float, help="microns per pixel to perform segmentation")
-    parser.add_argument('--base_pix_x', default=0.107999132774, type=float, help="convert to microns along width by multiplying the original pixels by base_pix_x microns per pixel")
-    parser.add_argument('--base_pix_y', default=0.107997631125, type=float, help="convert to microns along height by multiplying the original pixels by base_pix_y microns per pixel")
+    parser.add_argument('--base_pix_x', default=1.0, type=float, help="convert to microns along width by multiplying the original pixels by base_pix_x microns per pixel")
+    parser.add_argument('--base_pix_y', default=1.0, type=float, help="convert to microns along height by multiplying the original pixels by base_pix_y microns per pixel")
     parser.add_argument('--base_ts_x', default=1.0, type=float, help="convert between transcript locations and target pixels along width")
     parser.add_argument('--base_ts_y', default=1.0, type=float, help="convert between transcript locations and target pixels along height")
-    parser.add_argument('--global_shift_x', default=12, type=int, help="additional adjustment to align transcripts to DAPI in target pixels along image width")
-    parser.add_argument('--global_shift_y', default=10, type=int, help="additional adjustment to align transcripts to DAPI in target pixels along image height")
+    parser.add_argument('--global_shift_x', default=0, type=int, help="additional adjustment to align transcripts to DAPI in target pixels along image width")
+    parser.add_argument('--global_shift_y', default=0, type=int, help="additional adjustment to align transcripts to DAPI in target pixels along image height")
 
-    parser.add_argument('--fp_config', default='config_merscope_melanoma2.json', type=str)
+    parser.add_argument('--fp_config', default='config_stereoseq_mousebrain.json', type=str)
 
     parser.add_argument('--epoch', default=1, type=int)
     parser.add_argument('--steps', default=4000, type=int, help="number of training steps")

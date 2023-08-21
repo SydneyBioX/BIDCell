@@ -16,7 +16,7 @@ import csv
 from utils import get_patches_coords, get_n_processes
 
 def process_gene_chunk(gene_chunk, df_patch, img_height, img_width, dir_output, hs, ws,
-                       gene_col, x_col, y_col):
+                       gene_col, x_col, y_col, counts_col):
     
     # print(gene_chunk)
     for i_fe, fe in enumerate(gene_chunk):
@@ -25,12 +25,21 @@ def process_gene_chunk(gene_chunk, df_patch, img_height, img_width, dir_output, 
         map_fe = np.zeros((img_height, img_width))
         # print(map_fe.shape)
 
-        for idx in df_fe.index:
-            idx_x = np.round(df_patch.iloc[idx][x_col]).astype(int)
-            idx_y = np.round(df_patch.iloc[idx][y_col]).astype(int)
+        if counts_col == None:
+            for idx in df_fe.index:
+                idx_x = np.round(df_patch.iloc[idx][x_col]).astype(int)
+                idx_y = np.round(df_patch.iloc[idx][y_col]).astype(int)
 
-            map_fe[idx_y, idx_x] += 1
-        
+                map_fe[idx_y, idx_x] += 1
+
+        else:
+            for idx in df_fe.index:
+                idx_x = np.round(df_patch.iloc[idx][x_col]).astype(int)
+                idx_y = np.round(df_patch.iloc[idx][y_col]).astype(int)
+                idx_counts = df_patch.iloc[idx][counts_col]
+
+                map_fe[idx_y, idx_x] += idx_counts
+
         # print(map_fe.shape)
 
         fp_fe_map = f"{dir_output}/{fe}_{hs}_{ws}.tif"
@@ -41,7 +50,7 @@ def process_gene_chunk(gene_chunk, df_patch, img_height, img_width, dir_output, 
 def stitch_patches(dir_patches, fp_pattern):
     """Stitches together the patches of summed genes and saves as new tif"""
     fp_patches = glob.glob(dir_patches + '/' + fp_pattern)
-    # fp_patches = [os.path.basename(x) for x in fp_patches]
+    fp_patches = natsort.natsorted(fp_patches)
     
     coords = np.zeros((len(fp_patches), 4), dtype=int)
     
@@ -49,7 +58,7 @@ def stitch_patches(dir_patches, fp_pattern):
         
         coords_patch = [int(x) for x in re.findall(r'\d+', os.path.basename(fp))]
         coords[i,:] = np.array(coords_patch)
-    
+            
     height_patch = coords[0,1] - coords[0,0]
     width_patch = coords[0,3] - coords[0,2]
     height = np.max(coords[:,1]) + height_patch
@@ -68,7 +77,7 @@ def stitch_patches(dir_patches, fp_pattern):
     print(whole.shape)
 
     tifffile.imwrite(dir_patches+"/all_genes_sum.tif", whole, photometric='minisblack')
-
+   
 
 def main(config):
 
@@ -107,9 +116,16 @@ def main(config):
         print('Loading transcripts file')
         fp_transcripts =  dir_dataset + '/' + config.fp_transcripts
         if pathlib.Path(fp_transcripts).suffixes[-1] == '.gz':
-            df = pd.read_csv(fp_transcripts, compression='gzip')
+            # if config.delimiter == "tab":
+            if ".tsv" in fp_transcripts:
+                df = pd.read_csv(fp_transcripts, sep='\t', compression='gzip')
+            else:
+                df = pd.read_csv(fp_transcripts, compression='gzip')
         else:
-            df = pd.read_csv(fp_transcripts)
+            if ".tsv" in fp_transcripts:
+                df = pd.read_csv(fp_transcripts, sep='\t')
+            else:
+                df = pd.read_csv(fp_transcripts)
         print(df.head())
     
         print('Filtering transcripts')
@@ -118,6 +134,11 @@ def main(config):
                     (~df[gene_col].str.startswith(tuple(transcripts_to_filter)))]
         else: 
             df = df[(~df[gene_col].str.startswith(tuple(transcripts_to_filter)))]
+
+        if config.fp_selected_genes is not None:
+            with open(dir_dataset + '/' + config.fp_selected_genes) as file:
+                selected_genes = [line.rstrip() for line in file]
+            df = df[(df[gene_col].isin(selected_genes))]
 
         # Scale
         print(df[x_col].min(), df[x_col].max(), df[y_col].min(), df[y_col].max())
@@ -132,12 +153,18 @@ def main(config):
             with pd.option_context('mode.chained_assignment', None):
                 df.loc[:, x_col] = df[x_col] - min_x + config.global_shift_x
                 df.loc[:, y_col] = df[y_col] - min_y + config.global_shift_y
-                
+
+        size_x = df[x_col].max() + 1
+        size_y = df[y_col].max() + 1
+        
         # Write transform parameters to file
         fp_affine = os.path.join(dir_dataset, config.fp_affine)
-        params = ["scale_ts_x", "scale_ts_y", "min_x", "min_y", "global_shift_x", "global_shift_y", "origin"]
+        params = ["scale_ts_x", "scale_ts_y", 
+                  "min_x", "min_y", "size_x", "size_y",
+                  "global_shift_x", "global_shift_y", "origin"]
         vals = [config.scale_ts_x, config.scale_ts_y, 
                 min_x, min_y,
+                size_x, size_y,
                 config.global_shift_x, config.global_shift_y,
                 config.shift_to_origin]
         with open(fp_affine, 'w') as f:
@@ -176,8 +203,9 @@ def main(config):
     total_height_t = int(np.ceil(df[y_col].max())) + 1
     total_width_t = int(np.ceil(df[x_col].max())) + 1
 
-    if config.fp_nuclei is not None:
-        nuclei_img = tifffile.imread(os.path.join(dir_dataset, config.fp_nuclei))
+    fp_nuclei = os.path.join(dir_dataset, config.fp_nuclei)
+    if os.path.exists(fp_nuclei):
+        nuclei_img = tifffile.imread(fp_nuclei)
         nuclei_h = nuclei_img.shape[0]
         nuclei_w = nuclei_img.shape[1]
         if total_height_t <= nuclei_h and total_width_t <= nuclei_w:
@@ -186,7 +214,7 @@ def main(config):
         else:
             sys.exit(f"Dimensions of transcript map [{total_height_t},{total_width_t}] exceeds those of nuclei image [{nuclei_h},{nuclei_w}]. Check scale_ts_x and scale_ts_y values. Then consider specifying --global_shift_x and --global_shift_y, or padding nuclei")
     else:
-        warnings.warn("Computing dimensions from transcript locations - check dimensions are the same as nuclei image. It is highly advised to provide nuclei file name via --fp_nuclei to ensure dimensions are identical")
+        warnings.warn("Computing dimensions from transcript locations - check dimensions are the same as nuclei image. Unless cropping DAPI to size of transcript map, it is highly advised to provide nuclei file name via --fp_nuclei to ensure dimensions are identical")
         total_height = total_height_t
         total_width = total_width_t
 
@@ -199,10 +227,6 @@ def main(config):
     
     print('Converting to maps')
 
-    # if config.n_processes == None:
-    #     n_processes = mp.cpu_count()
-    # else:
-    #     n_processes = config.n_processes if config.n_processes <= mp.cpu_count() else mp.cpu_count()
     n_processes = get_n_processes(config.n_processes)
     gene_names_chunks = np.array_split(gene_names, n_processes)
 
@@ -223,7 +247,8 @@ def main(config):
             p = mp.Process(target=process_gene_chunk, args=(gene_chunk, df_patch, 
                                                             img_height, img_width,
                                                             dir_out_maps, hs, ws,
-                                                            gene_col, x_col, y_col))
+                                                            gene_col, x_col, y_col,
+                                                            config.counts_col))
             processes.append(p)
             p.start()
 
@@ -240,7 +265,7 @@ def main(config):
 
         # Sum across all markers
         fp_out_map_sum = f"all_genes_sum_{hs}_{he}_{ws}_{we}.tif"
-        tifffile.imwrite(dir_out_maps+'/'+fp_out_map_sum, np.sum(map_all_genes, -1).astype(np.uint16), photometric='minisblack')
+        tifffile.imwrite(dir_out_maps+'/'+fp_out_map_sum, np.sum(map_all_genes, -1).astype(np.uint8), photometric='minisblack')
 
         # Save to hdf5
         fp_out_map = f"all_genes_{hs}_{he}_{ws}_{we}.hdf5"
@@ -274,7 +299,7 @@ if __name__ == '__main__':
     parser.add_argument('--max_height', default=3500, type=int, help="Height of patches")
     parser.add_argument('--max_width', default=4000, type=int, help="Width of patches")
 
-    parser.add_argument('--fp_nuclei', default='nuclei.tif', type=str, help="None = auto compute dimensions")
+    parser.add_argument('--fp_nuclei', default='nuclei.tif', type=str)
     parser.add_argument('--fp_affine', default='affine.csv', type=str)
 
     # Shift to origin, making min(x) and min(y) (0,0)
@@ -282,13 +307,19 @@ if __name__ == '__main__':
     parser.set_defaults(shift_to_origin=False)
 
     # Additional adjustment to align to DAPI
-    parser.add_argument('--global_shift_x', default=12, type=int)
-    parser.add_argument('--global_shift_y', default=10, type=int)
+    parser.add_argument('--global_shift_x', default=0, type=int)
+    parser.add_argument('--global_shift_y', default=0, type=int)
 
     # Names of columns
     parser.add_argument('--x_col', default='global_x', type=str)
     parser.add_argument('--y_col', default='global_y', type=str)
     parser.add_argument('--gene_col', default='gene', type=str)
+
+    # BGI Stereo-seq
+    parser.add_argument('--fp_selected_genes', default=None, type=str) # selected_genes.txt
+    parser.add_argument('--counts_col', default=None, type=str) # MIDCounts
+    # parser.add_argument('--delimiter', default=None, type=str)
+
 
     config = parser.parse_args()
     main(config)

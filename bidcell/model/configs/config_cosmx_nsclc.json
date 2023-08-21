@@ -1,9 +1,10 @@
 {
     "data_params":{
-        "train_split_pct": 80,
         "patch_size": 64,
-        "cell_types": ["Alveolar", "B", "Basal", "CD4Tconv.Treg", "CD8T.CD8Tex", "Ciliated", "Club", "DC", "Endothelial", "Epithelial", "Fibroblasts", "Malignant", "Mast", "Mono.Macro", "Myofibroblasts", "NK", "Neutrophils", "Pericytes", "Plasma", "Tprolif"],
-        "elongated": ["Endothelial", "Fibroblasts", "Myofibroblasts", "Pericytes"]
+        "elongated": ["Adventitial fibroblasts", "Alveolar fibroblasts", "Peribronchial fibroblasts", "Subpleural fibroblasts", "Myofibroblasts", "Fibromyocytes"]
+    },
+    "model_params":{
+        "name": "custom"
     },
     "training_params":{
         "total_epochs": 1,
@@ -28,9 +29,10 @@
         "expr_fp_ext": ".hdf5",
         "nuclei_fp": "../../data/dataset_cosmx_nsclc/nuclei.tif",
         "nuclei_types_fp": "../../data/dataset_cosmx_nsclc/nuclei_cell_type.h5",
-        "pos_markers_fp": "../../data/sc_references/sc_nsclc_markers_pos_maxoverlap18.csv",
+        "pos_markers_fp": "../../data/sc_references/sc_nsclc_markers_pos.csv",
         "neg_markers_fp": "../../data/sc_references/sc_nsclc_markers_neg.csv",
-        "atlas_fp": "../../data/sc_references/sc_nsclc.csv"
+        "atlas_fp": "../../data/sc_references/sc_nsclc.csv",
+        "gene_names": "../../data/dataset_cosmx_nsclc/all_gene_names.txt"
     },
     "experiment_dirs": {
         "load_dir": "last",

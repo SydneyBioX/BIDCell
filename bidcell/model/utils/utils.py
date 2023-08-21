@@ -8,6 +8,7 @@ from scipy.special import softmax
 import numpy as np
 import random 
 import matplotlib.pyplot as plt
+import natsort
 
 def sorted_alphanumeric(data):
     """
@@ -61,20 +62,37 @@ def json_file_to_pyobj(filename):
     return json2obj(open(filename).read())
 
 
+def get_newest_id(exp_dir='experiments'):
+    """Get the latest experiment ID based on its timestamp 
+
+    Parameters
+    ----------
+    exp_dir : str, optional
+        Name of the directory that contains all the experiment directories, by default 'experiments'
+
+    Returns
+    -------
+    exp_id : str
+        Name of the latest experiment directory
+    """
+    folders = next(os.walk(exp_dir))[1]
+    folders = natsort.natsorted(folders)
+    folder_last = folders[-1]
+    exp_id = folder_last.replace('\\','/')
+    return exp_id
+
+
 def get_experiment_id(make_new, load_dir):
     """
     Get timestamp ID of current experiment
     """    
     if make_new is False:
         if load_dir == 'last':
-            folders = next(os.walk('experiments'))[1]
-            folders = sorted_alphanumeric(folders)
-            folder_last = folders[-1]
-            timestamp = folder_last.replace('\\','/')
+            timestamp = get_newest_id('experiments')
         else:
             timestamp = load_dir
     else:
-        timestamp = dt.datetime.now().strftime("%Y_%B_%d_%H_%M_%S")
+        timestamp = dt.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
     
     return timestamp
 

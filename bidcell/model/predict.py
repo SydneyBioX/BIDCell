@@ -14,8 +14,10 @@ import re
 import bisect
 
 from dataio.dataset_input import DataProcessing
-from model.model import UNet3Plus as Network
+from model.model import SegmentationModel as Network
 from utils.utils import *
+
+import segmentation_models_pytorch as smp
 
 def main(config):
 
@@ -43,7 +45,16 @@ def main(config):
     n_genes = atlas_exprs.shape[1] - 3
     print('Number of genes: %d' %n_genes)
 
-    model = Network(n_channels=n_genes)
+    if json_opts.model_params.name != 'custom':
+        model = smp.Unet(
+            encoder_name=json_opts.model_params.name,      
+            encoder_weights=None,     
+            in_channels=n_genes,           
+            classes=2,             
+        )    
+    else:
+        model = Network(n_channels=n_genes)
+        
     model = model.to(device)
 
     # Get list of model files
@@ -80,9 +91,9 @@ def main(config):
                                 shuffle=False, num_workers=0)
 
         n_test_examples = len(test_loader)
-        logging.info("Total number of testing examples: %d" %n_test_examples)
+        logging.info("Total number of patches: %d" %n_test_examples)
 
-        logging.info("Begin testing")
+        logging.info("Begin prediction")
         
         for epoch_idx, (test_epoch, test_step) in enumerate(zip(saved_model_epochs, saved_model_steps)):
             current_dir = test_output_dir + '/' + 'epoch_' + str(test_epoch) + '_step_' + str(test_step)
@@ -94,7 +105,7 @@ def main(config):
             model.load_state_dict(checkpoint['model_state_dict'])
             epoch = checkpoint['epoch']
             assert(epoch == test_epoch)
-            print("Testing " + load_path)
+            print("Predict using " + load_path)
 
             model = model.eval()
 
@@ -144,7 +155,7 @@ def main(config):
             
             tifffile.imwrite(seg_fp, whole_seg.astype(np.uint32), photometric='minisblack')
 
-    logging.info("Testing finished")
+    logging.info("Finished")
 
     return test_output_dir
 

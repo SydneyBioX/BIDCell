@@ -35,8 +35,23 @@ def main(config):
 
     print("Reading DAPI image")
     fp_dapi = os.path.join(dir_dataset, config.fp_dapi)
+    print(fp_dapi)
     dapi = tifffile.imread(fp_dapi)
 
+    # Crop to size of transcript map (requires getting transcript maps first)
+    if config.crop_to_ts:
+        # Get starting coordinates 
+        fp_affine = os.path.join(dir_dataset, config.fp_affine)
+        
+        affine = pd.read_csv(fp_affine, index_col=0, header=None, sep='\t')
+        
+        min_x = int(float(affine.loc["min_x"].item()))
+        min_y = int(float(affine.loc["min_y"].item()))
+        size_x = int(float(affine.loc["size_x"].item()))
+        size_y = int(float(affine.loc["size_y"].item()))
+                
+        dapi = dapi[min_y:min_y+size_y, min_x:min_x+size_x]
+        
     dapi_h = dapi.shape[0]
     dapi_w = dapi.shape[1]
     print(f"DAPI shape h: {dapi_h} w: {dapi_w}")
@@ -148,5 +163,10 @@ if __name__ == '__main__':
     parser.add_argument('--use_cpu', action='store_true')
     parser.set_defaults(use_cpu=False)
     
+    # If specified, crop nuclei to size of transcript maps
+    parser.add_argument('--crop_to_ts', action='store_true')
+    parser.set_defaults(crop_to_ts=False)
+    parser.add_argument('--fp_affine', default="affine.csv", type=str)
+
     config = parser.parse_args()
     main(config)
