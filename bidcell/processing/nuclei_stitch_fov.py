@@ -7,7 +7,7 @@ import glob
 import re
 from PIL import Image
 import sys
-from typing import Optional
+from typing import Union
 
 
 def check_pattern(string, pattern):
@@ -65,10 +65,7 @@ def read_dapi(fp, channel_first, channel_dapi):
     return dapi
 
 
-def stitch_nuclei(
-        config: Optional[argparse.ArgumentParser]):
-    if not config:
-        config = locals()
+def stitch_nuclei(config: Union[argparse.ArgumentParser, dict]):
 
     dir_dataset = os.path.join(config.data_dir, config.dataset)
 
@@ -204,7 +201,7 @@ if __name__ == '__main__':
     parser.add_argument('--pattern_f', default='F###', type=str, help="String pattern to find in file names for the FOV number")
 
     parser.add_argument('--channel_first', action='store_true', help="channel axis first or last in image volumes")
-    parser.set_defaults(channel_first=False)
+    parser.set_defaults(channel_first=False) # TODO: What is this?
     parser.add_argument('--channel_dapi', default='-1', type=int, help="channel index DAPI image is in")
 
     parser.add_argument('--fp_dapi_stitched', default='dapi_preprocessed.tif', type=str)
