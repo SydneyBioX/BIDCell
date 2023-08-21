@@ -1,5 +1,11 @@
 """BIDCellModel class module"""
-from typing import Optional
+
+
+available_vendors: Dict[str, str] = {
+    "cosmx": "CosMx",
+    "merscope": "Merscope",
+    "visium": "Visium"
+}
 
 
 class BIDCellModel:
