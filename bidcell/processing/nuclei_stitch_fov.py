@@ -6,7 +6,9 @@ import natsort
 import glob
 import re
 from PIL import Image
-import sys 
+import sys
+from typing import Optional
+
 
 def check_pattern(string, pattern):
     """Check that a string contains a pattern"""
@@ -18,7 +20,7 @@ def check_pattern(string, pattern):
         return True  # Pattern found in the string
     else:
         return False  # Pattern not found in the string
-                
+
 
 def check_shape_imgs(fp, target_h, target_w):
     """Check that an image (given its file path) has the same shape as target"""
@@ -46,7 +48,7 @@ def get_string_with_pattern(number, pattern):
     elif num_hash >= len(str(number)):
         padded = str(number).zfill(num_hash)
         return no_hash + str(padded)
-    else: 
+    else:
         sys.exit(f"Number requires more characters than {pattern}")
 
 
@@ -56,22 +58,27 @@ def read_dapi(fp, channel_first, channel_dapi):
 
     if len(dapi.shape) > 2:
         if channel_first:
-            dapi = dapi[channel_dapi,:,:]
+            dapi = dapi[channel_dapi, :, :]
         else:
-            dapi = dapi[:,:,channel_dapi]
+            dapi = dapi[:, :, channel_dapi]
 
     return dapi
 
 
-def stitch_nuclei(config):
+def stitch_nuclei(
+        config: Optional[argparse.ArgumentParser]):
+    if not config:
+        config = locals()
+
     dir_dataset = os.path.join(config.data_dir, config.dataset)
 
-    if config.dir_dapi == None:
+    if not config.dir_dapi:
         dir_dapi = dir_dataset
     else:
         dir_dapi = os.path.join(dir_dataset, config.dir_dapi)
 
-    ext_pat = ''.join('[%s%s]' % (e.lower(), e.upper()) for e in config.ext_dapi)
+    ext_pat = ''.join('[%s%s]' % (
+        e.lower(), e.upper()) for e in config.ext_dapi)
     fp_dapi_list = glob.glob(os.path.join(dir_dapi, "*." + ext_pat))
     fp_dapi_list = natsort.natsorted(fp_dapi_list)
 
@@ -93,22 +100,27 @@ def stitch_nuclei(config):
 
     # Error if patterns in file path names not found
     found_f = [check_pattern(s, config.pattern_f) for s in fp_dapi_list]
-    check_images_meet_criteria(fp_dapi_list, found_f, "FOV string pattern not found in")
+    check_images_meet_criteria(
+        fp_dapi_list, found_f, "FOV string pattern not found in")
 
     if config.pattern_z != None:
         found_z = [check_pattern(s, config.pattern_z) for s in fp_dapi_list]
-        check_images_meet_criteria(fp_dapi_list, found_z, "Z slice string pattern not found in")
+        check_images_meet_criteria(
+            fp_dapi_list, found_z, "Z slice string pattern not found in")
 
     # Check shape the same as sample
     match_shape = [check_shape_imgs(s, fov_h, fov_w) for s in fp_dapi_list]
-    check_images_meet_criteria(fp_dapi_list, match_shape, "Different image shape for")
+    check_images_meet_criteria(
+        fp_dapi_list, match_shape, "Different image shape for")
 
     # Locations of each FOV in the whole image
     n_fov = config.n_fov
     if config.row_major:
-        order = np.arange(config.n_fov_h*config.n_fov_w).reshape((config.n_fov_h, config.n_fov_w))
+        order = np.arange(config.n_fov_h*config.n_fov_w).reshape(
+            (config.n_fov_h, config.n_fov_w))
     else:
-        order = np.arange(config.n_fov_h*config.n_fov_w).reshape((config.n_fov_h, config.n_fov_w), order='F')
+        order = np.arange(config.n_fov_h*config.n_fov_w).reshape(
+            (config.n_fov_h, config.n_fov_w), order='F')
 
     # Arrangement of the FOVs - default is ul
     if config.start_corner == "ur":
@@ -143,7 +155,8 @@ def stitch_nuclei(config):
 
         # Take MIP - or z level 
         if config.mip:
-            dapi_stack = np.zeros((len(fp_stack_fov), fov_h, fov_w), dtype=fov_dtype)
+            dapi_stack = np.zeros(
+                (len(fp_stack_fov), fov_h, fov_w), dtype=fov_dtype)
             for i, fp in enumerate(fp_stack_fov):
                 dapi_stack[i,:,:] = read_dapi(fp, 
                                               config.channel_first, 
@@ -153,7 +166,8 @@ def stitch_nuclei(config):
 
         else:
             # Find z level slice for FOV  
-            pattern_slice = get_string_with_pattern(config.z_level, config.pattern_z)
+            pattern_slice = get_string_with_pattern(
+                config.z_level, config.pattern_z)
             print(pattern_slice)
             found_slice = [check_pattern(s, pattern_slice) for s in fp_stack_fov]
             found_slice_idx = [i for i, x in enumerate(found_slice) if x]
