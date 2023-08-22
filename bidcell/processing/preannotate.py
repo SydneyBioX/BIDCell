@@ -6,7 +6,7 @@ from scipy.stats import spearmanr
 import pandas as pd
 import multiprocessing as mp
 import glob
-from utils import get_n_processes
+from .utils import get_n_processes
 import json 
 import collections
 import sys

@@ -13,7 +13,7 @@ import re
 import warnings
 import sys
 import csv
-from utils import get_patches_coords, get_n_processes
+from .utils import get_patches_coords, get_n_processes
 
 def process_gene_chunk(gene_chunk, df_patch, img_height, img_width, dir_output, hs, ws,
                        gene_col, x_col, y_col, counts_col):

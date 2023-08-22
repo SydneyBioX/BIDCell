@@ -12,7 +12,7 @@ import pathlib
 import glob
 import re
 from skimage.transform import resize
-from utils import get_patches_coords
+from .utils import get_patches_coords
 
 
 def resize_dapi(dapi, new_h, new_w):

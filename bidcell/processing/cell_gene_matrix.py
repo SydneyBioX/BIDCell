@@ -9,7 +9,7 @@ from scipy.stats import spearmanr
 import pandas as pd
 import multiprocessing as mp
 import glob
-from utils import get_patches_coords, get_n_processes
+from .utils import get_patches_coords, get_n_processes
 
 np.seterr(divide='ignore', invalid='ignore')
 
