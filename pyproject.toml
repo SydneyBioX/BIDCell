@@ -1,0 +1,38 @@
+[tool.poetry]
+name = "bidcell"
+version = "0.1.0"
+description = "Biologically-informed deep learning for cell segmentation of subcelluar spatial transcriptomics data."
+authors = ["Helen Fu <xiaohang.fu@sydney.edu.au>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.9,<3.13"
+pandas = "^2.0.3"
+numpy = "^1.25.2"
+tifffile = "^2023.8.12"
+imgaug = "^0.4.0"
+h5py = "^3.9.0"
+imageio = "^2.31.1"
+cv = "^1.0.0"
+scipy = "^1.11.2"
+matplotlib = "^3.7.2"
+natsort = "^8.4.0"
+cellpose = "^2.2.2"
+scikit-image = "^0.21.0"
+segmentation-models-pytorch = "^0.3.3"
+tqdm = "^4.66.1"
+torch = {version = "^2.0.1+cpu", source = "pytorch"}
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.7.0"
+ipykernel = "^6.25.1"
+
+
+[[tool.poetry.source]]
+name = "pytorch"
+url = "https://download.pytorch.org/whl/cpu"
+priority = "explicit"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
