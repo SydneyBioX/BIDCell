@@ -1,15 +1,17 @@
-import numpy as np 
-import matplotlib.pyplot as plt 
-import tifffile 
-import os
 import argparse
-import re
-import random
-import cv2
-from scipy import ndimage as ndi
-import glob 
+import glob
 import multiprocessing as mp
+import os
+import random
+import re
 from collections import Counter
+
+import cv2
+import matplotlib.pyplot as plt
+import numpy as np
+import tifffile
+from scipy import ndimage as ndi
+
 # from bidcell.processing.utils import get_n_processes
 
 def get_n_processes(n_processes):

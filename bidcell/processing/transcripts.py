@@ -1,19 +1,22 @@
-import tifffile
-import pandas as pd
-import numpy as np
-import h5py
-import os
-import natsort
 import argparse
-from tqdm import tqdm 
-import multiprocessing as mp
-import pathlib
-import glob
-import re
-import warnings
-import sys
 import csv
-from .utils import get_patches_coords, get_n_processes
+import glob
+import multiprocessing as mp
+import os
+import pathlib
+import re
+import sys
+import warnings
+
+import h5py
+import natsort
+import numpy as np
+import pandas as pd
+import tifffile
+from tqdm import tqdm
+
+from .utils import get_n_processes, get_patches_coords
+
 
 def process_gene_chunk(gene_chunk, df_patch, img_height, img_width, dir_output, hs, ws,
                        gene_col, x_col, y_col, counts_col):

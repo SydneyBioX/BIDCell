@@ -1,12 +1,12 @@
-import numpy as np
-import tifffile
-import h5py
-import os
-import natsort
 import argparse
-from tqdm import tqdm 
 import glob
+import os
 import re
+
+import h5py
+import natsort
+import numpy as np
+from tqdm import tqdm
 
 
 def generate_patches(config):

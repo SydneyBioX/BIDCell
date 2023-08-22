@@ -1,16 +1,17 @@
-import numpy as np 
-import h5py
 import argparse
-import os
-from scipy.stats import spearmanr
-import pandas as pd
-import multiprocessing as mp
-import glob
-from .utils import get_n_processes
-import json 
 import collections
+import glob
+import json
+import multiprocessing as mp
+import os
 import sys
-from natsort import natsorted
+
+import h5py
+import numpy as np
+import pandas as pd
+from scipy.stats import spearmanr
+
+from .utils import get_n_processes
 
 np.seterr(divide='ignore', invalid='ignore')
 

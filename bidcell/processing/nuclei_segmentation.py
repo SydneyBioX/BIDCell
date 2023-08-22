@@ -1,17 +1,13 @@
-from cellpose import models
-import tifffile
-import pandas as pd
-import numpy as np
-import h5py
-import os
-import natsort
 import argparse
-from tqdm import tqdm 
-import multiprocessing as mp
-import pathlib
-import glob
-import re
+import os
+
+import numpy as np
+import pandas as pd
+import tifffile
+from cellpose import models
 from skimage.transform import resize
+from tqdm import tqdm
+
 from .utils import get_patches_coords
 
 

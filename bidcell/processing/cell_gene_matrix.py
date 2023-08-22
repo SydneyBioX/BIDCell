@@ -1,17 +1,18 @@
-import numpy as np 
-import h5py
+import argparse
+import glob
+import multiprocessing as mp
+import os
+
+import cv2
+import numpy as np
+import pandas as pd
 import tifffile
 from tqdm import tqdm
-import argparse
-import os
-import cv2 
-from scipy.stats import spearmanr
-import pandas as pd
-import multiprocessing as mp
-import glob
-from .utils import get_patches_coords, get_n_processes
+
+from .utils import get_n_processes, get_patches_coords
 
 np.seterr(divide='ignore', invalid='ignore')
+
 
 def process_chunk(chunk, output_dir, cell_ids_unique, col_names, seg_map,
                   x_col, y_col, gene_col):

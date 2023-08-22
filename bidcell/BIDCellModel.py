@@ -1,16 +1,16 @@
 """BIDCellModel class module"""
-from typing import Optional, Dict
 import os
-from processing.nuclei_stitch_fov import stitch_nuclei
-from processing.nuclei_segmentation import segment_nuclei
-from processing.transcripts import generate_expression_maps
-from processing.transcript_patches import generate_patches
-from processing.cell_gene_matrix import make_cell_gene_mat
-from processing.preannotate import preannotate
-from model.train import train
-from model.predict import predict
-from model.postprocess_predictions import postprocess_predicitons
+from typing import Dict, Optional
 
+from model.postprocess_predictions import postprocess_predicitons
+from model.predict import predict
+from model.train import train
+from processing.cell_gene_matrix import make_cell_gene_mat
+from processing.nuclei_segmentation import segment_nuclei
+from processing.nuclei_stitch_fov import stitch_nuclei
+from processing.preannotate import preannotate
+from processing.transcript_patches import generate_patches
+from processing.transcripts import generate_expression_maps
 
 available_vendors: Dict[str, str] = {
     "cosmx": "CosMx",

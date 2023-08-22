@@ -1,14 +1,14 @@
-import os
+import collections
 import datetime as dt
 import json
-import collections
+import os
+import random
 import re
-import torch 
-from scipy.special import softmax
-import numpy as np
-import random 
+
 import matplotlib.pyplot as plt
 import natsort
+import numpy as np
+from scipy.special import softmax
 
 def sorted_alphanumeric(data):
     """

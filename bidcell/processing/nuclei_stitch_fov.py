@@ -1,13 +1,14 @@
-import tifffile
-import numpy as np
 import argparse
-import os
-import natsort
 import glob
+import os
 import re
-from PIL import Image
 import sys
 from typing import Union
+
+import natsort
+import numpy as np
+import tifffile
+from PIL import Image
 
 
 def check_pattern(string, pattern):

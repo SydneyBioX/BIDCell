@@ -1,23 +1,25 @@
 import argparse
+import bisect
+import glob
 import logging
 import os
+import re
 import sys
 
+import natsort
+import numpy as np
+import pandas as pd
+import segmentation_models_pytorch as smp
+import tifffile
 import torch
 from torch.utils.data import DataLoader
-import numpy as np
-import tifffile
-import pandas as pd 
-import glob
-import natsort
-import re
-import bisect
 
 from .dataio.dataset_input import DataProcessing
 from .model.model import SegmentationModel as Network
-from .utils.utils import *
+from .utils.utils import (get_experiment_id, get_files_list, get_seg_mask,
+                          json_file_to_pyobj, make_dir, save_fig_outputs,
+                          sorted_alphanumeric)
 
-import segmentation_models_pytorch as smp
 
 def predict(config):
 

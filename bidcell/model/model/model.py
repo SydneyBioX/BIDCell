@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*- 
 # Credit: https://github.com/avBuffer/UNet3plus_pth 
-import numpy as np
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-from .layers import unetConv2
+
 from .intialisation import init_weights
+from .layers import unetConv2
 
 
 class SegmentationModel(nn.Module):
