@@ -16,8 +16,9 @@ from scipy.ndimage import rotate
 import re
 import glob 
 import natsort
+import warnings
 
-np.warnings.filterwarnings('ignore', category=np.VisibleDeprecationWarning)
+warnings.filterwarnings('ignore', category=np.VisibleDeprecationWarning)
 
 
 class DataProcessing(data.Dataset):
