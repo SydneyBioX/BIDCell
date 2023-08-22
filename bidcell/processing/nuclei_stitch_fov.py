@@ -65,7 +65,7 @@ def read_dapi(fp, channel_first, channel_dapi):
     return dapi
 
 
-def stitch_nuclei(config: Union[argparse.ArgumentParser, dict]):
+def stitch_nuclei(config: Union[argparse.ArgumentParser, dict]) -> str:
 
     dir_dataset = os.path.join(config.data_dir, config.dataset)
 
@@ -187,6 +187,7 @@ def stitch_nuclei(config: Union[argparse.ArgumentParser, dict]):
     fp_output = dir_dataset+'/'+config.fp_dapi_stitched
     tifffile.imwrite(fp_output, stitched, photometric='minisblack')
     print(f"Saved {fp_output}")
+    return fp_output
 
 
 if __name__ == '__main__':
