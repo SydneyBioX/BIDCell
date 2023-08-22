@@ -12,3 +12,4 @@ bidcell/model/experiments
 !sc_breast.csv
 !sc_breast_markers_neg.csv
 !sc_breast_markers_pos.csv
+.vscode/settings.json
