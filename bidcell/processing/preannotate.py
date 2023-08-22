@@ -67,20 +67,7 @@ def process_chunk_corr(matrix, dir_output, sc_expr, sc_labels, n_atlas_types):
     df_split.to_csv(dir_output + '/preannotations_%d.csv' %matrix_out[0,0], index=False)
     
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument('--data_dir', default='../../data/', type=str)
-    parser.add_argument('--dataset', default='dataset_xenium_breast1', type=str)
-    parser.add_argument('--expr_dir', default='cell_gene_matrices/nuclei', type=str)
-    parser.add_argument('--fp_expr', default='cell_expr.csv', type=str)
-    parser.add_argument('--fp_output', default='nuclei_cell_type.h5', type=str)
-    parser.add_argument('--fp_ref', default='../../data/sc_references/sc_breast.csv', type=str,
-                        help='single cell reference')
-    parser.add_argument('--n_processes', default=None, type=int)
-
-    config = parser.parse_args()
-
+def preannotate(config):
     dir_dataset = os.path.join(config.data_dir, config.dataset)
     expr_dir = os.path.join(dir_dataset, config.expr_dir)
 
@@ -145,3 +132,19 @@ if __name__ == '__main__':
     # Clean up
     for fpc in fp_chunks:
         os.remove(fpc)
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('--data_dir', default='../../data/', type=str)
+    parser.add_argument('--dataset', default='dataset_xenium_breast1', type=str)
+    parser.add_argument('--expr_dir', default='cell_gene_matrices/nuclei', type=str)
+    parser.add_argument('--fp_expr', default='cell_expr.csv', type=str)
+    parser.add_argument('--fp_output', default='nuclei_cell_type.h5', type=str)
+    parser.add_argument('--fp_ref', default='../../data/sc_references/sc_breast.csv', type=str,
+                        help='single cell reference')
+    parser.add_argument('--n_processes', default=None, type=int)
+
+    config = parser.parse_args()
+    preannotate(config)

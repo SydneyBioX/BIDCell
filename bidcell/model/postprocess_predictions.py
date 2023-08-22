@@ -205,7 +205,6 @@ def process_chunk(chunk, patch_size, img_whole, nuclei_img, output_dir):
         plt.close(fig)
 
 
-
 def combine(config, dir_id, patch_size, nuclei_img):
     """
     Combine the patches previously output by the connect function
@@ -271,7 +270,6 @@ def combine(config, dir_id, patch_size, nuclei_img):
     to_check_ids = list(set(masked_ids) & set(windowed_ids))
 
     return seg_final, to_check_ids
-    
 
 
 def process_check_splits(config, dir_id, nuclei_img, seg_final, chunk_ids):
@@ -328,19 +326,7 @@ def process_check_splits(config, dir_id, nuclei_img, seg_final, chunk_ids):
     tifffile.imwrite(dir_id + '/' + str(chunk_ids[0]) + '_checked_splits.tif', chunk_seg, photometric='minisblack')
 
 
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument('--dir_id', default='last', type=str)
-    parser.add_argument('--epoch', default=1, type=int)
-    parser.add_argument('--step', default=4000, type=int)
-    parser.add_argument('--nucleus_fp', default='../../data/dataset_merscope_melanoma2/nuclei.tif', type=str)
-    parser.add_argument('--patch_size', default=1024, type=int)
-    parser.add_argument('--n_processes', default=None, type=int)
-
-    config = parser.parse_args()
-    
+def postprocess_predicitons(config):
     dir_id = "experiments/" + get_exp_dir(config) + '/test_output/'
 
     pred_fp = dir_id + 'epoch_%d_step_%d.tif' %(config.epoch, config.step)
@@ -411,3 +397,17 @@ if __name__ == '__main__':
     fp_output_seg = fp_dir + '.tif'
     print('Saved segmentation to %s' %fp_output_seg)
     tifffile.imwrite(fp_output_seg, seg_final.astype(np.uint32), photometric='minisblack')
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('--dir_id', default='last', type=str)
+    parser.add_argument('--epoch', default=1, type=int)
+    parser.add_argument('--step', default=4000, type=int)
+    parser.add_argument('--nucleus_fp', default='../../data/dataset_merscope_melanoma2/nuclei.tif', type=str)
+    parser.add_argument('--patch_size', default=1024, type=int)
+    parser.add_argument('--n_processes', default=None, type=int)
+
+    config = parser.parse_args()
+    postprocess_predicitons(config)

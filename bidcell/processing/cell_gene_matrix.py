@@ -83,47 +83,8 @@ def read_expr_csv(fp):
         sys.exit(f"Cannot read {fp}")
     
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
+def make_cell_gene_mat(config):
 
-    parser.add_argument('--data_dir', default='../../data/', type=str)
-    parser.add_argument('--dataset', default='dataset_merscope_melanoma2', type=str)
-    
-    parser.add_argument('--fp_seg', default='/mnt/HDD4/Helen/wip_other_datasets/bidcell/model/experiments/2023_July_06_09_41_41/test_output/epoch_1_step_4000_connected.tif', type=str,
-                        help='segmentation')
-    parser.add_argument('--output_dir', default='cell_gene_matrices/2023_July_06_09_41_41', type=str,
-                        help='output directory')
-                        
-    parser.add_argument('--fp_output_expr', default='cell_expr.csv', type=str,
-                        help='output file')
-    parser.add_argument('--fp_output_full', default='cell_outputs_', type=str,
-                        help='output file')
-    parser.add_argument('--fp_transcripts_processed', default='transcripts_processed.csv', type=str,
-                        help='filtered and xy-scaled transcripts data')
-    parser.add_argument('--fp_gene_names', default='all_gene_names.txt', type=str,
-                        help='txt file containing list of gene names')                    
-    parser.add_argument('--fp_affine', default='affine.csv', type=str,
-                        help='csv file containing affine transformation of transcript maps')
-                        
-    parser.add_argument('--scale_factor_x', default=1/9.259333610534667969, type=float,
-                        help='conversion between pixel size and microns for x dimension')  
-    parser.add_argument('--scale_factor_y', default=1/9.259462356567382812, type=float,
-                        help='conversion between pixel size and microns for y dimension')   
-    parser.add_argument('--max_sum_hw', default=50000, type=int,
-                        help='max h+w for resized segmentation to extract expressions from')  
-    parser.add_argument('--n_processes', default=None, type=int)
-
-    # Names of columns
-    parser.add_argument('--x_col', default='global_x', type=str)
-    parser.add_argument('--y_col', default='global_y', type=str)
-    parser.add_argument('--gene_col', default='gene', type=str)
-    
-    parser.add_argument('--only_expr', action='store_true', help="only get cell expressions, no additional info")
-    parser.set_defaults(only_expr=False)
-    
-    config = parser.parse_args()
-    
-   
     dir_dataset = os.path.join(config.data_dir, config.dataset)
     output_dir = os.path.join(dir_dataset, config.output_dir)
     fp_transcripts_processed = os.path.join(dir_dataset, config.fp_transcripts_processed)
@@ -277,3 +238,44 @@ if __name__ == '__main__':
             p.join()
 
         print('Done')
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('--data_dir', default='../../data/', type=str)
+    parser.add_argument('--dataset', default='dataset_merscope_melanoma2', type=str)
+    
+    parser.add_argument('--fp_seg', default='/mnt/HDD4/Helen/wip_other_datasets/bidcell/model/experiments/2023_July_06_09_41_41/test_output/epoch_1_step_4000_connected.tif', type=str,
+                        help='segmentation')
+    parser.add_argument('--output_dir', default='cell_gene_matrices/2023_July_06_09_41_41', type=str,
+                        help='output directory')
+                        
+    parser.add_argument('--fp_output_expr', default='cell_expr.csv', type=str,
+                        help='output file')
+    parser.add_argument('--fp_output_full', default='cell_outputs_', type=str,
+                        help='output file')
+    parser.add_argument('--fp_transcripts_processed', default='transcripts_processed.csv', type=str,
+                        help='filtered and xy-scaled transcripts data')
+    parser.add_argument('--fp_gene_names', default='all_gene_names.txt', type=str,
+                        help='txt file containing list of gene names')                    
+    parser.add_argument('--fp_affine', default='affine.csv', type=str,
+                        help='csv file containing affine transformation of transcript maps')
+                        
+    parser.add_argument('--scale_factor_x', default=1/9.259333610534667969, type=float,
+                        help='conversion between pixel size and microns for x dimension')  
+    parser.add_argument('--scale_factor_y', default=1/9.259462356567382812, type=float,
+                        help='conversion between pixel size and microns for y dimension')   
+    parser.add_argument('--max_sum_hw', default=50000, type=int,
+                        help='max h+w for resized segmentation to extract expressions from')  
+    parser.add_argument('--n_processes', default=None, type=int)
+
+    # Names of columns
+    parser.add_argument('--x_col', default='global_x', type=str)
+    parser.add_argument('--y_col', default='global_y', type=str)
+    parser.add_argument('--gene_col', default='gene', type=str)
+    
+    parser.add_argument('--only_expr', action='store_true', help="only get cell expressions, no additional info")
+    parser.set_defaults(only_expr=False)
+    
+    config = parser.parse_args()

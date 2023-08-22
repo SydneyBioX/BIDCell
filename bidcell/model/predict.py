@@ -19,7 +19,7 @@ from utils.utils import *
 
 import segmentation_models_pytorch as smp
 
-def main(config):
+def predict(config):
 
     json_opts = json_file_to_pyobj(config.config_file)
 
@@ -250,7 +250,7 @@ if __name__ == '__main__':
 
     config = parser.parse_args()
 
-    test_output_dir = main(config)
+    test_output_dir = predict(config)
     
     # test_output_dir = 'experiments/2023_July_06_09_41_41/test_output'
     

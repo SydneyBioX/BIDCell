@@ -30,7 +30,7 @@ def segment_dapi(img, diameter=None, use_cpu=False):
     return mask
 
 
-def main(config):
+def segment_nuclei(config) -> str:
     dir_dataset = os.path.join(config.data_dir, config.dataset)
 
     print("Reading DAPI image")
@@ -169,4 +169,4 @@ if __name__ == '__main__':
     parser.add_argument('--fp_affine', default="affine.csv", type=str)
 
     config = parser.parse_args()
-    main(config)
+    segment_nuclei(config)

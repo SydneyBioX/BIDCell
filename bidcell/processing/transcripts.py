@@ -79,7 +79,7 @@ def stitch_patches(dir_patches, fp_pattern):
     tifffile.imwrite(dir_patches+"/all_genes_sum.tif", whole, photometric='minisblack')
    
 
-def main(config):
+def generate_expression_maps(config) -> str:
 
     """
     Generates transcript expression maps from transcripts.csv.gz, which contains transcript data with locations.
@@ -275,6 +275,8 @@ def main(config):
     print('Saved all maps')
     
     stitch_patches(dir_out_maps, '/all_genes_sum_*.tif')
+    return dir_out_maps
+
 
 
 if __name__ == '__main__':
@@ -322,4 +324,4 @@ if __name__ == '__main__':
 
 
     config = parser.parse_args()
-    main(config)
+    generate_expression_maps(config)

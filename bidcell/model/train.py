@@ -17,7 +17,8 @@ from utils.utils import *
 
 import segmentation_models_pytorch as smp
 
-def main(config):
+
+def train(config):
 
     json_opts = json_file_to_pyobj(config.config_file)
 
@@ -245,4 +246,4 @@ if __name__ == '__main__':
                         help='total number of steps to train')
                         
     config = parser.parse_args()
-    main(config)
+    train(config)

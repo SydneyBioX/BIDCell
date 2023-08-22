@@ -8,7 +8,8 @@ from tqdm import tqdm
 import glob
 import re
 
-def main(config):
+
+def generate_patches(config):
     """
     Divides transcriptomic maps of all genes into patches for input to the CNN
     
@@ -89,6 +90,6 @@ if __name__ == '__main__':
     parser.add_argument('--patch_size', default=64, type=int)
 
     config = parser.parse_args()
-    main(config)
+    generate_patches(config)
 
     
