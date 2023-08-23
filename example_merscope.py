@@ -16,7 +16,7 @@ def main(args):
 
     os.system(f"python nuclei_segmentation.py --dataset {args.dataset} --fp_dapi {args.fp_dapi} --scale_pix_x {scale_pix_x} --scale_pix_y {scale_pix_y} --max_height 10000 --max_width 10000")
 
-    os.system(f"python transcripts.py --dataset {args.dataset} --n_processes {args.n_processes} --fp_transcripts {args.fp_transcripts} --scale_ts_x {scale_ts_x} --scale_ts_y {scale_ts_y} --max_height 3500 --max_width 4000 --global_shift_x {args.global_shift_x} --global_shift_y {args.global_shift_y} --x_col {args.x_col} --y_col {args.y_col} --gene_col {args.gene_col}")
+    os.system(f"python transcripts.py --dataset {args.dataset} --n_processes {args.n_processes} --fp_transcripts {args.fp_transcripts} --scale_ts_x {scale_ts_x} --scale_ts_y {scale_ts_y} --max_height 3500 --max_width 4000 --global_shift_x {args.global_shift_x} --global_shift_y {args.global_shift_y} --x_col {args.x_col} --y_col {args.y_col} --gene_col {args.gene_col} --shift_to_origin")
 
     os.system(f"python transcript_patches.py --dataset {args.dataset} --patch_size {args.patch_size}")
 
