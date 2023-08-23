@@ -2,7 +2,7 @@
 import os
 from typing import Dict, Optional
 
-from model.postprocess_predictions import postprocess_predicitons
+from model.postprocess_predictions import postprocess_predictions
 from model.predict import predict
 from model.train import train
 from processing.cell_gene_matrix import make_cell_gene_mat
@@ -74,7 +74,7 @@ class BIDCellModel:
 
     def predict(self) -> None:
         predict(self.config)
-        postprocess_predicitons(self.config)
+        postprocess_predictions(self.config)
 
     def _get_defaults(vendor: str) -> dict:
         # TODO: figure out defaults situation

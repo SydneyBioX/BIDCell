@@ -332,7 +332,7 @@ def process_check_splits(config, dir_id, nuclei_img, seg_final, chunk_ids):
     )
 
 
-def postprocess_predicitons(config):
+def postprocess_predictions(config):
     dir_id = "experiments/" + get_exp_dir(config) + "/test_output/"
 
     pred_fp = dir_id + "epoch_%d_step_%d.tif" % (config.epoch, config.step)
@@ -426,4 +426,4 @@ if __name__ == "__main__":
     parser.add_argument("--n_processes", default=None, type=int)
 
     config = parser.parse_args()
-    postprocess_predicitons(config)
+    postprocess_predictions(config)
