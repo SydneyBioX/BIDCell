@@ -98,7 +98,7 @@ def stitch_nuclei(config: Union[argparse.ArgumentParser, dict]) -> str:
     found_f = [check_pattern(s, config.pattern_f) for s in fp_dapi_list]
     check_images_meet_criteria(fp_dapi_list, found_f, "FOV string pattern not found in")
 
-    if config.pattern_z != None:
+    if config.pattern_z is not None:
         found_z = [check_pattern(s, config.pattern_z) for s in fp_dapi_list]
         check_images_meet_criteria(
             fp_dapi_list, found_z, "Z slice string pattern not found in"

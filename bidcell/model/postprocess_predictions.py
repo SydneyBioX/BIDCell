@@ -17,7 +17,7 @@ from scipy import ndimage as ndi
 
 def get_n_processes(n_processes):
     """Number of CPUs for multiprocessing"""
-    if n_processes == None:
+    if n_processes is None:
         return mp.cpu_count()
     else:
         return n_processes if n_processes <= mp.cpu_count() else mp.cpu_count()
@@ -175,9 +175,9 @@ def process_chunk(chunk, patch_size, img_whole, nuclei_img, output_dir):
         random.shuffle(cell_ids_rand)
 
         keep_mask = np.isin(nuclei, cell_ids)
-        nuclei = np.where(keep_mask == True, nuclei, 0)
+        nuclei = np.where(keep_mask, nuclei, 0)
         keep_mask = np.isin(img, cell_ids)
-        img = np.where(keep_mask == True, nuclei, 0)
+        img = np.where(keep_mask, nuclei, 0)
 
         dictionary = dict(zip(cell_ids, cell_ids_rand))
         dictionary[0] = 0
@@ -241,7 +241,7 @@ def combine(config, dir_id, patch_size, nuclei_img):
         fp_y = int(fp_coords.split("_")[1])
 
         # Place into appropriate location
-        seg_final[fp_x : fp_x + patch_h, fp_y : fp_y + patch_w] = patch[:]
+        seg_final[fp_x: fp_x + patch_h, fp_y: fp_y + patch_w] = patch[:]
 
     # If cell is split by windowing, keep component with nucleus
     count_ids = Counter(cell_ids)

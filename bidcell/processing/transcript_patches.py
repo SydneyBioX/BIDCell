@@ -82,7 +82,7 @@ def generate_patches(config):
 
             # Get patches and save
             for h, w in tqdm(coords_starts):
-                patch = sst[h : h + patch_size, w : w + patch_size, :]
+                patch = sst[h: h + patch_size, w: w + patch_size, :]
 
                 fp_output = f"{dir_output}/{h+map_coords[0]}_{w+map_coords[2]}.hdf5"
 

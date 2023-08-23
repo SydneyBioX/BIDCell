@@ -97,9 +97,9 @@ class DataProcessing(data.Dataset):
 
         if self.isTraining:
             self.fp_patches = [fp_patches_all[x] for x in train_ids]
-            if total_steps != None:
+            if total_steps is not None:
                 self.fp_patches = self.fp_patches[:total_steps]
-        elif all_patches == True:
+        elif all_patches:
             self.fp_patches = fp_patches_all
         else:
             test_ids = [x for x in sample_ids if x not in train_ids]

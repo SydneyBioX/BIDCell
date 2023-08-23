@@ -2,6 +2,7 @@ import argparse
 import glob
 import multiprocessing as mp
 import os
+import sys
 
 import cv2
 import numpy as np

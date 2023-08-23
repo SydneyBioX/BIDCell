@@ -19,7 +19,7 @@ def resize_dapi(dapi, new_h, new_w):
 
 def segment_dapi(img, diameter=None, use_cpu=False):
     """Segment nuclei in DAPI image using Cellpose"""
-    use_gpu = True if use_cpu == False else False
+    use_gpu = True if not use_cpu else False
     model = models.Cellpose(gpu=use_gpu, model_type="cyto")
     channels = [0, 0]
     mask, _, _, _ = model.eval(img, diameter=diameter, channels=channels)
@@ -46,7 +46,7 @@ def segment_nuclei(config) -> str:
         size_x = int(float(affine.loc["size_x"].item()))
         size_y = int(float(affine.loc["size_y"].item()))
 
-        dapi = dapi[min_y : min_y + size_y, min_x : min_x + size_x]
+        dapi = dapi[min_y: min_y + size_y, min_x: min_x + size_x]
 
     dapi_h = dapi.shape[0]
     dapi_w = dapi.shape[1]
@@ -68,11 +68,11 @@ def segment_nuclei(config) -> str:
         or config.scale_pix_x != 1.0
         or config.scale_pix_y != 1.0
     ):
-        if config.max_height == None:
+        if config.max_height is None:
             max_height = dapi_h
         else:
             max_height = config.max_height if config.max_height < dapi_h else dapi_h
-        if config.max_width == None:
+        if config.max_width is None:
             max_width = dapi_w
         else:
             max_width = config.max_width if config.max_width < dapi_w else dapi_w
@@ -119,12 +119,12 @@ def segment_nuclei(config) -> str:
             patch = dapi[hs:he, ws:we]
 
             patch_resized = resize_dapi(patch, hsize, wsize)
-            rdapi[h : h + hsize, w : w + wsize] = patch_resized
+            rdapi[h: h + hsize, w: w + wsize] = patch_resized
 
             # Segment nuclei in each patch and place into final segmentation with unique ID
             patch_nuclei = segment_dapi(patch_resized, config.diameter, config.use_cpu)
             nuclei_mask = np.where(patch_nuclei > 0, 1, 0)
-            nuclei[h : h + hsize, w : w + wsize] = patch_nuclei + total_n * nuclei_mask
+            nuclei[h: h + hsize, w: w + wsize] = patch_nuclei + total_n * nuclei_mask
             unique_ids = np.unique(patch_nuclei)
             total_n += unique_ids.max()
 

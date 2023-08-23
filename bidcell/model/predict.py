@@ -75,7 +75,7 @@ def predict(config):
         ]
         saved_model_epochs = [x.split("_")[1] for x in saved_model_names]
         saved_model_steps = [x.split("_")[-1] for x in saved_model_names]
-        if config.test_epoch == None:
+        if config.test_epoch is None:
             saved_model_epochs = np.array(saved_model_epochs, dtype="int")
             saved_model_steps = np.array(saved_model_steps, dtype="int")
         elif config.test_epoch == -1:
@@ -189,8 +189,8 @@ def predict(config):
                 # tifffile.imwrite(seg_patch_fp, seg_patch.astype(np.uint32), photometric='minisblack')
 
                 whole_seg[
-                    coords_h1 : coords_h1 + json_opts.data_params.patch_size,
-                    coords_w1 : coords_w1 + json_opts.data_params.patch_size,
+                    coords_h1: coords_h1 + json_opts.data_params.patch_size,
+                    coords_w1: coords_w1 + json_opts.data_params.patch_size,
                 ] = seg_patch.copy()
 
             seg_fp = (

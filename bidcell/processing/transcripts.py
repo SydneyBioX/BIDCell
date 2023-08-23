@@ -38,7 +38,7 @@ def process_gene_chunk(
         map_fe = np.zeros((img_height, img_width))
         # print(map_fe.shape)
 
-        if counts_col == None:
+        if counts_col is None:
             for idx in df_fe.index:
                 idx_x = np.round(df_patch.iloc[idx][x_col]).astype(int)
                 idx_y = np.round(df_patch.iloc[idx][y_col]).astype(int)
@@ -80,7 +80,7 @@ def stitch_patches(dir_patches, fp_pattern):
 
     for i, fp in enumerate(fp_patches):
         hs, he, ws, we = coords[i, 0], coords[i, 1], coords[i, 2], coords[i, 3]
-        whole[hs : hs + height_patch, ws : ws + width_patch] = tifffile.imread(fp)
+        whole[hs: hs + height_patch, ws: ws + width_patch] = tifffile.imread(fp)
 
     height_trim = np.max(coords[:, 1])
     width_trim = np.max(coords[:, 3])

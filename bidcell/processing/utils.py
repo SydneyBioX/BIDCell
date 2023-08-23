@@ -19,7 +19,7 @@ def get_patches_coords(size, size_patch):
 
 def get_n_processes(n_processes):
     """Number of CPUs for multiprocessing"""
-    if n_processes == None:
+    if n_processes is None:
         return mp.cpu_count()
     else:
         return n_processes if n_processes <= mp.cpu_count() else mp.cpu_count()

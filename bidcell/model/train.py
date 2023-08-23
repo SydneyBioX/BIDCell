@@ -19,7 +19,12 @@ from .model.losses import (
     PosNegMarkerLoss,
 )
 from .model.model import SegmentationModel as Network
-from .utils.utils import get_experiment_id, json_file_to_pyobj, make_dir
+from .utils.utils import (
+    get_experiment_id,
+    json_file_to_pyobj,
+    make_dir,
+    save_fig_outputs,
+)
 
 
 def train(config):
@@ -35,7 +40,7 @@ def train(config):
     device = torch.device("cuda" if use_cuda else "cpu")
 
     # Create experiment directories
-    if config.resume_epoch == None:
+    if config.resume_epoch is None:
         make_new = True
     else:
         make_new = False
@@ -122,13 +127,13 @@ def train(config):
     scheduler.last_epoch = global_step
 
     # Starting epoch
-    if config.resume_epoch != None:
+    if config.resume_epoch is not None:
         initial_epoch = config.resume_epoch
     else:
         initial_epoch = 0
 
     # Restore saved model
-    if config.resume_epoch != None:
+    if config.resume_epoch is not None:
         load_path = (
             experiment_path
             + "/"

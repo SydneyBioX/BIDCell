@@ -53,10 +53,10 @@ def process_chunk_corr(matrix, dir_output, sc_expr, sc_labels, n_atlas_types):
     predicted_cell_type = [sc_labels[x] for x in best_i_type]
 
     nan_true = np.isnan(corr_best)
-    corr_best = [x if y == False else -1 for (x, y) in zip(corr_best, nan_true)]
-    best_i_type = [x if y == False else -1 for (x, y) in zip(best_i_type, nan_true)]
+    corr_best = [x if not y else -1 for (x, y) in zip(corr_best, nan_true)]
+    best_i_type = [x if not y else -1 for (x, y) in zip(best_i_type, nan_true)]
     predicted_cell_type = [
-        x if y == False else -1 for (x, y) in zip(predicted_cell_type, nan_true)
+        x if not y else -1 for (x, y) in zip(predicted_cell_type, nan_true)
     ]
 
     # cell ID
