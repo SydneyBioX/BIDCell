@@ -10,14 +10,15 @@ import natsort
 import numpy as np
 from scipy.special import softmax
 
+
 def sorted_alphanumeric(data):
     """
     Alphanumerically sort a list
     """
     convert = lambda text: int(text) if text.isdigit() else text.lower()
-    alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ] 
+    alphanum_key = lambda key: [convert(c) for c in re.split("([0-9]+)", key)]
     return sorted(data, key=alphanum_key)
-    
+
 
 def make_dir(dir_path):
     """
@@ -35,7 +36,7 @@ def delete_file(path):
         os.remove(path)
 
 
-def get_files_list(path, ext_array=['.tif']):
+def get_files_list(path, ext_array=[".tif"]):
     """
     Get all files in a directory with a specific extension
     """
@@ -51,19 +52,24 @@ def get_files_list(path, ext_array=['.tif']):
                     dirs_list.append(folder)
 
     return files_list, dirs_list
-    
+
 
 def json_file_to_pyobj(filename):
     """
     Read json config file
     """
-    def _json_object_hook(d): return collections.namedtuple('X', d.keys())(*d.values())
-    def json2obj(data): return json.loads(data, object_hook=_json_object_hook)
+
+    def _json_object_hook(d):
+        return collections.namedtuple("X", d.keys())(*d.values())
+
+    def json2obj(data):
+        return json.loads(data, object_hook=_json_object_hook)
+
     return json2obj(open(filename).read())
 
 
-def get_newest_id(exp_dir='experiments'):
-    """Get the latest experiment ID based on its timestamp 
+def get_newest_id(exp_dir="experiments"):
+    """Get the latest experiment ID based on its timestamp
 
     Parameters
     ----------
@@ -78,35 +84,35 @@ def get_newest_id(exp_dir='experiments'):
     folders = next(os.walk(exp_dir))[1]
     folders = natsort.natsorted(folders)
     folder_last = folders[-1]
-    exp_id = folder_last.replace('\\','/')
+    exp_id = folder_last.replace("\\", "/")
     return exp_id
 
 
 def get_experiment_id(make_new, load_dir):
     """
     Get timestamp ID of current experiment
-    """    
+    """
     if make_new is False:
-        if load_dir == 'last':
-            timestamp = get_newest_id('experiments')
+        if load_dir == "last":
+            timestamp = get_newest_id("experiments")
         else:
             timestamp = load_dir
     else:
         timestamp = dt.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
-    
+
     return timestamp
 
 
 def get_seg_mask(sample_seg, sample_n):
     """
     Generate the segmentation mask with unique cell IDs
-    """   
+    """
     sample_n = np.squeeze(sample_n)
 
     # Background prob is average probability of all cells EXCEPT FOR NUCLEI
     sample_probs = softmax(sample_seg, axis=1)
-    bgd_probs = np.expand_dims(np.mean(sample_probs[:,0,:,:], axis=0), 0)
-    fgd_probs = sample_probs[:,1,:,:]
+    bgd_probs = np.expand_dims(np.mean(sample_probs[:, 0, :, :], axis=0), 0)
+    fgd_probs = sample_probs[:, 1, :, :]
     probs = np.concatenate((bgd_probs, fgd_probs), axis=0)
     final_seg = np.argmax(probs, axis=0)
 
@@ -118,56 +124,56 @@ def get_seg_mask(sample_seg, sample_n):
     if ids_pred[0] != 0:
         ids_pred = np.insert(ids_pred, 0, 0)
     ids_orig = ids_orig[ids_pred]
-        
+
     dictionary = dict(zip(ids_pred, ids_orig))
     dictionary[0] = 0
     final_seg_orig = np.copy(final_seg)
-    final_seg_orig = np.vectorize(dictionary.get)(final_seg)  
+    final_seg_orig = np.vectorize(dictionary.get)(final_seg)
 
     # Add nuclei back in
     final_seg_orig = np.where(sample_n > 0, sample_n, final_seg_orig)
-    
+
     return final_seg_orig
-    
+
 
 def save_fig_outputs(sample_seg, sample_n, sample_sa, sample_expr, patch_fp):
-    """ 
+    """
     Generate figure of inputs and outputs
-    """ 
+    """
     sample_n = np.squeeze(sample_n)
-    
+
     sample_expr = np.squeeze(sample_expr)
-    sample_expr[sample_expr>0] = 1
-    
+    sample_expr[sample_expr > 0] = 1
+
     sample_sa = np.squeeze(np.sum(sample_sa, 0))
-    
+
     final_seg_orig = get_seg_mask(sample_seg, sample_n)
-    
+
     # Randomise colours for plot
     cells_ids_orig = np.unique(final_seg_orig)
     n_cells_ids = len(cells_ids_orig)
-    cell_ids_rand = np.arange(1, n_cells_ids+1)
+    cell_ids_rand = np.arange(1, n_cells_ids + 1)
     random.shuffle(cell_ids_rand)
     dictionary = dict(zip(cells_ids_orig, cell_ids_rand))
     dictionary[0] = 0
     final_seg_mapped = np.copy(final_seg_orig)
-    final_seg_mapped = np.vectorize(dictionary.get)(final_seg_orig)  
+    final_seg_mapped = np.vectorize(dictionary.get)(final_seg_orig)
     nuclei_mapped = np.copy(sample_n)
-    nuclei_mapped = np.vectorize(dictionary.get)(sample_n)  
-    
+    nuclei_mapped = np.vectorize(dictionary.get)(sample_n)
+
     # Plot
     fig, axes = plt.subplots(ncols=4, figsize=(12, 3), sharex=True, sharey=True)
     ax = axes.ravel()
 
     ax[0].imshow(nuclei_mapped, cmap=plt.cm.nipy_spectral)
-    ax[0].set_title('Nuclei')
+    ax[0].set_title("Nuclei")
     ax[1].imshow(final_seg_mapped, cmap=plt.cm.nipy_spectral)
-    ax[1].set_title('Cells')
+    ax[1].set_title("Cells")
     ax[2].imshow(sample_expr, cmap=plt.cm.gray)
-    ax[2].set_title('Expressions')
+    ax[2].set_title("Expressions")
     ax[3].imshow(sample_sa, cmap=plt.cm.gray)
-    ax[3].set_title('Eligible')
-    
+    ax[3].set_title("Eligible")
+
     for a in ax:
         a.set_axis_off()
 

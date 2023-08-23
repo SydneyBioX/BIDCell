@@ -14,31 +14,32 @@ from scipy import ndimage as ndi
 
 # from bidcell.processing.utils import get_n_processes
 
+
 def get_n_processes(n_processes):
     """Number of CPUs for multiprocessing"""
     if n_processes == None:
         return mp.cpu_count()
     else:
         return n_processes if n_processes <= mp.cpu_count() else mp.cpu_count()
-        
-        
+
+
 def sorted_alphanumeric(data):
     convert = lambda text: int(text) if text.isdigit() else text.lower()
-    alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ] 
+    alphanum_key = lambda key: [convert(c) for c in re.split("([0-9]+)", key)]
     return sorted(data, key=alphanum_key)
-    
-   
+
+
 def get_exp_dir(config):
-    if config.dir_id == 'last':
-        folders = next(os.walk('experiments'))[1]
+    if config.dir_id == "last":
+        folders = next(os.walk("experiments"))[1]
         folders = sorted_alphanumeric(folders)
         folder_last = folders[-1]
-        dir_id = folder_last.replace('\\','/')
+        dir_id = folder_last.replace("\\", "/")
     else:
         dir_id = config.dir_id
 
     return dir_id
-    
+
 
 def postprocess_connect(img, nuclei):
     cell_ids = np.unique(img)
@@ -46,10 +47,10 @@ def postprocess_connect(img, nuclei):
 
     random.shuffle(cell_ids)
 
-    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(5,5))
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
 
     # Touch diagonally = same object
-    s = ndi.generate_binary_structure(2,2)
+    s = ndi.generate_binary_structure(2, 2)
 
     final = np.zeros(img.shape, dtype=np.uint32)
 
@@ -77,16 +78,16 @@ def postprocess_connect(img, nuclei):
             counts = np.array(counts)
             unique = np.array(unique)
 
-            no_overlap = False 
+            no_overlap = False
 
             # Rarely, the nucleus is not the largest segment
-            for i_part in range(1,len(counts)):
+            for i_part in range(1, len(counts)):
                 if i_part > 1:
                     no_overlap = True
-                largest = unique[np.argmax(counts[i_part:])+i_part]
+                largest = unique[np.argmax(counts[i_part:]) + i_part]
                 connected_mask = np.where(unique_ids == largest, 1, 0)
                 # Break if current largest region overlaps nucleus
-                if np.sum(connected_mask*nucleus_mask) > 0.5:
+                if np.sum(connected_mask * nucleus_mask) > 0.5:
                     break
 
             # Close holes on largest section
@@ -108,7 +109,7 @@ def remove_islands(img, nuclei):
     random.shuffle(cell_ids)
 
     # Touch diagonally = same object
-    s = ndi.generate_binary_structure(2,2)
+    s = ndi.generate_binary_structure(2, 2)
 
     final = np.zeros(img.shape, dtype=np.uint32)
 
@@ -120,14 +121,14 @@ def remove_islands(img, nuclei):
         # Number of blobs belonging to cell
         unique_ids, num_blobs = ndi.label(i_mask, structure=s)
         if num_blobs > 1:
-            # Keep the blob with max overlap to nucleus 
+            # Keep the blob with max overlap to nucleus
             amount_overlap = np.zeros(num_blobs)
 
-            for i_blob in range(1,num_blobs+1):
+            for i_blob in range(1, num_blobs + 1):
                 blob = np.where(unique_ids == i_blob, 1, 0)
-                amount_overlap[i_blob-1] = np.sum(blob*nucleus_mask)
+                amount_overlap[i_blob - 1] = np.sum(blob * nucleus_mask)
             blob_keep = np.argmax(amount_overlap) + 1
-            
+
             final_mask = np.where(unique_ids == blob_keep, 1, 0)
 
         else:
@@ -135,7 +136,7 @@ def remove_islands(img, nuclei):
             if blob_size > 2:
                 final_mask = i_mask.copy()
             else:
-                final_mask = i_mask*0
+                final_mask = i_mask * 0
 
         final_mask = ndi.binary_fill_holes(final_mask).astype(int)
 
@@ -145,9 +146,7 @@ def remove_islands(img, nuclei):
 
 
 def process_chunk(chunk, patch_size, img_whole, nuclei_img, output_dir):
-    
-    for index in range(len(chunk)): 
-
+    for index in range(len(chunk)):
         coords = chunk[index]
         coords_x1 = coords[0]
         coords_y1 = coords[1]
@@ -158,27 +157,27 @@ def process_chunk(chunk, patch_size, img_whole, nuclei_img, output_dir):
 
         nuclei = nuclei_img[coords_x1:coords_x2, coords_y1:coords_y2]
 
-        output_fp = output_dir + '%d_%d.tif' %(coords_x1, coords_y1)
+        output_fp = output_dir + "%d_%d.tif" % (coords_x1, coords_y1)
 
         # print('Filling holes')
         filled = postprocess_connect(img, nuclei)
-        
+
         # print('Removing islands')
         final = remove_islands(filled, nuclei)
 
-        tifffile.imwrite(output_fp, final.astype(np.uint32), photometric='minisblack')
+        tifffile.imwrite(output_fp, final.astype(np.uint32), photometric="minisblack")
 
         cell_ids = np.unique(final)[1:]
 
         # Visualise cells with random colours
         n_cells_ids = len(cell_ids)
-        cell_ids_rand = np.arange(1, n_cells_ids+1)
+        cell_ids_rand = np.arange(1, n_cells_ids + 1)
         random.shuffle(cell_ids_rand)
 
         keep_mask = np.isin(nuclei, cell_ids)
-        nuclei = np.where(keep_mask==True, nuclei, 0)
+        nuclei = np.where(keep_mask == True, nuclei, 0)
         keep_mask = np.isin(img, cell_ids)
-        img = np.where(keep_mask==True, nuclei, 0)
+        img = np.where(keep_mask == True, nuclei, 0)
 
         dictionary = dict(zip(cell_ids, cell_ids_rand))
         dictionary[0] = 0
@@ -186,24 +185,24 @@ def process_chunk(chunk, patch_size, img_whole, nuclei_img, output_dir):
         img_mapped = np.copy(img)
         final_mapped = np.copy(final)
 
-        nuclei_mapped = np.vectorize(dictionary.get)(nuclei)  
-        img_mapped = np.vectorize(dictionary.get)(img)  
-        final_mapped = np.vectorize(dictionary.get)(final)  
+        nuclei_mapped = np.vectorize(dictionary.get)(nuclei)
+        img_mapped = np.vectorize(dictionary.get)(img)
+        final_mapped = np.vectorize(dictionary.get)(final)
 
         fig, axes = plt.subplots(ncols=3, figsize=(9, 3), sharex=True, sharey=True)
         ax = axes.ravel()
         ax[0].imshow(nuclei_mapped, cmap=plt.cm.gray)
-        ax[0].set_title('Nuclei')
+        ax[0].set_title("Nuclei")
         ax[1].imshow(img_mapped, cmap=plt.cm.nipy_spectral)
-        ax[1].set_title('Original')
+        ax[1].set_title("Original")
         ax[2].imshow(final_mapped, cmap=plt.cm.nipy_spectral)
-        ax[2].set_title('Processed')
+        ax[2].set_title("Processed")
         for a in ax:
             a.set_axis_off()
         fig.tight_layout()
-        # plt.show()        
+        # plt.show()
 
-        fig.savefig(output_fp.replace('tif','png'), dpi=300)
+        fig.savefig(output_fp.replace("tif", "png"), dpi=300)
         plt.close(fig)
 
 
@@ -212,9 +211,9 @@ def combine(config, dir_id, patch_size, nuclei_img):
     Combine the patches previously output by the connect function
     """
 
-    fp_dir = dir_id + 'epoch_%d_step_%d_connected' %(config.epoch, config.step)
-    fp_unconnected = dir_id + 'epoch_%d_step_%d.tif' %(config.epoch, config.step)
-    fp_output_seg = fp_dir + '.tif'
+    fp_dir = dir_id + "epoch_%d_step_%d_connected" % (config.epoch, config.step)
+    fp_unconnected = dir_id + "epoch_%d_step_%d.tif" % (config.epoch, config.step)
+    fp_output_seg = fp_dir + ".tif"
 
     dl_pred = tifffile.imread(fp_unconnected)
     height = dl_pred.shape[0]
@@ -222,7 +221,7 @@ def combine(config, dir_id, patch_size, nuclei_img):
 
     seg_final = np.zeros((height, width), dtype=np.uint32)
 
-    fp_seg = glob.glob(fp_dir+'/*.tif', recursive=True)
+    fp_seg = glob.glob(fp_dir + "/*.tif", recursive=True)
 
     sample = tifffile.imread(fp_seg[0])
     patch_h = sample.shape[0]
@@ -237,35 +236,35 @@ def combine(config, dir_id, patch_size, nuclei_img):
         patch_ids = patch_ids[patch_ids != 0]
         cell_ids.extend(patch_ids)
 
-        fp_coords = os.path.basename(fp).split('.')[0]
-        fp_x = int(fp_coords.split('_')[0])
-        fp_y = int(fp_coords.split('_')[1])
+        fp_coords = os.path.basename(fp).split(".")[0]
+        fp_x = int(fp_coords.split("_")[0])
+        fp_y = int(fp_coords.split("_")[1])
 
         # Place into appropriate location
-        seg_final[fp_x:fp_x+patch_h, fp_y:fp_y+patch_w] = patch[:]
+        seg_final[fp_x : fp_x + patch_h, fp_y : fp_y + patch_w] = patch[:]
 
-    # If cell is split by windowing, keep component with nucleus 
+    # If cell is split by windowing, keep component with nucleus
     count_ids = Counter(cell_ids)
     windowed_ids = [k for k, v in count_ids.items() if v > 1]
 
     # Check along borders
-    h_starts = list(np.arange(0, height-patch_size, patch_size))
-    w_starts = list(np.arange(0, width-patch_size, patch_size))
-    h_starts.append(height-patch_size)
-    w_starts.append(width-patch_size)
+    h_starts = list(np.arange(0, height - patch_size, patch_size))
+    w_starts = list(np.arange(0, width - patch_size, patch_size))
+    h_starts.append(height - patch_size)
+    w_starts.append(width - patch_size)
 
     # Mask along grid
     h_starts_wide = []
     w_starts_wide = []
-    for i in range(-10,11):
-        h_starts_wide.extend([x+i for x in h_starts])
-        w_starts_wide.extend([x+i for x in w_starts])
+    for i in range(-10, 11):
+        h_starts_wide.extend([x + i for x in h_starts])
+        w_starts_wide.extend([x + i for x in w_starts])
 
     mask = np.zeros(seg_final.shape)
-    mask[h_starts_wide,:] = 1
-    mask[:,w_starts_wide] = 1
+    mask[h_starts_wide, :] = 1
+    mask[:, w_starts_wide] = 1
 
-    masked = mask*seg_final
+    masked = mask * seg_final
     masked_ids = np.unique(masked)[1:]
 
     # IDs to check for split bodies
@@ -280,9 +279,9 @@ def process_check_splits(config, dir_id, nuclei_img, seg_final, chunk_ids):
     """
 
     chunk_seg = np.zeros(seg_final.shape, dtype=np.uint32)
-    
+
     # Touch diagonally = same object
-    s = ndi.generate_binary_structure(2,2)
+    s = ndi.generate_binary_structure(2, 2)
 
     for i in chunk_ids:
         i_mask = np.where(seg_final == i, 1, 0).astype(np.uint8)
@@ -292,47 +291,52 @@ def process_check_splits(config, dir_id, nuclei_img, seg_final, chunk_ids):
 
         # Bounding box
         bb = np.argwhere(unique_ids)
-        (ystart, xstart), (ystop, xstop) = bb.min(0), bb.max(0) + 1 
+        (ystart, xstart), (ystop, xstop) = bb.min(0), bb.max(0) + 1
         unique_ids_crop = unique_ids[ystart:ystop, xstart:xstop]
 
         nucleus_mask = np.where(nuclei_img == i, 1, 0).astype(np.uint8)
         nucleus_mask = nucleus_mask[ystart:ystop, xstart:xstop]
 
         if num_blobs > 1:
-
-            # Keep the blob with max overlap to nucleus 
+            # Keep the blob with max overlap to nucleus
             amount_overlap = np.zeros(num_blobs)
 
-            for i_blob in range(1,num_blobs+1):
+            for i_blob in range(1, num_blobs + 1):
                 blob = np.where(unique_ids_crop == i_blob, 1, 0)
-                amount_overlap[i_blob-1] = np.sum(blob*nucleus_mask)
+                amount_overlap[i_blob - 1] = np.sum(blob * nucleus_mask)
             blob_keep = np.argmax(amount_overlap) + 1
-            
+
             # Put into final segmentation
             final_mask = np.where(unique_ids_crop == blob_keep, 1, 0)
 
             # seg_final = np.where(seg_final == i, 0, seg_final)
-            
-            # # Double check the few outliers 
+
+            # # Double check the few outliers
             # unique_ids_2, num_blobs_2 = ndi.label(final_mask, structure=s)
             # if num_blobs_2 > 1:
             #     # Keep largest
             #     blob_keep_2 = np.argmax(np.bincount(unique_ids_2)[1:]) + 1
             #     final_mask = np.where(unique_ids_2 == blob_keep_2, 1, 0)
 
-            chunk_seg[ystart:ystop, xstart:xstop] = np.where(final_mask == 1, i, chunk_seg[ystart:ystop, xstart:xstop])
-        
+            chunk_seg[ystart:ystop, xstart:xstop] = np.where(
+                final_mask == 1, i, chunk_seg[ystart:ystop, xstart:xstop]
+            )
+
         else:
             chunk_seg = np.where(i_mask == 1, i, chunk_seg)
 
-    tifffile.imwrite(dir_id + '/' + str(chunk_ids[0]) + '_checked_splits.tif', chunk_seg, photometric='minisblack')
+    tifffile.imwrite(
+        dir_id + "/" + str(chunk_ids[0]) + "_checked_splits.tif",
+        chunk_seg,
+        photometric="minisblack",
+    )
 
 
 def postprocess_predicitons(config):
-    dir_id = "experiments/" + get_exp_dir(config) + '/test_output/'
+    dir_id = "experiments/" + get_exp_dir(config) + "/test_output/"
 
-    pred_fp = dir_id + 'epoch_%d_step_%d.tif' %(config.epoch, config.step)
-    output_dir = dir_id + 'epoch_%d_step_%d_connected/' %(config.epoch, config.step)
+    pred_fp = dir_id + "epoch_%d_step_%d.tif" % (config.epoch, config.step)
+    output_dir = dir_id + "epoch_%d_step_%d_connected/" % (config.epoch, config.step)
 
     nucleus_fp = config.nucleus_fp
     nuclei_img = tifffile.imread(nucleus_fp)
@@ -343,31 +347,34 @@ def postprocess_predicitons(config):
     img_whole = tifffile.imread(pred_fp)
 
     patch_size = config.patch_size
-    h_starts = list(np.arange(0, img_whole.shape[0]-patch_size, patch_size))
-    w_starts = list(np.arange(0, img_whole.shape[1]-patch_size, patch_size))
-    h_starts.append(img_whole.shape[0]-patch_size)
-    w_starts.append(img_whole.shape[1]-patch_size)
+    h_starts = list(np.arange(0, img_whole.shape[0] - patch_size, patch_size))
+    w_starts = list(np.arange(0, img_whole.shape[1] - patch_size, patch_size))
+    h_starts.append(img_whole.shape[0] - patch_size)
+    w_starts.append(img_whole.shape[1] - patch_size)
     coords_starts = [(x, y) for x in h_starts for y in w_starts]
-    print('%d patches available' %len(coords_starts))
+    print("%d patches available" % len(coords_starts))
 
     # num_processes = mp.cpu_count()
     num_processes = get_n_processes(config.n_processes)
-    print('Num multiprocessing splits: %d' %num_processes)
+    print("Num multiprocessing splits: %d" % num_processes)
 
     coords_splits = np.array_split(coords_starts, num_processes)
     processes = []
-    
-    print('Processing...')
+
+    print("Processing...")
 
     for chunk in coords_splits:
-        p = mp.Process(target=process_chunk, args=(chunk, patch_size, img_whole, nuclei_img, output_dir))
+        p = mp.Process(
+            target=process_chunk,
+            args=(chunk, patch_size, img_whole, nuclei_img, output_dir),
+        )
         processes.append(p)
         p.start()
 
     for p in processes:
         p.join()
 
-    print('Combining results')
+    print("Combining results")
     seg_final, to_check_ids = combine(config, dir_id, config.patch_size, nuclei_img)
     # print(len(np.unique(seg_final)), len(to_check_ids))
 
@@ -375,9 +382,10 @@ def postprocess_predicitons(config):
     processes = []
 
     for chunk_ids in ids_splits:
-        p = mp.Process(target=process_check_splits, args=(config, dir_id, 
-                                                          nuclei_img, seg_final, 
-                                                          chunk_ids))
+        p = mp.Process(
+            target=process_check_splits,
+            args=(config, dir_id, nuclei_img, seg_final, chunk_ids),
+        )
         processes.append(p)
         p.start()
 
@@ -385,9 +393,9 @@ def postprocess_predicitons(config):
         p.join()
 
     check_mask = np.isin(seg_final, to_check_ids)
-    seg_final = np.where(check_mask==1, 0, seg_final)
+    seg_final = np.where(check_mask == 1, 0, seg_final)
 
-    fp_checked_splits = glob.glob(dir_id+'/*_checked_splits.tif', recursive=True)
+    fp_checked_splits = glob.glob(dir_id + "/*_checked_splits.tif", recursive=True)
     for fp in fp_checked_splits:
         checked_split = tifffile.imread(fp)
         seg_final = np.where(checked_split > 0, checked_split, seg_final)
@@ -395,21 +403,27 @@ def postprocess_predicitons(config):
 
     # print(len(np.unique(seg_final)))
 
-    fp_dir = dir_id + 'epoch_%d_step_%d_connected' %(config.epoch, config.step)
-    fp_output_seg = fp_dir + '.tif'
-    print('Saved segmentation to %s' %fp_output_seg)
-    tifffile.imwrite(fp_output_seg, seg_final.astype(np.uint32), photometric='minisblack')
+    fp_dir = dir_id + "epoch_%d_step_%d_connected" % (config.epoch, config.step)
+    fp_output_seg = fp_dir + ".tif"
+    print("Saved segmentation to %s" % fp_output_seg)
+    tifffile.imwrite(
+        fp_output_seg, seg_final.astype(np.uint32), photometric="minisblack"
+    )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--dir_id', default='last', type=str)
-    parser.add_argument('--epoch', default=1, type=int)
-    parser.add_argument('--step', default=4000, type=int)
-    parser.add_argument('--nucleus_fp', default='../../data/dataset_merscope_melanoma2/nuclei.tif', type=str)
-    parser.add_argument('--patch_size', default=1024, type=int)
-    parser.add_argument('--n_processes', default=None, type=int)
+    parser.add_argument("--dir_id", default="last", type=str)
+    parser.add_argument("--epoch", default=1, type=int)
+    parser.add_argument("--step", default=4000, type=int)
+    parser.add_argument(
+        "--nucleus_fp",
+        default="../../data/dataset_merscope_melanoma2/nuclei.tif",
+        type=str,
+    )
+    parser.add_argument("--patch_size", default=1024, type=int)
+    parser.add_argument("--n_processes", default=None, type=int)
 
     config = parser.parse_args()
     postprocess_predicitons(config)
