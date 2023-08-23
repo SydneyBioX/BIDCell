@@ -196,13 +196,21 @@ def stitch_nuclei(config: Union[argparse.ArgumentParser, dict]) -> str:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--data_dir", default="../../data/", type=str)
-    parser.add_argument("--dataset", default="dataset_cosmx_nsclc", type=str)
     parser.add_argument(
-        "--dir_dapi", default="Lung5_Rep1-RawMorphologyImages", type=str
+        "--data_dir", default="../../data/", type=str, help="root data directory"
     )
-    parser.add_argument("--ext_dapi", default="tif", type=str)
-
+    parser.add_argument(
+        "--dataset", default="dataset_cosmx_nsclc", type=str, help="name of dataset"
+    )
+    parser.add_argument(
+        "--dir_dapi",
+        default="Lung5_Rep1-RawMorphologyImages",
+        type=str,
+        help="name of directory containing the DAPI FOV images",
+    )
+    parser.add_argument(
+        "--ext_dapi", default="tif", type=str, help="extension of the DAPI images"
+    )
     parser.add_argument(
         "--pattern_z",
         default="Z###",
@@ -215,19 +223,24 @@ if __name__ == "__main__":
         type=str,
         help="String pattern to find in file names for the FOV number",
     )
-
     parser.add_argument(
         "--channel_first",
         action="store_true",
-        help="channel axis first or last in image volumes",
+        help="channel axis first (e.g. [5,H,W]) or last (e.g. [H,W,5]) in image volumes",
     )
     parser.set_defaults(channel_first=False)  # TODO: What is this?
     parser.add_argument(
-        "--channel_dapi", default="-1", type=int, help="channel index DAPI image is in"
+        "--channel_dapi",
+        default="-1",
+        type=int,
+        help="channel index of the DAPI images in the image volumes",
     )
-
-    parser.add_argument("--fp_dapi_stitched", default="dapi_preprocessed.tif", type=str)
-
+    parser.add_argument(
+        "--fp_dapi_stitched",
+        default="dapi_preprocessed.tif",
+        type=str,
+        help="output file name of the stitched DAPI",
+    )
     parser.add_argument("--n_fov", default=30, type=int, help="total number of FOVs")
     parser.add_argument(
         "--min_fov", default=1, type=int, help="smallest FOV number - usually 0 or 1"
@@ -244,33 +257,28 @@ if __name__ == "__main__":
         type=int,
         help="number of FOVs tiled along horizontal axis",
     )
-
     parser.add_argument(
         "--start_corner",
         default="ul",
         type=str,
-        help="location of first FOV - choose from ul, ur, bl, br",
+        help="position of first FOV - choose from ul, ur, bl, br",
     )
-
     parser.add_argument(
         "--row_major", action="store_true", help="row major ordering of FOVs"
     )
     parser.set_defaults(row_major=False)
-
     parser.add_argument(
         "--z_level",
         default=1,
         type=int,
         help="which z slice to use, or --mip to use MIP",
     )
-
     parser.add_argument(
         "--mip",
         action="store_true",
         help="take the maximum intensity projection across all Z",
     )
     parser.set_defaults(mip=False)
-
     parser.add_argument(
         "--flip_ud", action="store_true", help="flip images up/down before stitching"
     )

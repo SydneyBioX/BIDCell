@@ -46,7 +46,7 @@ def segment_nuclei(config) -> str:
         size_x = int(float(affine.loc["size_x"].item()))
         size_y = int(float(affine.loc["size_y"].item()))
 
-        dapi = dapi[min_y: min_y + size_y, min_x: min_x + size_x]
+        dapi = dapi[min_y : min_y + size_y, min_x : min_x + size_x]
 
     dapi_h = dapi.shape[0]
     dapi_w = dapi.shape[1]
@@ -119,12 +119,12 @@ def segment_nuclei(config) -> str:
             patch = dapi[hs:he, ws:we]
 
             patch_resized = resize_dapi(patch, hsize, wsize)
-            rdapi[h: h + hsize, w: w + wsize] = patch_resized
+            rdapi[h : h + hsize, w : w + wsize] = patch_resized
 
             # Segment nuclei in each patch and place into final segmentation with unique ID
             patch_nuclei = segment_dapi(patch_resized, config.diameter, config.use_cpu)
             nuclei_mask = np.where(patch_nuclei > 0, 1, 0)
-            nuclei[h: h + hsize, w: w + wsize] = patch_nuclei + total_n * nuclei_mask
+            nuclei[h : h + hsize, w : w + wsize] = patch_nuclei + total_n * nuclei_mask
             unique_ids = np.unique(patch_nuclei)
             total_n += unique_ids.max()
 
@@ -146,25 +146,42 @@ def segment_nuclei(config) -> str:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--data_dir", default="../../data/", type=str)
-    parser.add_argument("--dataset", default="dataset_merscope_melanoma2", type=str)
-
     parser.add_argument(
-        "--fp_dapi", default="HumanMelanomaPatient2_images_mosaic_DAPI_z0.tif", type=str
+        "--data_dir", default="../../data/", type=str, help="root data directory"
     )
-    parser.add_argument("--fp_nuclei", default="nuclei.tif", type=str)
-    parser.add_argument("--fp_rdapi", default="dapi_resized.tif", type=str)
-
-    # Size of the images - divide into sections if too large
+    parser.add_argument(
+        "--dataset",
+        default="dataset_merscope_melanoma2",
+        type=str,
+        help="name of dataset",
+    )
+    parser.add_argument(
+        "--fp_dapi",
+        default="HumanMelanomaPatient2_images_mosaic_DAPI_z0.tif",
+        type=str,
+        help="file name of DAPI image",
+    )
+    parser.add_argument(
+        "--fp_nuclei",
+        default="nuclei.tif",
+        type=str,
+        help="file name of nuclei tif file",
+    )
+    parser.add_argument(
+        "--fp_rdapi",
+        default="dapi_resized.tif",
+        type=str,
+        help="file name of resized DAPI image",
+    )
     parser.add_argument(
         "--scale_pix_x",
-        default=1 / 9.259333610534667969,
+        default=0.107999132774,
         type=float,
         help="original pixel resolution to target pixel resolution (e.g., microns) along image width",
     )
     parser.add_argument(
         "--scale_pix_y",
-        default=1 / 9.259462356567382812,
+        default=0.107997631125,
         type=float,
         help="original pixel resolution to target pixel resolution (e.g., microns) along image height",
     )
@@ -172,24 +189,38 @@ if __name__ == "__main__":
         "--max_height",
         default=24000,
         type=int,
-        help="maximum height of patches to process in original resolution",
+        help="divide into sections if too large - maximum height to process in original resolution",
     )
     parser.add_argument(
         "--max_width",
         default=32000,
         type=int,
-        help="maximum width of patches to process in original resolution",
+        help="divide into sections if too large - maximum width to process in original resolution",
     )
-
-    # Cellpose parameters
-    parser.add_argument("--diameter", default=None, type=int)
-    parser.add_argument("--use_cpu", action="store_true")
+    parser.add_argument(
+        "--diameter",
+        default=None,
+        type=int,
+        help="estimated diameter of nuclei for Cellpose - or None to automatically compute",
+    )
+    parser.add_argument(
+        "--use_cpu",
+        action="store_true",
+        help="use CPU for Cellpose if no GPU available",
+    )
     parser.set_defaults(use_cpu=False)
-
-    # If specified, crop nuclei to size of transcript maps
-    parser.add_argument("--crop_to_ts", action="store_true")
+    parser.add_argument(
+        "--crop_to_ts",
+        action="store_true",
+        help="crop nuclei to size of transcript maps",
+    )
     parser.set_defaults(crop_to_ts=False)
-    parser.add_argument("--fp_affine", default="affine.csv", type=str)
+    parser.add_argument(
+        "--fp_affine",
+        default="affine.csv",
+        type=str,
+        help="file of affine transformation - needed if cropping to align DAPI to transcripts",
+    )
 
     config = parser.parse_args()
     segment_nuclei(config)
