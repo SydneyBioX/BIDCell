@@ -136,15 +136,15 @@ def make_cell_gene_mat(config):
     # affine = pd.read_csv(fp_affine, index_col=0, header=None, sep='\t')
     # scale_x_tr = float(affine.loc["scale_x"].item())
     # scale_y_tr = float(affine.loc["scale_y"].item())
-    # scale_pix_x = (scale_x_tr*config.scale_factor_x)
-    # scale_pix_y = (scale_y_tr*config.scale_factor_y)
-    scale_pix_x = config.scale_factor_x
-    scale_pix_y = config.scale_factor_y
+    # scale_pix_x = (scale_x_tr*config.scale_pix_x)
+    # scale_pix_y = (scale_y_tr*config.scale_pix_y)
+    scale_pix_x = config.scale_pix_x
+    scale_pix_y = config.scale_pix_y
 
     if not os.path.exists(output_dir + "/" + config.fp_output_expr):
         # Rescale to pixel size
-        height_pix = np.round(height / config.scale_factor_y).astype(int)
-        width_pix = np.round(width / config.scale_factor_x).astype(int)
+        height_pix = np.round(height / config.scale_pix_y).astype(int)
+        width_pix = np.round(width / config.scale_pix_x).astype(int)
 
         seg_map = cv2.resize(
             seg_map_mi.astype(np.int32),
@@ -338,13 +338,13 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "--scale_factor_x",
+        "--scale_pix_x",
         default=1 / 9.259333610534667969,
         type=float,
         help="conversion between pixel size and microns for x dimension",
     )
     parser.add_argument(
-        "--scale_factor_y",
+        "--scale_pix_y",
         default=1 / 9.259462356567382812,
         type=float,
         help="conversion between pixel size and microns for y dimension",

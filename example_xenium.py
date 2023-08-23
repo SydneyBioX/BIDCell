@@ -20,7 +20,7 @@ def main(args):
 
     os.system(f"python transcript_patches.py --dataset {args.dataset} --patch_size {args.patch_size}")
 
-    os.system(f"python cell_gene_matrix.py --dataset {args.dataset} --fp_seg ../../data/{args.dataset}/nuclei.tif --output_dir cell_gene_matrices/nuclei --scale_factor_x {scale_pix_x} --scale_factor_y {scale_pix_y} --n_processes {args.n_processes} --x_col {args.x_col} --y_col {args.y_col} --gene_col {args.gene_col} --only_expr")
+    os.system(f"python cell_gene_matrix.py --dataset {args.dataset} --fp_seg ../../data/{args.dataset}/nuclei.tif --output_dir cell_gene_matrices/nuclei --scale_pix_x {scale_pix_x} --scale_pix_y {scale_pix_y} --n_processes {args.n_processes} --x_col {args.x_col} --y_col {args.y_col} --gene_col {args.gene_col} --only_expr")
 
     os.system(f"python preannotate.py --dataset {args.dataset} --fp_ref {args.fp_ref} --n_processes {args.n_processes}")
 
@@ -36,7 +36,7 @@ def main(args):
 
     os.chdir("../processing")
 
-    os.system(f"python cell_gene_matrix.py --dataset {args.dataset} --fp_seg ../model/experiments/{exp_id}/test_output/epoch_{args.epoch}_step_{args.steps}_connected.tif --output_dir cell_gene_matrices/{exp_id} --scale_factor_x {scale_pix_x} --scale_factor_y {scale_pix_y} --n_processes {args.n_processes} --x_col {args.x_col} --y_col {args.y_col} --gene_col {args.gene_col}")
+    os.system(f"python cell_gene_matrix.py --dataset {args.dataset} --fp_seg ../model/experiments/{exp_id}/test_output/epoch_{args.epoch}_step_{args.steps}_connected.tif --output_dir cell_gene_matrices/{exp_id} --scale_pix_x {scale_pix_x} --scale_pix_y {scale_pix_y} --n_processes {args.n_processes} --x_col {args.x_col} --y_col {args.y_col} --gene_col {args.gene_col}")
 
 
 
