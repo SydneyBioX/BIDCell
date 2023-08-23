@@ -82,7 +82,7 @@ def generate_patches(config):
 
             # Get patches and save
             for h, w in tqdm(coords_starts):
-                patch = sst[h: h + patch_size, w: w + patch_size, :]
+                patch = sst[h : h + patch_size, w : w + patch_size, :]
 
                 fp_output = f"{dir_output}/{h+map_coords[0]}_{w+map_coords[2]}.hdf5"
 
@@ -94,11 +94,30 @@ def generate_patches(config):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--data_dir", default="../../data/", type=str)
-    parser.add_argument("--dataset", default="dataset_merscope_melanoma2", type=str)
-    parser.add_argument("--dir_out_maps", default="expr_maps", type=str)
-    parser.add_argument("--dir_out", default="expr_maps_input", type=str)
-    parser.add_argument("--patch_size", default=64, type=int)
+    parser.add_argument(
+        "--data_dir", default="../../data/", type=str, help="root data directory"
+    )
+    parser.add_argument(
+        "--dataset",
+        default="dataset_merscope_melanoma2",
+        type=str,
+        help="name of dataset",
+    )
+    parser.add_argument(
+        "--dir_out_maps",
+        default="expr_maps",
+        type=str,
+        help="directory containing processed gene expression maps",
+    )
+    parser.add_argument(
+        "--dir_out",
+        default="expr_maps_input",
+        type=str,
+        help="directory prefix of saved patches",
+    )
+    parser.add_argument(
+        "--patch_size", default=64, type=int, help="size of patches to crop"
+    )
 
     config = parser.parse_args()
     generate_patches(config)

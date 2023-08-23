@@ -296,27 +296,32 @@ def make_cell_gene_mat(config):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--data_dir", default="../../data/", type=str)
-    parser.add_argument("--dataset", default="dataset_merscope_melanoma2", type=str)
-
+    parser.add_argument(
+        "--data_dir", default="../../data/", type=str, help="root data directory"
+    )
+    parser.add_argument(
+        "--dataset",
+        default="dataset_merscope_melanoma2",
+        type=str,
+        help="name of dataset",
+    )
     parser.add_argument(
         "--fp_seg",
-        default="/mnt/HDD4/Helen/wip_other_datasets/bidcell/model/experiments/2023_July_06_09_41_41/test_output/epoch_1_step_4000_connected.tif",
+        default="bidcell/model/experiments/2023_July_06_09_41_41/test_output/epoch_1_step_4000_connected.tif",
         type=str,
-        help="segmentation",
+        help="segmentation tif file",
     )
     parser.add_argument(
         "--output_dir",
         default="cell_gene_matrices/2023_July_06_09_41_41",
         type=str,
-        help="output directory",
-    )
-
-    parser.add_argument(
-        "--fp_output_expr", default="cell_expr.csv", type=str, help="output file"
+        help="output directory of cell-gene matrix and cell metadata",
     )
     parser.add_argument(
-        "--fp_output_full", default="cell_outputs_", type=str, help="output file"
+        "--fp_output_expr", default="cell_expr.csv", type=str, help="output file containing only cell-gene matrix"
+    )
+    parser.add_argument(
+        "--fp_output_full", default="cell_outputs_", type=str, help="suffix of output files containing cell-gene matrix and metadata"
     )
     parser.add_argument(
         "--fp_transcripts_processed",
@@ -336,18 +341,17 @@ if __name__ == "__main__":
         type=str,
         help="csv file containing affine transformation of transcript maps",
     )
-
     parser.add_argument(
         "--scale_pix_x",
-        default=1 / 9.259333610534667969,
+        default=0.107999132774,
         type=float,
-        help="conversion between pixel size and microns for x dimension",
+        help="original pixel resolution to segmentation pixel resolution (e.g., microns) along image width",
     )
     parser.add_argument(
         "--scale_pix_y",
-        default=1 / 9.259462356567382812,
+        default=0.107997631125,
         type=float,
-        help="conversion between pixel size and microns for y dimension",
+        help="original pixel resolution to segmentation pixel resolution (e.g., microns) along image height",
     )
     parser.add_argument(
         "--max_sum_hw",
@@ -355,13 +359,30 @@ if __name__ == "__main__":
         type=int,
         help="max h+w for resized segmentation to extract expressions from",
     )
-    parser.add_argument("--n_processes", default=None, type=int)
-
-    # Names of columns
-    parser.add_argument("--x_col", default="global_x", type=str)
-    parser.add_argument("--y_col", default="global_y", type=str)
-    parser.add_argument("--gene_col", default="gene", type=str)
-
+    parser.add_argument(
+        "--n_processes",
+        default=None,
+        type=int,
+        help="number of CPUs for multiprocessing",
+    )
+    parser.add_argument(
+        "--x_col",
+        default="global_x",
+        type=str,
+        help="name of x location column in transcripts file",
+    )
+    parser.add_argument(
+        "--y_col",
+        default="global_y",
+        type=str,
+        help="name of y location column in transcripts file",
+    )
+    parser.add_argument(
+        "--gene_col",
+        default="gene",
+        type=str,
+        help="name of genes column in transcripts file",
+    )
     parser.add_argument(
         "--only_expr",
         action="store_true",

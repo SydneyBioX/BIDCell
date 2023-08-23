@@ -158,18 +158,42 @@ def preannotate(config):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--data_dir", default="../../data/", type=str)
-    parser.add_argument("--dataset", default="dataset_xenium_breast1", type=str)
-    parser.add_argument("--expr_dir", default="cell_gene_matrices/nuclei", type=str)
-    parser.add_argument("--fp_expr", default="cell_expr.csv", type=str)
-    parser.add_argument("--fp_output", default="nuclei_cell_type.h5", type=str)
+    parser.add_argument(
+        "--data_dir", default="../../data/", type=str, help="root data directory"
+    )
+    parser.add_argument(
+        "--dataset", default="dataset_xenium_breast1", type=str, help="name of dataset"
+    )
+    parser.add_argument(
+        "--expr_dir",
+        default="cell_gene_matrices/nuclei",
+        type=str,
+        help="directory to load nuclei expression matrices from",
+    )
+    parser.add_argument(
+        "--fp_expr",
+        default="cell_expr.csv",
+        type=str,
+        help="file name of nuclei expression matrices",
+    )
+    parser.add_argument(
+        "--fp_output",
+        default="nuclei_cell_type.h5",
+        type=str,
+        help="file name to save nuclei annotations",
+    )
     parser.add_argument(
         "--fp_ref",
         default="../../data/sc_references/sc_breast.csv",
         type=str,
         help="single cell reference",
     )
-    parser.add_argument("--n_processes", default=None, type=int)
+    parser.add_argument(
+        "--n_processes",
+        default=None,
+        type=int,
+        help="number of CPUs for multiprocessing",
+    )
 
     config = parser.parse_args()
     preannotate(config)

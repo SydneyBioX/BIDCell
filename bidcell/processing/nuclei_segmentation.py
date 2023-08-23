@@ -177,13 +177,13 @@ if __name__ == "__main__":
         "--scale_pix_x",
         default=0.107999132774,
         type=float,
-        help="original pixel resolution to target pixel resolution (e.g., microns) along image width",
+        help="original pixel resolution to segmentation pixel resolution (e.g., microns) along image width",
     )
     parser.add_argument(
         "--scale_pix_y",
         default=0.107997631125,
         type=float,
-        help="original pixel resolution to target pixel resolution (e.g., microns) along image height",
+        help="original pixel resolution to segmentation pixel resolution (e.g., microns) along image height",
     )
     parser.add_argument(
         "--max_height",
