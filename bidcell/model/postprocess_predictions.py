@@ -241,7 +241,7 @@ def combine(config, dir_id, patch_size, nuclei_img):
         fp_y = int(fp_coords.split("_")[1])
 
         # Place into appropriate location
-        seg_final[fp_x: fp_x + patch_h, fp_y: fp_y + patch_w] = patch[:]
+        seg_final[fp_x : fp_x + patch_h, fp_y : fp_y + patch_w] = patch[:]
 
     # If cell is split by windowing, keep component with nucleus
     count_ids = Counter(cell_ids)
@@ -346,7 +346,7 @@ def postprocess_predictions(config):
 
     img_whole = tifffile.imread(pred_fp)
 
-    patch_size = config.patch_size_pp
+    patch_size = config.patch_size_mp
     h_starts = list(np.arange(0, img_whole.shape[0] - patch_size, patch_size))
     w_starts = list(np.arange(0, img_whole.shape[1] - patch_size, patch_size))
     h_starts.append(img_whole.shape[0] - patch_size)
@@ -414,16 +414,42 @@ def postprocess_predictions(config):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--dir_id", default="last", type=str)
-    parser.add_argument("--epoch", default=1, type=int)
-    parser.add_argument("--step", default=4000, type=int)
+    parser.add_argument(
+        "--dir_id",
+        default="last",
+        type=str,
+        help="name of experiment directory - either date format (e.g., 2023_08_23_06_45_38) or set to last for most recent",
+    )
+    parser.add_argument(
+        "--epoch",
+        default=1,
+        type=int,
+        help="the epoch of the model that generated the predictions",
+    )
+    parser.add_argument(
+        "--step",
+        default=4000,
+        type=int,
+        help="the step of the model that generated the prediction",
+    )
     parser.add_argument(
         "--nucleus_fp",
         default="../../data/dataset_merscope_melanoma2/nuclei.tif",
         type=str,
+        help="file path of nuclei .tif file",
     )
-    parser.add_argument("--patch_size_pp", default=1024, type=int)
-    parser.add_argument("--n_processes", default=None, type=int)
+    parser.add_argument(
+        "--patch_size_mp",
+        default=1024,
+        type=int,
+        help="size of patches to perform morphological processing",
+    )
+    parser.add_argument(
+        "--n_processes",
+        default=None,
+        type=int,
+        help="number of CPUs for multiprocessing",
+    )
 
     config = parser.parse_args()
     postprocess_predictions(config)
