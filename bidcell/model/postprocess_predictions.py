@@ -346,7 +346,7 @@ def postprocess_predicitons(config):
 
     img_whole = tifffile.imread(pred_fp)
 
-    patch_size = config.patch_size
+    patch_size = config.patch_size_pp
     h_starts = list(np.arange(0, img_whole.shape[0] - patch_size, patch_size))
     w_starts = list(np.arange(0, img_whole.shape[1] - patch_size, patch_size))
     h_starts.append(img_whole.shape[0] - patch_size)
@@ -375,7 +375,7 @@ def postprocess_predicitons(config):
         p.join()
 
     print("Combining results")
-    seg_final, to_check_ids = combine(config, dir_id, config.patch_size, nuclei_img)
+    seg_final, to_check_ids = combine(config, dir_id, patch_size, nuclei_img)
     # print(len(np.unique(seg_final)), len(to_check_ids))
 
     ids_splits = np.array_split(to_check_ids, num_processes)
@@ -422,7 +422,7 @@ if __name__ == "__main__":
         default="../../data/dataset_merscope_melanoma2/nuclei.tif",
         type=str,
     )
-    parser.add_argument("--patch_size", default=1024, type=int)
+    parser.add_argument("--patch_size_pp", default=1024, type=int)
     parser.add_argument("--n_processes", default=None, type=int)
 
     config = parser.parse_args()
