@@ -22,19 +22,12 @@ available_vendors: Dict[str, str] = {
 class BIDCellModel:
     def __init__(
         self,
-        vendor: str,  # TODO: infer vendor from data dir?
         raw_data_dir: str,
         outputs_dir: str,
         dapi_dir: Optional[str] = None,
         n_processes: Optional[int] = None,
     ) -> None:
         self.n_processes = n_processes
-
-        if vendor not in available_vendors.keys():
-            # TODO: list vendors
-            raise ValueError("Invalid vendor: must be one of ...")  # TODO
-
-        self.vendor = available_vendors[vendor]
 
         if not os.path.exists(raw_data_dir):
             raise ValueError(
