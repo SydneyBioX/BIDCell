@@ -31,7 +31,7 @@
         "nuclei_types_fp": "../../data/dataset_cosmx_nsclc/nuclei_cell_type.h5",
         "pos_markers_fp": "../../data/sc_references/sc_nsclc_markers_pos.csv",
         "neg_markers_fp": "../../data/sc_references/sc_nsclc_markers_neg.csv",
-        "atlas_fp": "../../data/sc_references/sc_nsclc.csv",
+        "ref_fp": "../../data/sc_references/sc_nsclc.csv",
         "gene_names": "../../data/dataset_cosmx_nsclc/all_gene_names.txt"
     },
     "experiment_dirs": {

@@ -57,8 +57,8 @@ class DataProcessing(data.Dataset):
             sys.exit("Invalid file path %s" % data_sources.pos_markers_fp)
         if not os.path.exists(data_sources.neg_markers_fp):
             sys.exit("Invalid file path %s" % data_sources.neg_markers_fp)
-        if not os.path.exists(data_sources.atlas_fp):
-            sys.exit("Invalid file path %s" % data_sources.atlas_fp)
+        if not os.path.exists(data_sources.ref_fp):
+            sys.exit("Invalid file path %s" % data_sources.ref_fp)
         if not os.path.exists(data_sources.gene_names):
             sys.exit("Invalid file path %s" % data_sources.gene_names)
 
@@ -125,7 +125,7 @@ class DataProcessing(data.Dataset):
         # type_names = data_params.cell_types
 
         # Get order of cell-types from sc reference
-        atlas_exprs = pd.read_csv(data_sources.atlas_fp, index_col=0)
+        atlas_exprs = pd.read_csv(data_sources.ref_fp, index_col=0)
         ct_idx_ref = atlas_exprs["ct_idx"].tolist()
         ct_ref = atlas_exprs["cell_type"].tolist()
         name_index_dict = {}
