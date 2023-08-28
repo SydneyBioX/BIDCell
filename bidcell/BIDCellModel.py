@@ -53,7 +53,7 @@ class DataSources(BaseModel):
     nuclei_types_fp: str
     pos_markers_fp: str
     neg_markers_fp: str
-    atlas_fp: str
+    ref_fp: str
     gene_names: str
 
 

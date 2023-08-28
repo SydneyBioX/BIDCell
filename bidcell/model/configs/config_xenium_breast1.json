@@ -31,7 +31,7 @@
         "nuclei_types_fp": "../../data/dataset_xenium_breast1/nuclei_cell_type.h5",
         "pos_markers_fp": "../../data/sc_references/sc_breast_markers_pos.csv",
         "neg_markers_fp": "../../data/sc_references/sc_breast_markers_neg.csv",
-        "atlas_fp": "../../data/sc_references/sc_breast.csv",
+        "ref_fp": "../../data/sc_references/sc_breast.csv",
         "gene_names": "../../data/dataset_xenium_breast1/all_gene_names.txt"
     },
     "experiment_dirs": {

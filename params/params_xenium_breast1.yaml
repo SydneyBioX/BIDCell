@@ -15,19 +15,19 @@ transcript_params:
   gene_col: feature_name # name of genes column in transcripts file
 
 affine_params:
-  target_pix_um: 1.0 # microns per pixel to perform segmentation 
+  target_pix_um: 1.0 # microns per pixel to perform segmentation; default: 1.0
   base_pix_x: 0.2125 # convert to microns along width by multiplying the original pixels by base_pix_x microns per pixel
   base_pix_y: 0.2125 # convert to microns along width by multiplying the original pixels by base_pix_y microns per pixel
   base_ts_x: 1.0 # convert between transcript locations and target pixels along width
   base_ts_y: 1.0 # convert between transcript locations and target pixels along height
-  global_shift_x: 0 # additional adjustment to align transcripts to DAPI in target pixels along image width
-  global_shift_y: 0 # additional adjustment to align transcripts to DAPI in target pixels along image height
+  global_shift_x: 0 # additional adjustment to align transcripts to DAPI in target pixels along image width; default: 0
+  global_shift_y: 0 # additional adjustment to align transcripts to DAPI in target pixels along image height; default: 0
 
 
 # for functions in bidcell/model
 
 model_params:
-  name: custom # 
+  name: custom # segmentation model to use: custom for model in model.py or set to a encoder name from segmentation_models_pytorch; default: custom
   patch_size: 48 # size of transcriptomic image patches for input to DL model
   elongated: # list of elongated cell types that are in the single-cell reference
   - Endothelial
@@ -36,40 +36,43 @@ model_params:
   - SMC
 
 training_params:
-  total_epochs: 1 # number of training epochs
-  learning_rate: 1.0e-05 # 
-  beta1: 0.9 # 
-  beta2: 0.999 # 
-  weight_decay: 0.0001 # 
-  optimizer: adam
-  ne_weight: 1
-  os_weight: 1
-  cc_weight: 1
-  ov_weight: 1
-  pos_weight: 1
-  neg_weight: 1
-  epoch: 1 # epoch to test 
-  steps: 4000 # number of training steps
+  total_epochs: 1 # number of training epochs; default: 1
+  steps: 4000 # number of training steps; default: 4000
+  learning_rate: 0.00001 # learning rate of DL model; default: 0.00001
+  beta1: 0.9 # adam optimiser beta1; default: 0.9
+  beta2: 0.999 # adam optimiser beta2; default: 0.999
+  weight_decay: 0.0001 # adam optimiser weight decay; default: 0.0001
+  optimizer: adam # adam or rmsprop; default: adam
+  ne_weight: 1.0 # weight for nuclei encapsulation loss; default: 1.0
+  os_weight: 1.0 # weight for oversegmentation loss; default: 1.0
+  cc_weight: 1.0 # weight for cell-calling loss; default: 1.0
+  ov_weight: 1.0 # weight for oversegmentation loss; default: 1.0
+  pos_weight: 1.0 # weight for positive marker loss; default: 1.0
+  neg_weight: 1.0 # weight for negative marker loss; default: 1.0
+
+testing_params:
+  epoch: 1 # epoch to test; default: 1
+  steps: 4000 # step number to test; default: 4000
 
 save_freqs:
   model_freq: 1000 # number of training steps per model save
   sample_freq: 100 # number of training steps per sample save 
 
 data_sources:
-  expr_fp: "../../data/dataset_xenium_breast1/expr_maps/expr_maps_input_patches_"
-  expr_fp_ext: ".hdf5"
-  nuclei_fp: "../../data/dataset_xenium_breast1/nuclei.tif"
-  nuclei_types_fp: "../../data/dataset_xenium_breast1/nuclei_cell_type.h5"
-  pos_markers_fp: "../../data/sc_references/sc_breast_markers_pos.csv"
-  neg_markers_fp: "../../data/sc_references/sc_breast_markers_neg.csv"
-  atlas_fp: "../../data/sc_references/sc_breast.csv"
-  gene_names: "../../data/dataset_xenium_breast1/all_gene_names.txt"
+  expr_fp: "../../data/dataset_xenium_breast1/expr_maps/expr_maps_input_patches_" # dir containing transcriptomic image patches 
+  expr_fp_ext: ".hdf5" # extension for transcriptomic image patch files; default: .hdf5
+  nuclei_fp: "../../data/dataset_xenium_breast1/nuclei.tif" # file path of nuclei tif file
+  nuclei_types_fp: "../../data/dataset_xenium_breast1/nuclei_cell_type.h5" # file path of nuclei annotations
+  gene_names: "../../data/dataset_xenium_breast1/all_gene_names.txt" # file path of txt file containing a list of genes in the panel
+  pos_markers_fp: "../../data/sc_references/sc_breast_markers_pos.csv" # file path of positive markers
+  neg_markers_fp: "../../data/sc_references/sc_breast_markers_neg.csv" # file path of negative markers
+  ref_fp: "../../data/sc_references/sc_breast.csv" # file path of reference data
 
 experiment_dirs: # directory names for each experiment under bidcell/model/experiments
-  load_dir: last
-  model_dir: models
-  test_output_dir: test_output
-  samples_dir: samples
+  load_dir: last # default: last 
+  model_dir: models # default: models
+  test_output_dir: test_output # default: test_output
+  samples_dir: samples # default: samples
 
 
 
@@ -88,52 +91,3 @@ experiment_dirs: # directory names for each experiment under bidcell/model/exper
 #   - SMC
 
 
-
-
-data_params:
-  patch_size: 64
-  elongated: ["Endothelial", "Fibroblasts", "Myofibroblasts", "SMC"]
-  interpolator: 'sitkBSpline' # This is an enumerated value, here None is not allowed
-  resampledPixelSpacing: # This disables resampling, as it is interpreted as None, to enable it, specify spacing in x, y, z as [x, y , z]
-  weightingNorm: # If no value is specified, it is interpreted as None
-
-imageType:
-  Original: {} # for dictionaries / mappings, None values are not allowed, '{}' is interpreted as an empty dictionary
-  LoG:
-    sigma: [1.0, 2.0, 3.0, 4.0, 5.0]  # If you include sigma values >5, remember to also increase the padDistance.
-  Wavelet: {}
-
-# Featureclasses, from which features must be calculated. If a featureclass is not mentioned, no features are calculated
-# for that class. Otherwise, the specified features are calculated, or, if none are specified, all are calculated (excluding redundant/deprecated features).
-featureClass:
-  # redundant Compactness 1, Compactness 2 an Spherical Disproportion features are disabled by default, they can be
-  # enabled by specifying individual feature names (as is done for glcm) and including them in the list.
-  shape:
-  firstorder: [] # specifying an empty list has the same effect as specifying nothing.
-  glcm:  # Disable SumAverage by specifying all other GLCM features available
-    - 'Autocorrelation'
-    - 'JointAverage'
-    - 'ClusterProminence'
-    - 'ClusterShade'
-    - 'ClusterTendency'
-    - 'Contrast'
-    - 'Correlation'
-    - 'DifferenceAverage'
-    - 'DifferenceEntropy'
-    - 'DifferenceVariance'
-    - 'JointEnergy'
-    - 'JointEntropy'
-    - 'Imc1'
-    - 'Imc2'
-    - 'Idm'
-    - 'Idmn'
-    - 'Id'
-    - 'Idn'
-    - 'InverseVariance'
-    - 'MaximumProbability'
-    - 'SumEntropy'
-    - 'SumSquares'
-  glrlm: # for lists none values are allowed, in this case, all features are enabled
-  glszm:
-  ngtdm:
-  gldm:  # contains deprecated features, but as no individual features are specified, the deprecated features are not enabled

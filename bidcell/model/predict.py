@@ -50,7 +50,7 @@ def predict(config):
     # Set up the model
     logging.info("Initialising model")
 
-    atlas_exprs = pd.read_csv(json_opts.data_sources.atlas_fp, index_col=0)
+    atlas_exprs = pd.read_csv(json_opts.data_sources.ref_fp, index_col=0)
     n_genes = atlas_exprs.shape[1] - 3
     print("Number of genes: %d" % n_genes)
 
