@@ -107,7 +107,7 @@ def train(config):
             model.parameters(),
             lr=json_opts.training_params.learning_rate,
             betas=(json_opts.training_params.beta1, json_opts.training_params.beta2),
-            weight_decay=json_opts.training_params.l2_reg_alpha,
+            weight_decay=json_opts.training_params.weight_decay,
         )
     else:
         sys.exit("Select optimiser from rmsprop or adam")
