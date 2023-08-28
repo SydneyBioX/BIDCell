@@ -1,6 +1,10 @@
 """BIDCellModel class module"""
+from typing import Optional
+from multiprocessing import cpu_count
 import os
-from typing import Dict, Optional
+
+import yaml
+from pydantic import BaseModel
 
 from model.postprocess_predictions import postprocess_predictions
 from model.predict import predict
@@ -12,44 +16,73 @@ from processing.preannotate import preannotate
 from processing.transcript_patches import generate_patches
 from processing.transcripts import generate_expression_maps
 
-available_vendors: Dict[str, str] = {
-    "cosmx": "CosMx",
-    "merscope": "Merscope",
-    "visium": "Visium",
-}
+
+class DataParams(BaseModel):
+    patch_size: int
+    elongated: list[str]
+
+
+class ModelPararms(BaseModel):
+    name: str
+
+
+class TrainingParams(BaseModel):
+    total_epochs: int
+    learning_rate: float
+    beta1: float
+    beta2: float
+    l2_reg_alpha: float
+    optimizer: str
+    ne_weight: float
+    os_weight: float
+    cc_weight: float
+    ov_weight: float
+    pos_weight: float
+    neg_weight: float
+
+
+class SaveFreqs(BaseModel):
+    model_freq: int
+    sample_freq: int
+
+
+class DataSources(BaseModel):
+    expr_fr: str
+    expr_fp_ext: str
+    nuclei_fp: str
+    nuclei_types_fp: str
+    pos_markers_fp: str
+    neg_markers_fp: str
+    atlas_fp: str
+    gene_names: str
+
+
+class ExperimentDirs(BaseModel):
+    load_dir: str
+    model_dir: str
+    test_output_dir: str
+    samples_dir: str
+
+
+class Config(BaseModel):
+    data_params: DataParams
+    model_params: ModelPararms
+    training_params: TrainingParams
+    save_freqs: SaveFreqs
+    data_sources: DataSources
+    experiment_dirs: ExperimentDirs
 
 
 class BIDCellModel:
-    def __init__(
-        self,
-        raw_data_dir: str,
-        outputs_dir: str,
-        dapi_dir: Optional[str] = None,
-        n_processes: Optional[int] = None,
-    ) -> None:
-        self.n_processes = n_processes
+    """The BIDCellModel class, which provides an interface for preprocessing, training and predicting all the cell types for a datset.
+    """
+    def __init__(self, config_file: str, n_processes: Optional[int] = None) -> None:
+        self.config = self.__parse_config(config_file)
 
-        if not os.path.exists(raw_data_dir):
-            raise ValueError(
-                f"Invalid data directory selected: {raw_data_dir} is not a valid path."
-            )
-        self.raw_data_dir = raw_data_dir
-
-        # check if output already exists
-        if os.path.exists(outputs_dir):
-            # TODO: Add overwrite param?
-            raise ValueError("Output path already exists!")
-
-        self.outputs_dir = outputs_dir
-
-        if dapi_dir and not os.path.exists(dapi_dir):
-            raise ValueError(
-                f"Invalid DAPI directory selected: {dapi_dir} is not a valid path."
-            )
-        self.dapi_dir = dapi_dir
-
-        # TODO: perhaps config should be a "hidden" var
-        self.config = BIDCellModel._get_defaults(self.vendor)
+        if n_processes is None:
+            self.n_processes = cpu_count()
+        else:
+            self.n_processes = n_processes
 
     def preprocess(self) -> None:
         if self.vendor == "CosMx":
@@ -59,7 +92,6 @@ class BIDCellModel:
         generate_patches(self.config)
         make_cell_gene_mat(self.config)
         preannotate(self.config)
-
         # TODO: Which information do the end users need from the process?
 
     def train(self) -> None:
@@ -69,10 +101,29 @@ class BIDCellModel:
         predict(self.config)
         postprocess_predictions(self.config)
 
-    def _get_defaults(vendor: str) -> dict:
-        # TODO: figure out defaults situation
-        raise NotImplementedError()
-        return dict()
+    def __parse_config(self, config_file_path: str) -> dict:
+        if not os.path.exists():
+            FileNotFoundError(
+                f"Config file at {config_file_path} could not be found. Please check if the filepath is valid."
+            )
+
+        with open(config_file_path) as config_file:
+            try:
+                config = yaml.safe_load(config_file)
+            except Exception:
+                ValueError(
+                    "The inputted YAML config was invalid, try looking at the example config."
+                )
+
+        if not isinstance(config, dict):
+            ValueError(
+                "The inputted YAML config was invalid, try looking at the example config."
+            )
+
+        # validate the configuration schema
+        config = Config(**config)
+
+        return dict(config)
 
     def set_config() -> None:
         # TODO: Document all config options and allow setting single or
