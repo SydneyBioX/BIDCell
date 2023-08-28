@@ -1,20 +1,62 @@
 # for functions in bidcell/processing
 
-cpu_params:
+cpus:
   n_processes: 16 # number of CPUs for multiprocessing
 
-paths_params:
+files:
   dataset: dataset_xenium_breast1 # name of dataset under data/
   fp_dapi: morphology_mip.ome.tif # name of DAPI image
   fp_transcripts: transcripts.csv.gz # name of transcripts file
   fp_ref: ../../data/sc_references/sc_breast.csv 
 
-transcript_params:
+files_defaults: # recommend to leave as defaults
+  data_dir: ../../data/ # root data directory
+  fp_affine: affine.csv # file of affine transformation - needed if cropping to align DAPI to transcripts
+  fp_nuclei: nuclei.tif # file name of nuclei tif file
+  fp_rdapi: dapi_resized.tif # file name of resized DAPI image
+  fp_transcripts_to_filter: transcripts_to_filter.txt # txt file containing names of transcripts to filter out
+  dir_out_maps: expr_maps # directory containing processed gene expression maps
+  fp_out_filtered: transcripts_processed.csv # filtered and xy-scaled transcripts data
+  fp_out_gene_names: all_gene_names.txt # txt file containing list of gene names
+  dir_patches: expr_maps_input_patches_ # directory prefix of transcript patches
+
+# nuclei_fovs:
+#   dir_dapi: # e.g., Lung5_Rep1-RawMorphologyImages
+#   ext_dapi: tif
+#   pattern_z: Z###
+#   pattern_f: F###
+#   channel_first: False 
+#   channel_dapi: -1 
+#   fp_dapi_stitched: dapi_preprocessed.tif
+#   n_fov: 30
+#   min_fov: 1
+#   n_fov_h: 6 
+#   n_fov_w: 5
+#   start_corner: ul
+#   row_major: False
+#   z_level: 1
+#   mip: False 
+#   flip_ud: False 
+
+nuclei:
+  # crop_nuclei_to_ts: False
+  # use_cpu: False
+  # diameter: 20 # default: None
+  max_height: 24000 # divide into sections if too large - maximum height to process in original resolution; default: 24000
+  max_width: 32000 # divide into sections if too large - maximum width to process in original resolution; default: 32000
+
+transcripts:
+  min_qv: 20 # for Xenium - transcripts with qv below this value will be filtered out
+  max_height: 3500 # divide into sections if too large - height of patches; default: 3500
+  max_width: 4000 # divide into sections if too large - width of patches; default: 4000
+  shift_to_origin: False # shift to origin, making min(x) and min(y) (0,0)
   x_col: x_location # name of x location column in transcripts file
   y_col: y_location # name of y location column in transcripts file
   gene_col: feature_name # name of genes column in transcripts file
+  # fp_selected_genes: selected_genes.txt # name of file containing genes to use, eg selected_genes.txt
+  # counts_col: MIDCounts # name of counts column in transcripts file, eg MIDCounts
 
-affine_params:
+affine:
   target_pix_um: 1.0 # microns per pixel to perform segmentation; default: 1.0
   base_pix_x: 0.2125 # convert to microns along width by multiplying the original pixels by base_pix_x microns per pixel
   base_pix_y: 0.2125 # convert to microns along width by multiplying the original pixels by base_pix_y microns per pixel
@@ -23,6 +65,18 @@ affine_params:
   global_shift_x: 0 # additional adjustment to align transcripts to DAPI in target pixels along image width; default: 0
   global_shift_y: 0 # additional adjustment to align transcripts to DAPI in target pixels along image height; default: 0
 
+preannotate: 
+  expr_dir: cell_gene_matrices/nuclei # directory to load nuclei expression matrices from
+  fp_expr: cell_expr.csv # file name of nuclei expression matrices
+  fp_nuclei_anno: nuclei_cell_type.h5 # file name to save nuclei annotations
+  fp_ref: ../../data/sc_references/sc_breast.csv # single cell reference
+
+cell_gene_matrix:
+  fp_seg: bidcell/model/experiments/2023_July_06_09_41_41/test_output/epoch_1_step_4000_connected.tif # segmentation tif file
+  output_dir: cell_gene_matrices/2023_July_06_09_41_41 # output directory of cell-gene matrix and cell metadata
+  max_sum_hw: 50000 # max h+w for resized segmentation to extract expressions from
+  fp_out_cells: cell_outputs_ # suffix of output files containing cell-gene matrix and metadata
+  # only_expr
 
 # for functions in bidcell/model
 
@@ -37,7 +91,7 @@ model_params:
 
 training_params:
   total_epochs: 1 # number of training epochs; default: 1
-  steps: 4000 # number of training steps; default: 4000
+  total_steps: 4000 # number of training steps; default: 4000
   learning_rate: 0.00001 # learning rate of DL model; default: 0.00001
   beta1: 0.9 # adam optimiser beta1; default: 0.9
   beta2: 0.999 # adam optimiser beta2; default: 0.999
@@ -51,8 +105,12 @@ training_params:
   neg_weight: 1.0 # weight for negative marker loss; default: 1.0
 
 testing_params:
-  epoch: 1 # epoch to test; default: 1
-  steps: 4000 # step number to test; default: 4000
+  test_epoch: 1 # epoch to test; default: 1
+  test_step: 4000 # step number to test; default: 4000
+
+postprocess:
+  patch_size_mp: 1024 # size of patches to perform morphological processing; default: 1024
+  # dir_id: last
 
 save_freqs:
   model_freq: 1000 # number of training steps per model save
@@ -73,21 +131,4 @@ experiment_dirs: # directory names for each experiment under bidcell/model/exper
   model_dir: models # default: models
   test_output_dir: test_output # default: test_output
   samples_dir: samples # default: samples
-
-
-
-
-
-
-
-
-
-# data_params:
-#   patch_size: 48
-#   elongated:
-#   - Endothelial
-#   - Fibroblasts
-#   - Myofibroblasts
-#   - SMC
-
 

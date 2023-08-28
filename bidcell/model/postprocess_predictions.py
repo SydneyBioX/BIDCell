@@ -338,7 +338,7 @@ def postprocess_predictions(config):
     pred_fp = dir_id + "epoch_%d_step_%d.tif" % (config.epoch, config.step)
     output_dir = dir_id + "epoch_%d_step_%d_connected/" % (config.epoch, config.step)
 
-    nucleus_fp = config.nucleus_fp
+    nucleus_fp = os.path.join(config.data_dir, config.dataset, config.nucleus_fp)
     nuclei_img = tifffile.imread(nucleus_fp)
 
     if not os.path.exists(output_dir):
@@ -415,6 +415,15 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
+        "--data_dir", default="../../data/", type=str, help="root data directory"
+    )
+    parser.add_argument(
+        "--dataset",
+        default="dataset_merscope_melanoma2",
+        type=str,
+        help="name of dataset",
+    )
+    parser.add_argument(
         "--dir_id",
         default="last",
         type=str,
@@ -434,7 +443,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--nucleus_fp",
-        default="../../data/dataset_merscope_melanoma2/nuclei.tif",
+        default="nuclei.tif",
         type=str,
         help="file path of nuclei .tif file",
     )

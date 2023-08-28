@@ -141,7 +141,7 @@ def make_cell_gene_mat(config):
     scale_pix_x = config.scale_pix_x
     scale_pix_y = config.scale_pix_y
 
-    if not os.path.exists(output_dir + "/" + config.fp_output_expr):
+    if not os.path.exists(output_dir + "/" + config.fp_expr):
         # Rescale to pixel size
         height_pix = np.round(height / config.scale_pix_y).astype(int)
         width_pix = np.round(width / config.scale_pix_x).astype(int)
@@ -243,7 +243,7 @@ def make_cell_gene_mat(config):
                 df_i = pd.read_csv(fpc, index_col=0)
                 df_out.iloc[:, 1:] = df_out.iloc[:, 1:].add(df_i.iloc[:, 1:])
 
-            df_out.to_csv(output_dir + "/" + config.fp_output_expr)
+            df_out.to_csv(output_dir + "/" + config.fp_expr)
 
             # Clean up
             for fpc in fp_chunks:
@@ -255,7 +255,7 @@ def make_cell_gene_mat(config):
         del df_expr
 
     else:
-        df_out = pd.read_csv(output_dir + "/" + config.fp_output_expr, index_col=0)
+        df_out = pd.read_csv(output_dir + "/" + config.fp_expr, index_col=0)
 
     if not config.only_expr:
         print("Computing cell locations and sizes")
@@ -264,7 +264,7 @@ def make_cell_gene_mat(config):
         matrix_all_splits = np.array_split(matrix_all, n_processes)
         processes = []
 
-        fp_output = output_dir + "/" + config.fp_output_full
+        fp_output = output_dir + "/" + config.fp_out_cells
         col_names_coords = [
             "cell_id",
             "cell_centroid_x",
@@ -318,10 +318,10 @@ if __name__ == "__main__":
         help="output directory of cell-gene matrix and cell metadata",
     )
     parser.add_argument(
-        "--fp_output_expr", default="cell_expr.csv", type=str, help="output file containing only cell-gene matrix"
+        "--fp_expr", default="cell_expr.csv", type=str, help="output file containing only cell-gene matrix"
     )
     parser.add_argument(
-        "--fp_output_full", default="cell_outputs_", type=str, help="suffix of output files containing cell-gene matrix and metadata"
+        "--fp_out_cells", default="cell_outputs_", type=str, help="suffix of output files containing cell-gene matrix and metadata"
     )
     parser.add_argument(
         "--fp_transcripts_processed",

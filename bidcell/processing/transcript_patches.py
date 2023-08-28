@@ -54,8 +54,8 @@ def generate_patches(config):
 
             dir_output = os.path.join(
                 dir_dataset,
-                config.dir_out
-                + "_patches_%dx%d_shift_%d" % (patch_size, patch_size, shift_patches),
+                config.dir_patches
+                + "%dx%d_shift_%d" % (patch_size, patch_size, shift_patches),
             )
             if not os.path.exists(dir_output):
                 os.makedirs(dir_output)
@@ -110,8 +110,8 @@ if __name__ == "__main__":
         help="directory containing processed gene expression maps",
     )
     parser.add_argument(
-        "--dir_out",
-        default="expr_maps_input",
+        "--dir_patches",
+        default="expr_maps_input_patches_",
         type=str,
         help="directory prefix of saved patches",
     )

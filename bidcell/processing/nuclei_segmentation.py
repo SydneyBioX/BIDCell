@@ -35,7 +35,7 @@ def segment_nuclei(config) -> str:
     dapi = tifffile.imread(fp_dapi)
 
     # Crop to size of transcript map (requires getting transcript maps first)
-    if config.crop_to_ts:
+    if config.crop_nuclei_to_ts:
         # Get starting coordinates
         fp_affine = os.path.join(dir_dataset, config.fp_affine)
 
@@ -210,11 +210,11 @@ if __name__ == "__main__":
     )
     parser.set_defaults(use_cpu=False)
     parser.add_argument(
-        "--crop_to_ts",
+        "--crop_nuclei_to_ts",
         action="store_true",
         help="crop nuclei to size of transcript maps",
     )
-    parser.set_defaults(crop_to_ts=False)
+    parser.set_defaults(crop_nuclei_to_ts=False)
     parser.add_argument(
         "--fp_affine",
         default="affine.csv",

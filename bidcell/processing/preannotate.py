@@ -145,7 +145,7 @@ def preannotate(config):
     cell_type_col = cell_df["cell_type"].to_numpy()
     cell_id_col = cell_df["cell_id"].to_numpy()
 
-    h5f = h5py.File(dir_dataset + "/" + config.fp_output, "w")
+    h5f = h5py.File(dir_dataset + "/" + config.fp_nuclei_anno, "w")
     h5f.create_dataset("data", data=cell_type_col)
     h5f.create_dataset("ids", data=cell_id_col)
     h5f.close()
@@ -177,7 +177,7 @@ if __name__ == "__main__":
         help="file name of nuclei expression matrices",
     )
     parser.add_argument(
-        "--fp_output",
+        "--fp_nuclei_anno",
         default="nuclei_cell_type.h5",
         type=str,
         help="file name to save nuclei annotations",
