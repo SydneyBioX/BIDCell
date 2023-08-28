@@ -21,22 +21,22 @@ files_defaults: # recommend to leave as defaults
   dir_patches: expr_maps_input_patches_ # directory prefix of transcript patches
 
 # nuclei_fovs:
-#   dir_dapi: # e.g., Lung5_Rep1-RawMorphologyImages
-#   ext_dapi: tif
-#   pattern_z: Z###
-#   pattern_f: F###
-#   channel_first: False 
-#   channel_dapi: -1 
-#   fp_dapi_stitched: dapi_preprocessed.tif
-#   n_fov: 30
-#   min_fov: 1
-#   n_fov_h: 6 
-#   n_fov_w: 5
-#   start_corner: ul
-#   row_major: False
-#   z_level: 1
-#   mip: False 
-#   flip_ud: False 
+#   dir_dapi: Lung5_Rep1-RawMorphologyImages # name of directory containing the DAPI FOV images
+#   ext_dapi: tif # extension of the DAPI images
+#   pattern_z: Z### # String pattern to find in the file names for the Z number, or None for no Z component
+#   pattern_f: F### # String pattern to find in file names for the FOV number
+#   channel_first: False # channel axis first (e.g. [5,H,W]) or last (e.g. [H,W,5]) in image volumes
+#   channel_dapi: -1 # channel index of the DAPI images in the image volumes
+#   fp_dapi_stitched: dapi_preprocessed.tif # output file name of the stitched DAPI
+#   n_fov: 30 # total number of FOVs
+#   min_fov: 1 # smallest FOV number - usually 0 or 1
+#   n_fov_h: 6 # number of FOVs tiled along vertical axis
+#   n_fov_w: 5 # number of FOVs tiled along horizontal axis
+#   start_corner: ul # position of first FOV - choose from ul, ur, bl, br
+#   row_major: False # row major ordering of FOVs
+#   z_level: 1 # which z slice to use, or --mip to use MIP
+#   mip: False # take the maximum intensity projection across all Z
+#   flip_ud: False # flip images up/down before stitching
 
 nuclei:
   # crop_nuclei_to_ts: False
