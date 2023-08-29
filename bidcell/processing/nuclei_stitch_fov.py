@@ -72,7 +72,7 @@ def stitch_nuclei(config: Union[argparse.ArgumentParser, dict]) -> str:
     if not config.dir_dapi:
         dir_dapi = dir_dataset
     else:
-        dir_dapi = os.path.join(dir_dataset, config.dir_dapi)
+        dir_dapi = config.dir_dapi
 
     ext_pat = "".join("[%s%s]" % (e.lower(), e.upper()) for e in config.ext_dapi)
     fp_dapi_list = glob.glob(os.path.join(dir_dapi, "*." + ext_pat))

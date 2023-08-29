@@ -30,7 +30,7 @@ def segment_nuclei(config) -> str:
     dir_dataset = os.path.join(config.data_dir, config.dataset)
 
     print("Reading DAPI image")
-    fp_dapi = os.path.join(dir_dataset, config.fp_dapi)
+    fp_dapi = config.fp_dapi
     print(fp_dapi)
     dapi = tifffile.imread(fp_dapi)
 

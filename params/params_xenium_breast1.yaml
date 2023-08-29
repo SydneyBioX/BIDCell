@@ -5,8 +5,8 @@ cpus:
 
 files:
   dataset: dataset_xenium_breast1 # name of dataset under data/
-  fp_dapi: morphology_mip.ome.tif # name of DAPI image
-  fp_transcripts: transcripts.csv.gz # name of transcripts file
+  fp_dapi: ../../data/dataset_xenium_breast1/morphology_mip.ome.tif # name of DAPI image
+  fp_transcripts: ../../data/dataset_xenium_breast1/transcripts.csv.gz # path of transcripts file
   fp_ref: ../../data/sc_references/sc_breast.csv 
 
 files_defaults: # recommend to leave as defaults
@@ -21,7 +21,7 @@ files_defaults: # recommend to leave as defaults
   dir_patches: expr_maps_input_patches_ # directory prefix of transcript patches
 
 # nuclei_fovs:
-#   dir_dapi: Lung5_Rep1-RawMorphologyImages # name of directory containing the DAPI FOV images
+#   dir_dapi: ../../data/dataset_cosmx_nsclc/Lung5_Rep1-RawMorphologyImages # name of directory containing the DAPI FOV images
 #   ext_dapi: tif # extension of the DAPI images
 #   pattern_z: Z### # String pattern to find in the file names for the Z number, or None for no Z component
 #   pattern_f: F### # String pattern to find in file names for the FOV number
