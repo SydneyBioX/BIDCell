@@ -1,5 +1,5 @@
 """BIDCellModel class module"""
-from typing import Optional
+from typing import Optional, Literal
 from multiprocessing import cpu_count
 import os
 
@@ -37,59 +37,159 @@ class AttrDict(dict):
             self[key] = from_nested_dict(self[key])
 
 
-class DataParams(BaseModel):
+class FileParams(BaseModel):
+    data_dir: str
+    dataset: str
+    fp_dapi: str
+    fp_transcripts: str
+    fp_ref: str
+
+
+class FileDefufaultsPararms(BaseModel):
+    fp_affine: str = "affine.csv"
+    fp_nuclei: str = "nuclei.tif"
+    fp_rdapi: str = "dapi_resized.tif"
+    fp_transcripts_to_filter: str = "transcripts_to_filter.txt"
+    dir_out_maps: str = "expr_maps"
+    fp_out_filtered: str = "transcripts_processed.csv"
+    fp_out_gene_names: str = "all_gene_names.txt"
+    dir_patches: str = "expr_maps_input_patches_"
+
+
+class NucleiFovParams(BaseModel):
+    stitch_nuclei_fovs: bool
+    dir_dapi: str | None = None
+    ext_dapi: str = "tif"
+    pattern_z: str = "Z###"
+    pattern_f: str = "F###"
+    channel_first: bool = False
+    channel_dapi: int = -1
+    fp_dapi_stitched: str = "dapi_preprocessed.tif"
+    n_fov: int | None = None
+    min_fov: int | None = None
+    n_fov_h: int | None = None
+    n_fov_w: int | None = None
+    start_corner: Literal["ul", "ur", "bl", "br"] = "ul"
+    row_major: bool = False
+    z_level: int = 1
+    mip: bool = False
+    flip_ud: bool = False
+    # TODO: Add validator for class which checks if dir_dapi is present if stitch_nuclei_fovs is True
+
+
+class NucleiParams(BaseModel):
+    max_height: int = 24000
+    max_width: int = 32000
+    crop_nuclei_to_ts: bool = False
+    use_cpu: bool = False
+    diameter: int | None = None
+
+
+class TranscriptParams:
+    min_qv: int = 20
+    max_height: int = 3500
+    max_width: int = 4000
+    shift_to_origin: False
+    x_col: str = "x_location"
+    y_col: str = "y_location"
+    gene_col: str = "feature_name"
+    fp_selected_genes: str | None = None
+    counts_col: str | None = None
+
+
+class AffineParams(BaseModel):
+    target_pix_um: float = 1.0
+    base_pix_x: float
+    base_pix_y: float
+    base_ts_x: float
+    base_ts_y: float
+    global_shift_x: int = 0
+    global_shift_y: int = 0
+
+
+class PreannotateParams(BaseModel):
+    expr_dir: str
+    fp_expr: str
+    fp_nuclei_anno: str
+    fp_ref: str
+
+
+class CellGeneMatParams(BaseModel):
+    fp_seg: str
+    output_dir: str
+    max_sum_hw: int
+    fp_out_cells: str
+
+
+class ModelParams(BaseModel):
+    name: str = "custom"  # TODO: Validate this field
     patch_size: int
     elongated: list[str]
 
 
-class ModelPararms(BaseModel):
-    name: str
-
-
 class TrainingParams(BaseModel):
-    total_epochs: int
-    learning_rate: float
-    beta1: float
-    beta2: float
-    l2_reg_alpha: float
-    optimizer: str
-    ne_weight: float
-    os_weight: float
-    cc_weight: float
-    ov_weight: float
-    pos_weight: float
-    neg_weight: float
+    total_epochs: int = 1
+    total_steps: int = 4000
+    learning_rate: float = 0.00001
+    beta1: float = 0.9
+    beta2: float = 0.999
+    weight_decay: float = 0.0001
+    optimizer: Literal["adam", "rmsprop"] = "adam"
+    ne_weight: float = 1.0
+    os_weight: float = 1.0
+    cc_weight: float = 1.0
+    ov_weight: float = 1.0
+    pos_weight: float = 1.0
+    neg_weight: float = 1.0
 
 
-class SaveFreqs(BaseModel):
+class TestingParams(BaseModel):
+    test_epoch: int = 1
+    test_step: int = 4000
+
+
+class PostprocessParams(BaseModel):
+    patch_size_mp: int = 1024
+    dir_id: str | None = None
+
+
+class SaveFreqParams(BaseModel):
     model_freq: int
     sample_freq: int
 
 
-class DataSources(BaseModel):
-    expr_fr: str
+class DataSourceParams(BaseModel):
+    expr_fp: str
     expr_fp_ext: str
     nuclei_fp: str
     nuclei_types_fp: str
+    gene_names: str
     pos_markers_fp: str
     neg_markers_fp: str
     ref_fp: str
-    gene_names: str
 
 
 class ExperimentDirs(BaseModel):
-    load_dir: str
-    model_dir: str
-    test_output_dir: str
-    samples_dir: str
+    load_dir: str = "last"
+    model_dir: str = "models"
+    test_output_dir: str = "test_output"
+    samples_dir: str = "samples"
 
 
 class Config(BaseModel):
-    data_params: DataParams
-    model_params: ModelPararms
+    files: FileParams
+    files_defaults: FileDefufaultsPararms
+    nuclei_fovs: NucleiFovParams
+    nuclei: NucleiParams
+    transcripts: TranscriptParams
+    affine: AffineParams
+    preannotate: PreannotateParams
+    model_params: ModelParams
     training_params: TrainingParams
-    save_freqs: SaveFreqs
-    data_sources: DataSources
+    testing_params: TestingParams
+    postprocess: PostprocessParams
+    save_freqs: SaveFreqParams
+    data_sources: DataSourceParams
     experiment_dirs: ExperimentDirs
 
 
@@ -119,9 +219,13 @@ class BIDCellModel:
 
     def predict(self) -> None:
         predict(self.config)
+        # TODO: figure out the most recent experiment. get_lastest_id()
+        if self.config.postprocess.dir_id == "last":
+            self.config.postprocess.dir_id = get_lastest_id()
         postprocess_predictions(self.config)
+        # TODO: Figure out final cell_gene_matrix call
 
-    def __parse_config(self, config_file_path: str) -> dict:
+    def __parse_config(self, config_file_path: str) -> Config:
         if not os.path.exists():
             FileNotFoundError(
                 f"Config file at {config_file_path} could not be found. Please check if the filepath is valid."
@@ -143,7 +247,7 @@ class BIDCellModel:
         # validate the configuration schema
         config = Config(**config)
 
-        return dict(config)
+        return config
 
     def set_config() -> None:
         # TODO: Document all config options and allow setting single or
