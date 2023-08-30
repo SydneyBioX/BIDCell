@@ -71,6 +71,9 @@ class FileParams(BaseModel):
     # file path of nuclei annotations
     fp_nuclei_anno: str = "nuclei_cell_type.h5"
 
+    # Internal
+    fp_stitched: str | None = None
+
 
 class NucleiFovParams(BaseModel):
     stitch_nuclei_fovs: bool
@@ -196,8 +199,9 @@ class Config(BaseModel):
     model_params: ModelParams
     training_params: TrainingParams
     testing_params: TestingParams
-    postprocess: PostprocessParams
-    experiment_dirs: ExperimentDirs
+    cpus: int
+    # postprocess: PostprocessParams
+    # experiment_dirs: ExperimentDirs
 
 
 class BIDCellModel:
@@ -212,8 +216,8 @@ class BIDCellModel:
             self.n_processes = n_processes
 
     def preprocess(self) -> None:
-        if self.vendor == "CosMx":
-            self.config["fp_stitched"] = stitch_nuclei(self.config)
+        if self.config.nuclei_fovs.stitch_nuclei_fovs:
+            self.config.files.fp_stitched = stitch_nuclei(self.config)
         self.config["fp_rdapi"] = segment_nuclei(self.config)
         self.config["fp_maps"] = generate_expression_maps(self.config)
         generate_patches(self.config)
@@ -233,7 +237,7 @@ class BIDCellModel:
         # TODO: Figure out final cell_gene_matrix call
 
     def __parse_config(self, config_file_path: str) -> Config:
-        if not os.path.exists():
+        if not os.path.exists(config_file_path):
             FileNotFoundError(
                 f"Config file at {config_file_path} could not be found. Please check if the filepath is valid."
             )

@@ -1,8 +1,7 @@
 # for functions in bidcell/processing
 # NOTE: Commented options default to None
 
-cpus:
-  n_processes: 16 # number of CPUs for multiprocessing
+cpus: 16 # number of CPUs for multiprocessing
 
 files:
   data_dir: ../../data/ # root data directory for processed/output data
@@ -33,7 +32,7 @@ nuclei_fovs:
   flip_ud: False # flip images up/down before stitching
 
 nuclei:
-  # diameter: 20 # estimated diameter of nuclei for Cellpose - or None to automatically compute, default: None
+  diameter: # estimated diameter of nuclei for Cellpose - or None to automatically compute, default: None
 
 transcripts:
   shift_to_origin: False # shift to origin, making min(x) and min(y) (0,0)
