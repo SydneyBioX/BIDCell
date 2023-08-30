@@ -50,7 +50,7 @@ def predict(config):
     # Set up the model
     logging.info("Initialising model")
 
-    atlas_exprs = pd.read_csv(json_opts.data_sources.ref_fp, index_col=0)
+    atlas_exprs = pd.read_csv(config.files.fp_ref, index_col=0)
     n_genes = atlas_exprs.shape[1] - 3
     print("Number of genes: %d" % n_genes)
 
@@ -237,14 +237,21 @@ def fill_grid(config, dir_id):
     shift = int(patch_size / 2)
 
     expr_fp = (
-        json_opts.data_sources.expr_fp
+        config.files.data_dir 
+        + '/' 
+        + config.files.dataset
+        + '/' 
+        + config.files.dir_out_maps 
+        + '/'
+        + config.files.dir_patches
         + str(json_opts.data_params.patch_size)
         + "x"
         + str(json_opts.data_params.patch_size)
         + "_shift_"
         + str(shift)
     )
-    expr_fp_ext = json_opts.data_sources.expr_fp_ext
+    # expr_fp_ext = json_opts.data_sources.expr_fp_ext
+    expr_fp_ext = ".hdf5"
 
     pred_fp = "%s/epoch_%d_step_%d_seg_shift0.tif" % (
         dir_id,

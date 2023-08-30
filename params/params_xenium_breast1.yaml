@@ -5,56 +5,41 @@ cpus:
   n_processes: 16 # number of CPUs for multiprocessing
 
 files:
-  data_dir: ../../data/ # root data directory
+  data_dir: ../../data/ # root data directory for processed/output data
   dataset: dataset_xenium_breast1 # name of dataset under data/
   fp_dapi: ../../data/dataset_xenium_breast1/morphology_mip.ome.tif # name of DAPI image
   fp_transcripts: ../../data/dataset_xenium_breast1/transcripts.csv.gz # path of transcripts file
-  fp_ref: ../../data/sc_references/sc_breast.csv 
+  fp_ref: ../../data/sc_references/sc_breast.csv # file path of reference data
+  fp_pos_markers: "../../data/sc_references/sc_breast_markers_pos.csv" # file path of positive markers
+  fp_neg_markers: "../../data/sc_references/sc_breast_markers_neg.csv" # file path of negative markers
 
-files_defaults: # recommend to leave as defaults
-  fp_affine: affine.csv # file of affine transformation - needed if cropping to align DAPI to transcripts
-  fp_nuclei: nuclei.tif # file name of nuclei tif file
-  fp_rdapi: dapi_resized.tif # file name of resized DAPI image
-  fp_transcripts_to_filter: transcripts_to_filter.txt # txt file containing names of transcripts to filter out
-  dir_out_maps: expr_maps # directory containing processed gene expression maps
-  fp_out_filtered: transcripts_processed.csv # filtered and xy-scaled transcripts data
-  fp_out_gene_names: all_gene_names.txt # txt file containing list of gene names
-  dir_patches: expr_maps_input_patches_ # directory prefix of transcript patches
-
-# nuclei_fovs:
-#   dir_dapi: ../../data/dataset_cosmx_nsclc/Lung5_Rep1-RawMorphologyImages # name of directory containing the DAPI FOV images
-#   ext_dapi: tif # extension of the DAPI images
-#   pattern_z: Z### # String pattern to find in the file names for the Z number, or None for no Z component
-#   pattern_f: F### # String pattern to find in file names for the FOV number
-#   channel_first: False # channel axis first (e.g. [5,H,W]) or last (e.g. [H,W,5]) in image volumes
-#   channel_dapi: -1 # channel index of the DAPI images in the image volumes
-#   fp_dapi_stitched: dapi_preprocessed.tif # output file name of the stitched DAPI
-#   n_fov: 30 # total number of FOVs
-#   min_fov: 1 # smallest FOV number - usually 0 or 1
-#   n_fov_h: 6 # number of FOVs tiled along vertical axis
-#   n_fov_w: 5 # number of FOVs tiled along horizontal axis
-#   start_corner: ul # position of first FOV - choose from ul, ur, bl, br
-#   row_major: False # row major ordering of FOVs
-#   z_level: 1 # which z slice to use, or --mip to use MIP
-#   mip: False # take the maximum intensity projection across all Z
-#   flip_ud: False # flip images up/down before stitching
+nuclei_fovs:
+  stitch_nuclei_fovs: False # set True to stitch separate FOVs of DAPI together in 1 image
+  dir_dapi: ../../data/dataset_cosmx_nsclc/Lung5_Rep1-RawMorphologyImages # name of directory containing the DAPI FOV images
+  ext_dapi: tif # extension of the DAPI images
+  pattern_z: Z### # String pattern to find in the file names for the Z number, or None for no Z component
+  pattern_f: F### # String pattern to find in file names for the FOV number
+  channel_first: False # channel axis first (e.g. [5,H,W]) or last (e.g. [H,W,5]) in image volumes
+  channel_dapi: -1 # channel index of the DAPI images in the image volumes
+  fp_dapi_stitched: dapi_preprocessed.tif # output file name of the stitched DAPI
+  n_fov: 30 # total number of FOVs
+  min_fov: 1 # smallest FOV number - usually 0 or 1
+  n_fov_h: 6 # number of FOVs tiled along vertical axis
+  n_fov_w: 5 # number of FOVs tiled along horizontal axis
+  start_corner: ul # position of first FOV - choose from ul, ur, bl, br
+  row_major: False # row major ordering of FOVs
+  z_level: 1 # which z slice to use, or set mip to use MIP
+  mip: False # take the maximum intensity projection across all Z
+  flip_ud: False # flip images up/down before stitching
 
 nuclei:
-  max_height: 24000 # divide into sections if too large - maximum height to process in original resolution; default: 24000
-  max_width: 32000 # divide into sections if too large - maximum width to process in original resolution; default: 32000
-  crop_nuclei_to_ts: False # TODO: write description, default: false
-  use_cpu: False # TODO: write description, default: false
-  # diameter: 20 # TODO: write description, default: None
+  # diameter: 20 # estimated diameter of nuclei for Cellpose - or None to automatically compute, default: None
 
 transcripts:
-  min_qv: 20 # for Xenium - transcripts with qv below this value will be filtered out
-  max_height: 3500 # divide into sections if too large - height of patches; default: 3500
-  max_width: 4000 # divide into sections if too large - width of patches; default: 4000
   shift_to_origin: False # shift to origin, making min(x) and min(y) (0,0)
   x_col: x_location # name of x location column in transcripts file
   y_col: y_location # name of y location column in transcripts file
   gene_col: feature_name # name of genes column in transcripts file
-  # fp_selected_genes: selected_genes.txt # name of file containing genes to use, eg selected_genes.txt, default: None
   # counts_col: MIDCounts # name of counts column in transcripts file, eg MIDCounts, default: None
 
 affine:
@@ -65,21 +50,6 @@ affine:
   base_ts_y: 1.0 # convert between transcript locations and target pixels along height
   global_shift_x: 0 # additional adjustment to align transcripts to DAPI in target pixels along image width; default: 0
   global_shift_y: 0 # additional adjustment to align transcripts to DAPI in target pixels along image height; default: 0
-
-preannotate: 
-  expr_dir: cell_gene_matrices/nuclei # directory to load nuclei expression matrices from
-  fp_expr: cell_expr.csv # file name of nuclei expression matrices
-  fp_nuclei_anno: nuclei_cell_type.h5 # file name to save nuclei annotations
-  fp_ref: ../../data/sc_references/sc_breast.csv # single cell reference
-
-cell_gene_matrix:
-  fp_seg: bidcell/model/experiments/2023_July_06_09_41_41/test_output/epoch_1_step_4000_connected.tif # segmentation tif file
-  output_dir: cell_gene_matrices/2023_July_06_09_41_41 # output directory of cell-gene matrix and cell metadata
-  max_sum_hw: 50000 # max h+w for resized segmentation to extract expressions from
-  fp_out_cells: cell_outputs_ # suffix of output files containing cell-gene matrix and metadata
-  # only_expr
-
-# for functions in bidcell/model
 
 model_params:
   name: custom # segmentation model to use: custom for model in model.py or set to a encoder name from segmentation_models_pytorch; default: custom
@@ -93,11 +63,6 @@ model_params:
 training_params:
   total_epochs: 1 # number of training epochs; default: 1
   total_steps: 4000 # number of training steps; default: 4000
-  learning_rate: 0.00001 # learning rate of DL model; default: 0.00001
-  beta1: 0.9 # adam optimiser beta1; default: 0.9
-  beta2: 0.999 # adam optimiser beta2; default: 0.999
-  weight_decay: 0.0001 # adam optimiser weight decay; default: 0.0001
-  optimizer: adam # adam or rmsprop; default: adam
   ne_weight: 1.0 # weight for nuclei encapsulation loss; default: 1.0
   os_weight: 1.0 # weight for oversegmentation loss; default: 1.0
   cc_weight: 1.0 # weight for cell-calling loss; default: 1.0
@@ -109,28 +74,4 @@ testing_params:
   test_epoch: 1 # epoch to test; default: 1
   test_step: 4000 # step number to test; default: 4000
 
-postprocess:
-  patch_size_mp: 1024 # size of patches to perform morphological processing; default: 1024
-  # dir_id: last
-  # TODO: should dir_id be None?
-
-save_freqs:
-  model_freq: 1000 # number of training steps per model save
-  sample_freq: 100 # number of training steps per sample save 
-
-data_sources:
-  expr_fp: "../../data/dataset_xenium_breast1/expr_maps/expr_maps_input_patches_" # dir containing transcriptomic image patches 
-  expr_fp_ext: ".hdf5" # extension for transcriptomic image patch files; default: .hdf5
-  nuclei_fp: "../../data/dataset_xenium_breast1/nuclei.tif" # file path of nuclei tif file
-  nuclei_types_fp: "../../data/dataset_xenium_breast1/nuclei_cell_type.h5" # file path of nuclei annotations
-  gene_names: "../../data/dataset_xenium_breast1/all_gene_names.txt" # file path of txt file containing a list of genes in the panel
-  pos_markers_fp: "../../data/sc_references/sc_breast_markers_pos.csv" # file path of positive markers
-  neg_markers_fp: "../../data/sc_references/sc_breast_markers_neg.csv" # file path of negative markers
-  ref_fp: "../../data/sc_references/sc_breast.csv" # file path of reference data
-
-experiment_dirs: # directory names for each experiment under bidcell/model/experiments
-  load_dir: last # default: last 
-  model_dir: models # default: models
-  test_output_dir: test_output # default: test_output
-  samples_dir: samples # default: samples
 

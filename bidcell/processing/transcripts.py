@@ -108,15 +108,15 @@ def generate_expression_maps(config) -> str:
 
     """
 
-    dir_dataset = config.data_dir + "/" + config.dataset
+    dir_dataset = os.path.join(config.data_dir, config.dataset)
     dir_out_maps = dir_dataset + "/" + config.dir_out_maps
     if not os.path.exists(dir_out_maps):
         os.makedirs(dir_out_maps)
 
-    fp_out_filtered = dir_dataset + "/" + config.fp_out_filtered
+    fp_transcripts_processed = dir_dataset + "/" + config.fp_transcripts_processed
 
     # Names to filter out
-    fp_transcripts_to_filter = config.data_dir + "/" + config.fp_transcripts_to_filter
+    fp_transcripts_to_filter = os.path.join(config.data_dir, config.fp_transcripts_to_filter)
     with open(fp_transcripts_to_filter) as file:
         transcripts_to_filter = [line.rstrip() for line in file]
 
@@ -125,7 +125,7 @@ def generate_expression_maps(config) -> str:
     y_col = config.y_col
     gene_col = config.gene_col
 
-    if not os.path.exists(fp_out_filtered):
+    if not os.path.exists(fp_transcripts_processed):
         print("Loading transcripts file")
         fp_transcripts = config.fp_transcripts
         if pathlib.Path(fp_transcripts).suffixes[-1] == ".gz":
@@ -207,10 +207,10 @@ def generate_expression_maps(config) -> str:
         print("Finished filtering")
         print("Saving csv...")
 
-        df.to_csv(fp_out_filtered)
+        df.to_csv(fp_transcripts_processed)
     else:
         print("Loading filtered transcripts")
-        df = pd.read_csv(fp_out_filtered, index_col=0)
+        df = pd.read_csv(fp_transcripts_processed, index_col=0)
 
     # Round locations and convert to integer
     df[x_col] = df[x_col].round().astype(int)
@@ -223,7 +223,7 @@ def generate_expression_maps(config) -> str:
     gene_names = df[gene_col].unique()
     print("%d unique genes" % len(gene_names))
     gene_names = natsort.natsorted(gene_names)
-    with open(dir_dataset + "/" + config.fp_out_gene_names, "w") as f:
+    with open(dir_dataset + "/" + config.fp_gene_names, "w") as f:
         for line in gene_names:
             f.write(f"{line}\n")
 
@@ -370,13 +370,13 @@ if __name__ == "__main__":
         help="directory containing processed gene expression maps",
     )
     parser.add_argument(
-        "--fp_out_filtered",
+        "--fp_transcripts_processed",
         default="transcripts_processed.csv",
         type=str,
         help="processed transcripts file",
     )
     parser.add_argument(
-        "--fp_out_gene_names",
+        "--fp_gene_names",
         default="all_gene_names.txt",
         type=str,
         help="txt file containing names of all the genes",

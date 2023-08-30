@@ -32,11 +32,14 @@ class DataProcessing(data.Dataset):
         self.patch_size = data_params.patch_size
         self.isTraining = isTraining
 
-        # if shift_patches == 0:
-        # self.expr_fp = data_sources.expr_fp + str(self.patch_size) + 'x' + str(self.patch_size)
-        # else:
         self.expr_fp = (
-            data_sources.expr_fp
+            config.files.data_dir
+            + "/"
+            + config.files.dataset
+            + "/"
+            + config.files.dir_out_maps
+            + "/"
+            + config.files.dir_patches
             + str(self.patch_size)
             + "x"
             + str(self.patch_size)
@@ -44,33 +47,43 @@ class DataProcessing(data.Dataset):
             + str(shift_patches)
         )
 
-        self.expr_fp_ext = data_sources.expr_fp_ext
+        self.nuclei_fp = os.path.join(
+            config.files.data_dir, config.files.dataset, config.files.fp_nuclei
+        )
+        self.nuclei_types_fp = os.path.join(
+            config.files.data_dir, config.files.dataset, config.files.fp_nuclei_anno
+        )
+        self.gene_names_fp = os.path.join(
+            config.files.data_dir, config.files.dataset, config.files.fp_gene_names
+        )
+
+        self.pos_markers_fp = config.files.fp_pos_markers
+        self.neg_markers_fp = config.files.fp_neg_markers
+        self.ref_fp = config.files.fp_ref
 
         # Check valid data directories
         if not os.path.exists(self.expr_fp):
             sys.exit("Invalid file path %s" % self.expr_fp)
-        if not os.path.exists(data_sources.nuclei_fp):
-            sys.exit("Invalid file path %s" % data_sources.nuclei_fp)
-        if not os.path.exists(data_sources.nuclei_types_fp):
-            sys.exit("Invalid file path %s" % data_sources.nuclei_types_fp)
-        if not os.path.exists(data_sources.pos_markers_fp):
-            sys.exit("Invalid file path %s" % data_sources.pos_markers_fp)
-        if not os.path.exists(data_sources.neg_markers_fp):
-            sys.exit("Invalid file path %s" % data_sources.neg_markers_fp)
-        if not os.path.exists(data_sources.ref_fp):
-            sys.exit("Invalid file path %s" % data_sources.ref_fp)
-        if not os.path.exists(data_sources.gene_names):
-            sys.exit("Invalid file path %s" % data_sources.gene_names)
-
-        self.nuclei_fp = data_sources.nuclei_fp
-        self.nuclei_types_fp = data_sources.nuclei_types_fp
+        if not os.path.exists(self.nuclei_fp):
+            sys.exit("Invalid file path %s" % self.nuclei_fp)
+        if not os.path.exists(self.nuclei_types_fp):
+            sys.exit("Invalid file path %s" % self.nuclei_types_fp)
+        if not os.path.exists(self.pos_markers_fp):
+            sys.exit("Invalid file path %s" % self.pos_markers_fp)
+        if not os.path.exists(self.neg_markers_fp):
+            sys.exit("Invalid file path %s" % self.neg_markers_fp)
+        if not os.path.exists(self.ref_fp):
+            sys.exit("Invalid file path %s" % self.ref_fp)
+        if not os.path.exists(self.gene_names_fp):
+            sys.exit("Invalid file path %s" % self.gene_names_fp)
 
         self.nuclei = tifffile.imread(self.nuclei_fp)
         self.nuclei = self.nuclei.astype(np.int32)
         print("Loaded nuclei")
         print(self.nuclei.shape)
 
-        expr_fp_ext = data_sources.expr_fp_ext
+        # expr_fp_ext = data_sources.expr_fp_ext
+        expr_fp_ext = ".hdf5"
         fp_patches_all = glob.glob(self.expr_fp + "/*" + expr_fp_ext)
         fp_patches_all = natsort.natsorted(fp_patches_all)
 
@@ -125,7 +138,7 @@ class DataProcessing(data.Dataset):
         # type_names = data_params.cell_types
 
         # Get order of cell-types from sc reference
-        atlas_exprs = pd.read_csv(data_sources.ref_fp, index_col=0)
+        atlas_exprs = pd.read_csv(self.ref_fp, index_col=0)
         ct_idx_ref = atlas_exprs["ct_idx"].tolist()
         ct_ref = atlas_exprs["cell_type"].tolist()
         name_index_dict = {}
@@ -144,15 +157,15 @@ class DataProcessing(data.Dataset):
 
         # print('%d patches available' %len(self.coords_starts))
 
-        df_pos_markers = pd.read_csv(data_sources.pos_markers_fp, index_col=0)
-        df_neg_markers = pd.read_csv(data_sources.neg_markers_fp, index_col=0)
+        df_pos_markers = pd.read_csv(self.pos_markers_fp, index_col=0)
+        df_neg_markers = pd.read_csv(self.neg_markers_fp, index_col=0)
 
         # self.pos_markers = df_pos_markers.to_numpy()
         # self.neg_markers = df_neg_markers.to_numpy()
         self.pos_markers = df_pos_markers
         self.neg_markers = df_neg_markers
 
-        with open(data_sources.gene_names) as file:
+        with open(self.gene_names_fp) as file:
             self.gene_names = [line.rstrip() for line in file]
 
     def augment_data(self, batch_raw):
@@ -192,16 +205,6 @@ class DataProcessing(data.Dataset):
 
     def __getitem__(self, index):
         "Generates one sample of data"
-        # coords = self.coords_starts[index]
-        # coords_h1 = coords[0]
-        # coords_w1 = coords[1]
-        # coords_h2 = coords_h1 + self.patch_size
-        # coords_w2 = coords_w1 + self.patch_size
-
-        # expr_fp = self.expr_fp + '/' + str(coords_h1) + 'x' + str(coords_w1) + self.expr_fp_ext
-        # h5f = h5py.File(expr_fp, 'r')
-        # expr = h5f['data'][:].astype(np.float64)
-        # h5f.close()
 
         patch_fp = self.fp_patches[index]
         h5f = h5py.File(patch_fp, "r")
