@@ -7,8 +7,8 @@ cpus:
 files:
   data_dir: ../../data/ # root data directory
   dataset: dataset_xenium_breast1 # name of dataset under data/
-  fp_dapi: morphology_mip.ome.tif # name of DAPI image
-  fp_transcripts: transcripts.csv.gz # name of transcripts file
+  fp_dapi: ../../data/dataset_xenium_breast1/morphology_mip.ome.tif # name of DAPI image
+  fp_transcripts: ../../data/dataset_xenium_breast1/transcripts.csv.gz # path of transcripts file
   fp_ref: ../../data/sc_references/sc_breast.csv 
 
 files_defaults: # recommend to leave as defaults
@@ -21,25 +21,23 @@ files_defaults: # recommend to leave as defaults
   fp_out_gene_names: all_gene_names.txt # txt file containing list of gene names
   dir_patches: expr_maps_input_patches_ # directory prefix of transcript patches
 
-# TODO: Explain what these parameters are for. I assume it is only for CosMx
-nuclei_fovs:
-  stitch_nuclei_fovs: False # whether the dataset has multiple FOV files that require stitching (e.g. CosMx)
-  dir_dapi: Lung5_Rep1-RawMorphologyImages # name of directory containing the DAPI FOV images
-  ext_dapi: tif # extension of the DAPI images, default: tiff
-  pattern_z: Z### # String pattern to find in the file names for the Z number, or None for no Z component, default: Z###
-  pattern_f: F### # String pattern to find in file names for the FOV number, default: F###
-  channel_first: False # channel axis first (e.g. [5,H,W]) or last (e.g. [H,W,5]) in image volumes, default: False
-  channel_dapi: -1 # channel index of the DAPI images in the image volumes (-1 will use the last channel), default: -1
-  fp_dapi_stitched: dapi_preprocessed.tif # output file name of the stitched DAPI, default: dapi_preprocessed.tif
-  n_fov: 30 # total number of FOVs
-  min_fov: 1 # smallest FOV number - usually 0 or 1
-  n_fov_h: 6 # number of FOVs tiled along vertical axis
-  n_fov_w: 5 # number of FOVs tiled along horizontal axis
-  start_corner: ul # position of first FOV - choose from ul, ur, bl, br
-  row_major: False # row major ordering of FOVs
-  z_level: 1 # which z slice to use, or --mip to use MIP
-  mip: False # take the maximum intensity projection across all Z
-  flip_ud: False # flip images up/down before stitching
+# nuclei_fovs:
+#   dir_dapi: ../../data/dataset_cosmx_nsclc/Lung5_Rep1-RawMorphologyImages # name of directory containing the DAPI FOV images
+#   ext_dapi: tif # extension of the DAPI images
+#   pattern_z: Z### # String pattern to find in the file names for the Z number, or None for no Z component
+#   pattern_f: F### # String pattern to find in file names for the FOV number
+#   channel_first: False # channel axis first (e.g. [5,H,W]) or last (e.g. [H,W,5]) in image volumes
+#   channel_dapi: -1 # channel index of the DAPI images in the image volumes
+#   fp_dapi_stitched: dapi_preprocessed.tif # output file name of the stitched DAPI
+#   n_fov: 30 # total number of FOVs
+#   min_fov: 1 # smallest FOV number - usually 0 or 1
+#   n_fov_h: 6 # number of FOVs tiled along vertical axis
+#   n_fov_w: 5 # number of FOVs tiled along horizontal axis
+#   start_corner: ul # position of first FOV - choose from ul, ur, bl, br
+#   row_major: False # row major ordering of FOVs
+#   z_level: 1 # which z slice to use, or --mip to use MIP
+#   mip: False # take the maximum intensity projection across all Z
+#   flip_ud: False # flip images up/down before stitching
 
 nuclei:
   max_height: 24000 # divide into sections if too large - maximum height to process in original resolution; default: 24000

@@ -127,7 +127,7 @@ def generate_expression_maps(config) -> str:
 
     if not os.path.exists(fp_out_filtered):
         print("Loading transcripts file")
-        fp_transcripts = dir_dataset + "/" + config.fp_transcripts
+        fp_transcripts = config.fp_transcripts
         if pathlib.Path(fp_transcripts).suffixes[-1] == ".gz":
             if ".tsv" in fp_transcripts:
                 df = pd.read_csv(fp_transcripts, sep="\t", compression="gzip")
