@@ -264,7 +264,7 @@ def make_cell_gene_mat(config):
         matrix_all_splits = np.array_split(matrix_all, n_processes)
         processes = []
 
-        fp_output = output_dir + "/" + config.fp_out_cells
+        fp_output = output_dir + "/cell_outputs_"
         col_names_coords = [
             "cell_id",
             "cell_centroid_x",
@@ -319,9 +319,6 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--fp_expr", default="cell_expr.csv", type=str, help="output file containing only cell-gene matrix"
-    )
-    parser.add_argument(
-        "--fp_out_cells", default="cell_outputs_", type=str, help="suffix of output files containing cell-gene matrix and metadata"
     )
     parser.add_argument(
         "--fp_transcripts_processed",

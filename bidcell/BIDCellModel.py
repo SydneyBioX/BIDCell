@@ -44,17 +44,33 @@ class FileParams(BaseModel):
     fp_dapi: str
     fp_transcripts: str
     fp_ref: str
+    fp_pos_markers: str
+    fp_neg_markers: str
 
-
-class FileDefufaultsPararms(BaseModel):
-    fp_affine: str = "affine.csv"
-    fp_nuclei: str = "nuclei.tif"
-    fp_rdapi: str = "dapi_resized.tif"
-    fp_transcripts_to_filter: str = "transcripts_to_filter.txt"
-    dir_out_maps: str = "expr_maps"
-    fp_out_filtered: str = "transcripts_processed.csv"
-    fp_out_gene_names: str = "all_gene_names.txt"
-    dir_patches: str = "expr_maps_input_patches_"
+    # Internal defaults
+    
+    # file of affine transformation - needed if cropping to align DAPI to transcripts
+    fp_affine: str = "affine.csv" 
+    # file name of nuclei tif file
+    fp_nuclei: str = "nuclei.tif" 
+    # file name of resized DAPI image
+    fp_rdapi: str = "dapi_resized.tif" 
+    # txt file containing names of transcripts to filter out
+    fp_transcripts_to_filter: str = "transcripts_to_filter.txt" 
+    # directory containing processed gene expression maps
+    dir_out_maps: str = "expr_maps" 
+    # filtered and xy-scaled transcripts data
+    fp_transcripts_processed: str = "transcripts_processed.csv"
+    # txt file containing list of gene names
+    fp_gene_names: str = "all_gene_names.txt" 
+    # directory prefix of transcript patches
+    dir_patches: str = "expr_maps_input_patches_" 
+    # directory for nuclei expression matrices
+    expr_dir: str = "cell_gene_matrices/nuclei"
+    # file name of nuclei expression matrices
+    fp_expr: str = "cell_expr.csv" 
+    # file path of nuclei annotations
+    fp_nuclei_anno: str = "nuclei_cell_type.h5" 
 
 
 class NucleiFovParams(BaseModel):
@@ -79,17 +95,24 @@ class NucleiFovParams(BaseModel):
 
 
 class NucleiParams(BaseModel):
-    max_height: int = 24000
-    max_width: int = 32000
-    crop_nuclei_to_ts: bool = False
-    use_cpu: bool = False
-    diameter: int | None = None
+    # divide into sections if too large - maximum height to process in original resolution
+    max_height: int = 24000 
+    # divide into sections if too large - maximum width to process in original resolution
+    max_width: int = 32000 
+    # crop nuclei to size of transcript maps
+    crop_nuclei_to_ts: bool = False 
+    # use CPU for Cellpose if no GPU available
+    use_cpu: bool = False 
+    # estimated diameter of nuclei for Cellpose
+    diameter: int | None = None 
 
 
 class TranscriptParams:
     min_qv: int = 20
-    max_height: int = 3500
-    max_width: int = 4000
+    # divide into sections if too large - height of patches
+    max_height: int = 3500 
+    # divide into sections if too large - width of patches
+    max_width: int = 4000 
     shift_to_origin: False
     x_col: str = "x_location"
     y_col: str = "y_location"
@@ -108,18 +131,11 @@ class AffineParams(BaseModel):
     global_shift_y: int = 0
 
 
-class PreannotateParams(BaseModel):
-    expr_dir: str
-    fp_expr: str
-    fp_nuclei_anno: str
-    fp_ref: str
-
-
 class CellGeneMatParams(BaseModel):
     fp_seg: str
     output_dir: str
-    max_sum_hw: int
-    fp_out_cells: str
+    # max h+w for resized segmentation to extract expressions from
+    max_sum_hw: int = 50000 
 
 
 class ModelParams(BaseModel):
@@ -130,18 +146,27 @@ class ModelParams(BaseModel):
 
 class TrainingParams(BaseModel):
     total_epochs: int = 1
-    total_steps: int = 4000
-    learning_rate: float = 0.00001
-    beta1: float = 0.9
-    beta2: float = 0.999
-    weight_decay: float = 0.0001
-    optimizer: Literal["adam", "rmsprop"] = "adam"
+    total_steps: int = 4000 
+    # learning rate of DL model
+    learning_rate: float = 0.00001 
+    # adam optimiser beta1
+    beta1: float = 0.9 
+    # adam optimiser beta2
+    beta2: float = 0.999 
+    # adam optimiser weight decay
+    weight_decay: float = 0.0001 
+    # optimiser
+    optimizer: Literal["adam", "rmsprop"] = "adam" 
     ne_weight: float = 1.0
     os_weight: float = 1.0
     cc_weight: float = 1.0
     ov_weight: float = 1.0
     pos_weight: float = 1.0
     neg_weight: float = 1.0
+    # number of training steps per model save
+    model_freq: int = 1000 
+    # number of training steps per sample save 
+    sample_freq: int = 100 
 
 
 class TestingParams(BaseModel):
@@ -150,28 +175,14 @@ class TestingParams(BaseModel):
 
 
 class PostprocessParams(BaseModel):
-    patch_size_mp: int = 1024
+    # size of patches to perform morphological processing
+    patch_size_mp: int = 1024 
     dir_id: str | None = None
 
 
-class SaveFreqParams(BaseModel):
-    model_freq: int
-    sample_freq: int
-
-
-class DataSourceParams(BaseModel):
-    expr_fp: str
-    expr_fp_ext: str
-    nuclei_fp: str
-    nuclei_types_fp: str
-    gene_names: str
-    pos_markers_fp: str
-    neg_markers_fp: str
-    ref_fp: str
-
-
-class ExperimentDirs(BaseModel):
-    load_dir: str = "last"
+class ExperimentDirs(BaseModel): 
+    # directory names for each experiment under bidcell/model/experiments
+    load_dir: str = "last" 
     model_dir: str = "models"
     test_output_dir: str = "test_output"
     samples_dir: str = "samples"
@@ -179,7 +190,6 @@ class ExperimentDirs(BaseModel):
 
 class Config(BaseModel):
     files: FileParams
-    files_defaults: FileDefufaultsPararms
     nuclei_fovs: NucleiFovParams
     nuclei: NucleiParams
     transcripts: TranscriptParams
@@ -189,8 +199,6 @@ class Config(BaseModel):
     training_params: TrainingParams
     testing_params: TestingParams
     postprocess: PostprocessParams
-    save_freqs: SaveFreqParams
-    data_sources: DataSourceParams
     experiment_dirs: ExperimentDirs
 
 
