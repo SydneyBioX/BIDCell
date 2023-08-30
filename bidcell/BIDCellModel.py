@@ -106,13 +106,13 @@ class NucleiParams(BaseModel):
     diameter: int | None = None
 
 
-class TranscriptParams:
+class TranscriptParams(BaseModel):
     min_qv: int = 20
     # divide into sections if too large - height of patches
     max_height: int = 3500
     # divide into sections if too large - width of patches
     max_width: int = 4000
-    shift_to_origin: False
+    shift_to_origin: bool = False
     x_col: str = "x_location"
     y_col: str = "y_location"
     gene_col: str = "feature_name"
