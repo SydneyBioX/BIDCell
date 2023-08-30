@@ -6,16 +6,16 @@ import os
 import yaml
 from pydantic import BaseModel
 
-from model.postprocess_predictions import postprocess_predictions
-from model.predict import predict
-from model.train import train
-from processing.cell_gene_matrix import make_cell_gene_mat
-from processing.nuclei_segmentation import segment_nuclei
-from processing.nuclei_stitch_fov import stitch_nuclei
-from processing.preannotate import preannotate
-from processing.transcript_patches import generate_patches
-from processing.transcripts import generate_expression_maps
-from model.utils.utils import get_newest_id
+from bidcell.model.postprocess_predictions import postprocess_predictions
+from bidcell.model.predict import predict
+from bidcell.model.train import train
+from bidcell.processing.cell_gene_matrix import make_cell_gene_mat
+from bidcell.processing.nuclei_segmentation import segment_nuclei
+from bidcell.processing.nuclei_stitch_fov import stitch_nuclei
+from bidcell.processing.preannotate import preannotate
+from bidcell.processing.transcript_patches import generate_patches
+from bidcell.processing.transcripts import generate_expression_maps
+from bidcell.model.utils.utils import get_newest_id
 
 
 class AttrDict(dict):
@@ -48,29 +48,28 @@ class FileParams(BaseModel):
     fp_neg_markers: str
 
     # Internal defaults
-    
     # file of affine transformation - needed if cropping to align DAPI to transcripts
-    fp_affine: str = "affine.csv" 
+    fp_affine: str = "affine.csv"
     # file name of nuclei tif file
-    fp_nuclei: str = "nuclei.tif" 
+    fp_nuclei: str = "nuclei.tif"
     # file name of resized DAPI image
-    fp_rdapi: str = "dapi_resized.tif" 
+    fp_rdapi: str = "dapi_resized.tif"
     # txt file containing names of transcripts to filter out
-    fp_transcripts_to_filter: str = "transcripts_to_filter.txt" 
+    fp_transcripts_to_filter: str = "transcripts_to_filter.txt"
     # directory containing processed gene expression maps
-    dir_out_maps: str = "expr_maps" 
+    dir_out_maps: str = "expr_maps"
     # filtered and xy-scaled transcripts data
     fp_transcripts_processed: str = "transcripts_processed.csv"
     # txt file containing list of gene names
-    fp_gene_names: str = "all_gene_names.txt" 
+    fp_gene_names: str = "all_gene_names.txt"
     # directory prefix of transcript patches
-    dir_patches: str = "expr_maps_input_patches_" 
+    dir_patches: str = "expr_maps_input_patches_"
     # directory for nuclei expression matrices
     expr_dir: str = "cell_gene_matrices/nuclei"
     # file name of nuclei expression matrices
-    fp_expr: str = "cell_expr.csv" 
+    fp_expr: str = "cell_expr.csv"
     # file path of nuclei annotations
-    fp_nuclei_anno: str = "nuclei_cell_type.h5" 
+    fp_nuclei_anno: str = "nuclei_cell_type.h5"
 
 
 class NucleiFovParams(BaseModel):
@@ -96,23 +95,23 @@ class NucleiFovParams(BaseModel):
 
 class NucleiParams(BaseModel):
     # divide into sections if too large - maximum height to process in original resolution
-    max_height: int = 24000 
+    max_height: int = 24000
     # divide into sections if too large - maximum width to process in original resolution
-    max_width: int = 32000 
+    max_width: int = 32000
     # crop nuclei to size of transcript maps
-    crop_nuclei_to_ts: bool = False 
+    crop_nuclei_to_ts: bool = False
     # use CPU for Cellpose if no GPU available
-    use_cpu: bool = False 
+    use_cpu: bool = False
     # estimated diameter of nuclei for Cellpose
-    diameter: int | None = None 
+    diameter: int | None = None
 
 
 class TranscriptParams:
     min_qv: int = 20
     # divide into sections if too large - height of patches
-    max_height: int = 3500 
+    max_height: int = 3500
     # divide into sections if too large - width of patches
-    max_width: int = 4000 
+    max_width: int = 4000
     shift_to_origin: False
     x_col: str = "x_location"
     y_col: str = "y_location"
@@ -135,7 +134,7 @@ class CellGeneMatParams(BaseModel):
     fp_seg: str
     output_dir: str
     # max h+w for resized segmentation to extract expressions from
-    max_sum_hw: int = 50000 
+    max_sum_hw: int = 50000
 
 
 class ModelParams(BaseModel):
@@ -146,17 +145,17 @@ class ModelParams(BaseModel):
 
 class TrainingParams(BaseModel):
     total_epochs: int = 1
-    total_steps: int = 4000 
+    total_steps: int = 4000
     # learning rate of DL model
-    learning_rate: float = 0.00001 
+    learning_rate: float = 0.00001
     # adam optimiser beta1
-    beta1: float = 0.9 
+    beta1: float = 0.9
     # adam optimiser beta2
-    beta2: float = 0.999 
+    beta2: float = 0.999
     # adam optimiser weight decay
-    weight_decay: float = 0.0001 
+    weight_decay: float = 0.0001
     # optimiser
-    optimizer: Literal["adam", "rmsprop"] = "adam" 
+    optimizer: Literal["adam", "rmsprop"] = "adam"
     ne_weight: float = 1.0
     os_weight: float = 1.0
     cc_weight: float = 1.0
@@ -164,9 +163,9 @@ class TrainingParams(BaseModel):
     pos_weight: float = 1.0
     neg_weight: float = 1.0
     # number of training steps per model save
-    model_freq: int = 1000 
-    # number of training steps per sample save 
-    sample_freq: int = 100 
+    model_freq: int = 1000
+    # number of training steps per sample save
+    sample_freq: int = 100
 
 
 class TestingParams(BaseModel):
@@ -176,13 +175,13 @@ class TestingParams(BaseModel):
 
 class PostprocessParams(BaseModel):
     # size of patches to perform morphological processing
-    patch_size_mp: int = 1024 
+    patch_size_mp: int = 1024
     dir_id: str | None = None
 
 
-class ExperimentDirs(BaseModel): 
+class ExperimentDirs(BaseModel):
     # directory names for each experiment under bidcell/model/experiments
-    load_dir: str = "last" 
+    load_dir: str = "last"
     model_dir: str = "models"
     test_output_dir: str = "test_output"
     samples_dir: str = "samples"
@@ -194,7 +193,6 @@ class Config(BaseModel):
     nuclei: NucleiParams
     transcripts: TranscriptParams
     affine: AffineParams
-    preannotate: PreannotateParams
     model_params: ModelParams
     training_params: TrainingParams
     testing_params: TestingParams
@@ -275,7 +273,7 @@ class BIDCellModel:
 
 
 if __name__ == "__main__":
-    model = BIDCellModel()
+    model = BIDCellModel("params/params_xenium_breast1.yaml")
     model.preprocess()
     model.train()
     model.predict()
