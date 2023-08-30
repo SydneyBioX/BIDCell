@@ -15,6 +15,7 @@ from processing.nuclei_stitch_fov import stitch_nuclei
 from processing.preannotate import preannotate
 from processing.transcript_patches import generate_patches
 from processing.transcripts import generate_expression_maps
+from model.utils.utils import get_newest_id
 
 
 class AttrDict(dict):
@@ -221,7 +222,7 @@ class BIDCellModel:
         predict(self.config)
         # TODO: figure out the most recent experiment. get_lastest_id()
         if self.config.postprocess.dir_id == "last":
-            self.config.postprocess.dir_id = get_lastest_id()
+            self.config.postprocess.dir_id = get_newest_id()
         postprocess_predictions(self.config)
         # TODO: Figure out final cell_gene_matrix call
 
