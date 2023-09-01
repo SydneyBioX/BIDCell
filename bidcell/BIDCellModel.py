@@ -1,9 +1,6 @@
 """BIDCellModel class module"""
 from typing import Optional
 from multiprocessing import cpu_count
-import os
-
-import yaml
 
 from .model.postprocess_predictions import postprocess_predictions
 from .model.predict import predict
@@ -56,7 +53,7 @@ class BIDCellModel:
     def make_cell_gene_mat(self, is_cell=True):
         make_cell_gene_mat(self.config, is_cell)
 
-    def preannotate():
+    def preannotate(self):
         preannotate(self.config)
 
     def train(self) -> None:
