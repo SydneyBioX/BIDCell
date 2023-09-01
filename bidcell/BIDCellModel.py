@@ -51,11 +51,13 @@ class BIDCellModel:
 
     def preprocess(self) -> None:
         if self.config.nuclei_fovs.stitch_nuclei_fovs:
-            self.config.files.fp_stitched = stitch_nuclei(self.config)
-        self.config["fp_rdapi"] = segment_nuclei(self.config)
-        self.config["fp_maps"] = generate_expression_maps(self.config)
+            stitch_nuclei(self.config)
+        segment_nuclei(self.config)
+        generate_expression_maps(self.config)
         generate_patches(self.config)
-        make_cell_gene_mat(self.config) # TODO: set config.cgm_params.only_expr (True for nuclei)
+        make_cell_gene_mat(
+            self.config, is_cell=True
+        )  # TODO: set config.cgm_params.only_expr (True for nuclei)
         preannotate(self.config)
         # TODO: Which information do the end users need from the process?
 
@@ -129,10 +131,3 @@ class BIDCellModel:
         -------
         str"""
         return "Not implemented yet!"
-
-
-if __name__ == "__main__":
-    model = BIDCellModel("params/params_xenium_breast1.yaml")
-    model.preprocess()
-    model.train()
-    model.predict()
