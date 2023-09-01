@@ -401,7 +401,7 @@ def postprocess_predictions(config):
         seg_final = np.where(checked_split > 0, checked_split, seg_final)
         os.remove(fp)
 
-    # print(len(np.unique(seg_final)))
+    seg_final = np.where(nuclei_img > 0, nuclei_img, seg_final)
 
     fp_dir = dir_id + "epoch_%d_step_%d_connected" % (config.testing_params.test_epoch, config.testing_params.test_step)
     fp_output_seg = fp_dir + ".tif"
