@@ -8,13 +8,17 @@ import natsort
 import numpy as np
 from tqdm import tqdm
 
+from ..config import Config, load_config
 
-def generate_patches(config):
+
+def generate_patches(config: Config):
     """
     Divides transcriptomic maps of all genes into patches for input to the CNN
 
     """
-    dir_dataset = os.path.join(config.files.data_dir, config.files.dataset, config.files.dir_out_maps)
+    dir_dataset = os.path.join(
+        config.files.data_dir, config.files.dataset, config.files.dir_out_maps
+    )
 
     patch_size = config.model_params.patch_size
     shift = [0, int(patch_size / 2)]
@@ -94,30 +98,9 @@ def generate_patches(config):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    # parser.add_argument(
-    #     "--data_dir", default="../../data/", type=str, help="root data directory"
-    # )
-    # parser.add_argument(
-    #     "--dataset",
-    #     default="dataset_merscope_melanoma2",
-    #     type=str,
-    #     help="name of dataset",
-    # )
-    # parser.add_argument(
-    #     "--dir_out_maps",
-    #     default="expr_maps",
-    #     type=str,
-    #     help="directory containing processed gene expression maps",
-    # )
-    # parser.add_argument(
-    #     "--dir_patches",
-    #     default="expr_maps_input_patches_",
-    #     type=str,
-    #     help="directory prefix of saved patches",
-    # )
-    # parser.add_argument(
-    #     "--patch_size", default=64, type=int, help="size of patches to crop"
-    # )
+    parser.add_argument("--config_dir", type=str, help="path to config")
 
-    config = parser.parse_args()
+    args = parser.parse_args()
+    config = load_config(args.config_dir)
+
     generate_patches(config)

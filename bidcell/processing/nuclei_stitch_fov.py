@@ -3,12 +3,12 @@ import glob
 import os
 import re
 import sys
-from typing import Union
 
 import natsort
 import numpy as np
 import tifffile
 from PIL import Image
+from ..config import Config, load_config
 
 
 def check_pattern(string, pattern):
@@ -66,7 +66,7 @@ def read_dapi(fp, channel_first, channel_dapi):
     return dapi
 
 
-def stitch_nuclei(config: Union[argparse.ArgumentParser, dict]) -> str:
+def stitch_nuclei(config: Config):
     dir_dataset = os.path.join(config.files.data_dir, config.files.dataset)
 
     if not config.nuclei_fovs.dir_dapi:
@@ -190,99 +190,16 @@ def stitch_nuclei(config: Union[argparse.ArgumentParser, dict]) -> str:
     fp_output = dir_dataset + "/" + config.nuclei_fovs.fp_dapi_stitched
     tifffile.imwrite(fp_output, stitched, photometric="minisblack")
     print(f"Saved {fp_output}")
-    return fp_output
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    # parser.add_argument(
-    #     "--data_dir", default="../../data/", type=str, help="root data directory"
-    # )
-    # parser.add_argument(
-    #     "--dataset", default="dataset_cosmx_nsclc", type=str, help="name of dataset"
-    # )
-    # parser.add_argument(
-    #     "--dir_dapi",
-    #     default="Lung5_Rep1-RawMorphologyImages",
-    #     type=str,
-    #     help="name of directory containing the DAPI FOV images",
-    # )
-    # parser.add_argument(
-    #     "--ext_dapi", default="tif", type=str, help="extension of the DAPI images"
-    # )
-    # parser.add_argument(
-    #     "--pattern_z",
-    #     default="Z###",
-    #     type=str,
-    #     help="String pattern to find in the file names for the Z number, or None for no Z component",
-    # )
-    # parser.add_argument(
-    #     "--pattern_f",
-    #     default="F###",
-    #     type=str,
-    #     help="String pattern to find in file names for the FOV number",
-    # )
-    # parser.add_argument(
-    #     "--channel_first",
-    #     action="store_true",
-    #     help="channel axis first (e.g. [5,H,W]) or last (e.g. [H,W,5]) in image volumes",
-    # )
-    # parser.set_defaults(channel_first=False)  # TODO: What is this?
-    # parser.add_argument(
-    #     "--channel_dapi",
-    #     default="-1",
-    #     type=int,
-    #     help="channel index of the DAPI images in the image volumes",
-    # )
-    # parser.add_argument(
-    #     "--fp_dapi_stitched",
-    #     default="dapi_preprocessed.tif",
-    #     type=str,
-    #     help="output file name of the stitched DAPI",
-    # )
-    # parser.add_argument("--n_fov", default=30, type=int, help="total number of FOVs")
-    # parser.add_argument(
-    #     "--min_fov", default=1, type=int, help="smallest FOV number - usually 0 or 1"
-    # )
-    # parser.add_argument(
-    #     "--n_fov_h",
-    #     default=6,
-    #     type=int,
-    #     help="number of FOVs tiled along vertical axis",
-    # )
-    # parser.add_argument(
-    #     "--n_fov_w",
-    #     default=5,
-    #     type=int,
-    #     help="number of FOVs tiled along horizontal axis",
-    # )
-    # parser.add_argument(
-    #     "--start_corner",
-    #     default="ul",
-    #     type=str,
-    #     help="position of first FOV - choose from ul, ur, bl, br",
-    # )
-    # parser.add_argument(
-    #     "--row_major", action="store_true", help="row major ordering of FOVs"
-    # )
-    # parser.set_defaults(row_major=False)
-    # parser.add_argument(
-    #     "--z_level",
-    #     default=1,
-    #     type=int,
-    #     help="which z slice to use, or --mip to use MIP",
-    # )
-    # parser.add_argument(
-    #     "--mip",
-    #     action="store_true",
-    #     help="take the maximum intensity projection across all Z",
-    # )
-    # parser.set_defaults(mip=False)
-    # parser.add_argument(
-    #     "--flip_ud", action="store_true", help="flip images up/down before stitching"
-    # )
-    # parser.set_defaults(flip_ud=False)
+    parser.add_argument(
+        "--config_dir", type=str, help="path to config"
+    )
 
-    config = parser.parse_args()
+    args = parser.parse_args()
+    config = load_config(args.config_dir)
+
     stitch_nuclei(config)

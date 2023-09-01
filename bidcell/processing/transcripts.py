@@ -16,6 +16,7 @@ import tifffile
 from tqdm import tqdm
 
 from .utils import get_n_processes, get_patches_coords
+from ..config import Config, load_config
 
 
 def process_gene_chunk(
@@ -93,7 +94,7 @@ def stitch_patches(dir_patches, fp_pattern):
     )
 
 
-def generate_expression_maps(config) -> str:
+def generate_expression_maps(config: Config):
     """
     Generates transcript expression maps from transcripts.csv.gz, which contains transcript data with locations.
     Example file for Xenium:
@@ -324,148 +325,15 @@ def generate_expression_maps(config) -> str:
     print("Saved all maps")
 
     stitch_patches(dir_out_maps, "/all_genes_sum_*.tif")
-    return dir_out_maps
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    # parser.add_argument(
-    #     "--data_dir", default="../../data/", type=str, help="root data directory"
-    # )
-    # parser.add_argument(
-    #     "--dataset",
-    #     default="dataset_merscope_melanoma2",
-    #     type=str,
-    #     help="name of dataset",
-    # )
-    # parser.add_argument(
-    #     "--n_processes",
-    #     default=None,
-    #     type=int,
-    #     help="number of CPUs for multiprocessing",
-    # )
-    # parser.add_argument(
-    #     "--fp_transcripts",
-    #     default="HumanMelanomaPatient2_detected_transcripts.csv",
-    #     type=str,
-    #     help="name of transcripts file",
-    # )
-    # parser.add_argument(
-    #     "--min_qv",
-    #     default=20,
-    #     type=int,
-    #     help="for Xenium - transcripts with qv below this value will be filtered out",
-    # )
-    # parser.add_argument(
-    #     "--fp_transcripts_to_filter",
-    #     default="transcripts_to_filter.txt",
-    #     type=str,
-    #     help="txt file containing names of transcripts to filter out",
-    # )
-    # parser.add_argument(
-    #     "--dir_out_maps",
-    #     default="expr_maps",
-    #     type=str,
-    #     help="directory containing processed gene expression maps",
-    # )
-    # parser.add_argument(
-    #     "--fp_transcripts_processed",
-    #     default="transcripts_processed.csv",
-    #     type=str,
-    #     help="processed transcripts file",
-    # )
-    # parser.add_argument(
-    #     "--fp_gene_names",
-    #     default="all_gene_names.txt",
-    #     type=str,
-    #     help="txt file containing names of all the genes",
-    # )
-    # parser.add_argument(
-    #     "--scale_ts_x",
-    #     default=1.0,
-    #     type=float,
-    #     help="conversion between transcript location values and segmentation pixel resolution along width",
-    # )
-    # parser.add_argument(
-    #     "--scale_ts_y",
-    #     default=1.0,
-    #     type=float,
-    #     help="conversion between transcript location values and segmentation pixel resolution along height",
-    # )
-    # parser.add_argument(
-    #     "--max_height",
-    #     default=3500,
-    #     type=int,
-    #     help="divide into sections if too large - height of patches",
-    # )
-    # parser.add_argument(
-    #     "--max_width",
-    #     default=4000,
-    #     type=int,
-    #     help="divide into sections if too large - width of patches",
-    # )
-    # parser.add_argument(
-    #     "--fp_nuclei",
-    #     default="nuclei.tif",
-    #     type=str,
-    #     help="file name of nuclei tif file",
-    # )
-    # parser.add_argument(
-    #     "--fp_affine",
-    #     default="affine.csv",
-    #     type=str,
-    #     help="file of affine transformation",
-    # )
-    # parser.add_argument(
-    #     "--shift_to_origin",
-    #     action="store_true",
-    #     help="shift to origin, making min(x) and min(y) (0,0)",
-    # )
-    # parser.set_defaults(shift_to_origin=False)
+    parser.add_argument(
+        "--config_dir", type=str, help="path to config"
+    )
 
-    # parser.add_argument(
-    #     "--global_shift_x",
-    #     default=0,
-    #     type=int,
-    #     help="additional adjustment to align transcripts to DAPI in target pixels along image width",
-    # )
-    # parser.add_argument(
-    #     "--global_shift_y",
-    #     default=0,
-    #     type=int,
-    #     help="additional adjustment to align transcripts to DAPI in target pixels along image height",
-    # )
-    # parser.add_argument(
-    #     "--x_col",
-    #     default="global_x",
-    #     type=str,
-    #     help="name of x location column in transcripts file",
-    # )
-    # parser.add_argument(
-    #     "--y_col",
-    #     default="global_y",
-    #     type=str,
-    #     help="name of y location column in transcripts file",
-    # )
-    # parser.add_argument(
-    #     "--gene_col",
-    #     default="gene",
-    #     type=str,
-    #     help="name of genes column in transcripts file",
-    # )
-    # parser.add_argument(
-    #     "--fp_selected_genes",
-    #     default=None,
-    #     type=str,
-    #     help="name of file containing genes to use, eg selected_genes.txt",
-    # )
-    # parser.add_argument(
-    #     "--counts_col",
-    #     default=None,
-    #     type=str,
-    #     help="name of counts column in transcripts file, eg MIDCounts",
-    # )
-
-    config = parser.parse_args()
+    args = parser.parse_args()
+    config = load_config(args.config_dir)
     generate_expression_maps(config)

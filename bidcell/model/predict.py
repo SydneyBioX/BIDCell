@@ -25,6 +25,8 @@ from .utils.utils import (
     sorted_alphanumeric,
 )
 
+from ..config import load_config, Config
+
 
 def predict(config):
 
@@ -306,26 +308,13 @@ def fill_grid(config, dir_id):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    # parser.add_argument(
-    #     "--config_file",
-    #     default="configs/config.json",
-    #     type=str,
-    #     help="config file path",
-    # )
-    # parser.add_argument(
-    #     "--test_epoch",
-    #     default=1,
-    #     type=int,
-    #     help="test model from this epoch, -1 for last, None for all",
-    # )
-    # parser.add_argument(
-    #     "--test_step", default=4000, type=int, help="test model from this step"
-    # )
+    parser.add_argument(
+        "--config_dir", type=str, help="path to config"
+    )
 
-    config = parser.parse_args()
+    args = parser.parse_args()
+    config = load_config(args.config_dir)
 
     test_output_dir = predict(config)
 
-    # test_output_dir = 'experiments/2023_July_06_09_41_41/test_output'
-
-    fill_grid(config, test_output_dir)
+    fill_grid(config, test_output_dir)  # TODO: why fill gird and not predict!

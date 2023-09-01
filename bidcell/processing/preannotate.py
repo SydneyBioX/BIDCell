@@ -12,6 +12,7 @@ import pandas as pd
 from scipy.stats import spearmanr
 
 from .utils import get_n_processes
+from ..config import Config, load_config
 
 np.seterr(divide="ignore", invalid="ignore")
 
@@ -80,7 +81,7 @@ def process_chunk_corr(matrix, dir_output, sc_expr, sc_labels, n_atlas_types):
     )
 
 
-def preannotate(config):
+def preannotate(config: Config):
     dir_dataset = os.path.join(config.files.data_dir, config.files.dataset)
     expr_dir = os.path.join(dir_dataset, config.dir_expr_nuclei)
 
@@ -158,42 +159,11 @@ def preannotate(config):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    # parser.add_argument(
-    #     "--data_dir", default="../../data/", type=str, help="root data directory"
-    # )
-    # parser.add_argument(
-    #     "--dataset", default="dataset_xenium_breast1", type=str, help="name of dataset"
-    # )
-    # parser.add_argument(
-    #     "--expr_dir",
-    #     default="cell_gene_matrices/nuclei",
-    #     type=str,
-    #     help="directory to load nuclei expression matrices from",
-    # )
-    # parser.add_argument(
-    #     "--fp_expr",
-    #     default="cell_expr.csv",
-    #     type=str,
-    #     help="file name of nuclei expression matrices",
-    # )
-    # parser.add_argument(
-    #     "--fp_nuclei_anno",
-    #     default="nuclei_cell_type.h5",
-    #     type=str,
-    #     help="file name to save nuclei annotations",
-    # )
-    # parser.add_argument(
-    #     "--fp_ref",
-    #     default="../../data/sc_references/sc_breast.csv",
-    #     type=str,
-    #     help="single cell reference",
-    # )
-    # parser.add_argument(
-    #     "--n_processes",
-    #     default=None,
-    #     type=int,
-    #     help="number of CPUs for multiprocessing",
-    # )
+    parser.add_argument(
+        "--config_dir", type=str, help="path to config"
+    )
 
-    config = parser.parse_args()
+    args = parser.parse_args()
+    config = load_config(args.config_dir)
+
     preannotate(config)

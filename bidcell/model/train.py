@@ -24,9 +24,10 @@ from .utils.utils import (
     make_dir,
     save_fig_outputs,
 )
+from ..config import load_config, Config
 
 
-def train(config):
+def train(config: Config):
 
     logging.basicConfig(
         format="%(asctime)s %(levelname)s %(message)s",
@@ -300,24 +301,11 @@ def train(config):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    # parser.add_argument(
-    #     "--config_file",
-    #     default="configs/config.json",
-    #     type=str,
-    #     help="config file path",
-    # )
-    # parser.add_argument(
-    #     "--resume_epoch",
-    #     default=None,
-    #     type=int,
-    #     help="resume training from this epoch, set to None for new training",
-    # )
-    # parser.add_argument(
-    #     "--resume_step", default=0, type=int, help="resume training from this step"
-    # )
-    # parser.add_argument(
-    #     "--total_steps", default=6000, type=int, help="total number of steps to train"
-    # )
+    parser.add_argument(
+        "--config_dir", type=str, help="path to config"
+    )
 
-    config = parser.parse_args()
+    args = parser.parse_args()
+    config = load_config(args.config_dir)
+
     train(config)

@@ -11,8 +11,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import tifffile
 from scipy import ndimage as ndi
-
-# from bidcell.processing.utils import get_n_processes
+from ..config import load_config, Config
 
 
 def get_n_processes(n_processes):
@@ -332,7 +331,7 @@ def process_check_splits(config, dir_id, nuclei_img, seg_final, chunk_ids):
     )
 
 
-def postprocess_predictions(config):
+def postprocess_predictions(config: Config):
     dir_id = "experiments/" + get_exp_dir(config) + "/test_output/"
 
     pred_fp = dir_id + "epoch_%d_step_%d.tif" % (config.testing_params.test_epoch, config.testing_params.test_step)
@@ -414,51 +413,11 @@ def postprocess_predictions(config):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    # parser.add_argument(
-    #     "--data_dir", default="../../data/", type=str, help="root data directory"
-    # )
-    # parser.add_argument(
-    #     "--dataset",
-    #     default="dataset_merscope_melanoma2",
-    #     type=str,
-    #     help="name of dataset",
-    # )
-    # parser.add_argument(
-    #     "--dir_id",
-    #     default="last",
-    #     type=str,
-    #     help="name of experiment directory - either date format (e.g., 2023_08_23_06_45_38) or set to last for most recent",
-    # )
-    # parser.add_argument(
-    #     "--epoch",
-    #     default=1,
-    #     type=int,
-    #     help="the epoch of the model that generated the predictions",
-    # )
-    # parser.add_argument(
-    #     "--step",
-    #     default=4000,
-    #     type=int,
-    #     help="the step of the model that generated the prediction",
-    # )
-    # parser.add_argument(
-    #     "--nucleus_fp",
-    #     default="nuclei.tif",
-    #     type=str,
-    #     help="file path of nuclei .tif file",
-    # )
-    # parser.add_argument(
-    #     "--patch_size_mp",
-    #     default=1024,
-    #     type=int,
-    #     help="size of patches to perform morphological processing",
-    # )
-    # parser.add_argument(
-    #     "--n_processes",
-    #     default=None,
-    #     type=int,
-    #     help="number of CPUs for multiprocessing",
-    # )
+    parser.add_argument(
+        "--config_dir", type=str, help="path to config"
+    )
 
-    config = parser.parse_args()
+    args = parser.parse_args()
+    config = load_config(args.config_dir)
+
     postprocess_predictions(config)

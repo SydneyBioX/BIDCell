@@ -11,6 +11,7 @@ import tifffile
 from tqdm import tqdm
 
 from .utils import get_n_processes, get_patches_coords
+from ..config import Config, load_config
 
 np.seterr(divide="ignore", invalid="ignore")
 
@@ -89,7 +90,7 @@ def read_expr_csv(fp):
         sys.exit(f"Cannot read {fp}")
 
 
-def make_cell_gene_mat(config):
+def make_cell_gene_mat(config: Config, is_cell: bool):
     dir_dataset = os.path.join(config.files.data_dir, config.files.dataset)
     output_dir = os.path.join(dir_dataset, config.files.dir_output_matrices)
     fp_transcripts_processed = os.path.join(
@@ -296,95 +297,12 @@ def make_cell_gene_mat(config):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    # parser.add_argument(
-    #     "--data_dir", default="../../data/", type=str, help="root data directory"
-    # )
-    # parser.add_argument(
-    #     "--dataset",
-    #     default="dataset_merscope_melanoma2",
-    #     type=str,
-    #     help="name of dataset",
-    # )
-    # parser.add_argument(
-    #     "--fp_seg",
-    #     default="bidcell/model/experiments/2023_July_06_09_41_41/test_output/epoch_1_step_4000_connected.tif",
-    #     type=str,
-    #     help="segmentation tif file",
-    # )
-    # parser.add_argument(
-    #     "--output_dir",
-    #     default="cell_gene_matrices/2023_July_06_09_41_41",
-    #     type=str,
-    #     help="output directory of cell-gene matrix and cell metadata",
-    # )
-    # parser.add_argument(
-    #     "--fp_expr", default="cell_expr.csv", type=str, help="output file containing only cell-gene matrix"
-    # )
-    # parser.add_argument(
-    #     "--fp_transcripts_processed",
-    #     default="transcripts_processed.csv",
-    #     type=str,
-    #     help="filtered and xy-scaled transcripts data",
-    # )
-    # parser.add_argument(
-    #     "--fp_gene_names",
-    #     default="all_gene_names.txt",
-    #     type=str,
-    #     help="txt file containing list of gene names",
-    # )
-    # parser.add_argument(
-    #     "--fp_affine",
-    #     default="affine.csv",
-    #     type=str,
-    #     help="csv file containing affine transformation of transcript maps",
-    # )
-    # parser.add_argument(
-    #     "--scale_pix_x",
-    #     default=0.107999132774,
-    #     type=float,
-    #     help="original pixel resolution to segmentation pixel resolution (e.g., microns) along image width",
-    # )
-    # parser.add_argument(
-    #     "--scale_pix_y",
-    #     default=0.107997631125,
-    #     type=float,
-    #     help="original pixel resolution to segmentation pixel resolution (e.g., microns) along image height",
-    # )
-    # parser.add_argument(
-    #     "--max_sum_hw",
-    #     default=50000,
-    #     type=int,
-    #     help="max h+w for resized segmentation to extract expressions from",
-    # )
-    # parser.add_argument(
-    #     "--n_processes",
-    #     default=None,
-    #     type=int,
-    #     help="number of CPUs for multiprocessing",
-    # )
-    # parser.add_argument(
-    #     "--x_col",
-    #     default="global_x",
-    #     type=str,
-    #     help="name of x location column in transcripts file",
-    # )
-    # parser.add_argument(
-    #     "--y_col",
-    #     default="global_y",
-    #     type=str,
-    #     help="name of y location column in transcripts file",
-    # )
-    # parser.add_argument(
-    #     "--gene_col",
-    #     default="gene",
-    #     type=str,
-    #     help="name of genes column in transcripts file",
-    # )
-    # parser.add_argument(
-    #     "--only_expr",
-    #     action="store_true",
-    #     help="only get cell expressions, no additional info",
-    # )
-    # parser.set_defaults(only_expr=False)
+    parser.add_argument(
+        "--config_dir", type=str, help="path to config"
+        "--is_cell", type=bool, help="whether to segment cells or nuclei"
+    )
 
-    config = parser.parse_args()
+    args = parser.parse_args()
+    config = load_config(args.config_dir)
+
+    make_cell_gene_mat(config, args.is_cell)
