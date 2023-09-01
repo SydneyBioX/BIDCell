@@ -1,6 +1,9 @@
+import os
 from pydantic import BaseModel
 from typing import Literal
 from pathlib import Path
+
+import yaml
 
 
 class FileParams(BaseModel):
@@ -181,3 +184,27 @@ class Config(BaseModel):
     postprocess: PostprocessParams
     experiment_dirs: ExperimentDirs = ExperimentDirs()
     cgm_params: CellGeneMatParams
+
+
+def load_config(path: str) -> Config:
+    if not os.path.exists(path):
+        FileNotFoundError(
+            f"Config file at {path} could not be found. Please check if the filepath is valid."
+        )
+
+    with open(path) as config_file:
+        try:
+            config = yaml.safe_load(config_file)
+        except Exception:
+            raise ValueError(
+                "The inputted YAML config was invalid, try looking at the example config."
+            )
+
+    if not isinstance(config, dict):
+        raise ValueError(
+            "The inputted YAML config was invalid, try looking at the example config."
+        )
+
+    # validate the configuration schema
+    config = Config(**config)
+    return config

@@ -15,34 +15,14 @@ from .processing.preannotate import preannotate
 from .processing.transcript_patches import generate_patches
 from .processing.transcripts import generate_expression_maps
 from .model.utils.utils import get_newest_id
-from .config import Config
-
-
-class AttrDict(dict):
-    """Dictionary subclass whose entries can be accessed by attributes
-    (as well as normally).
-    """
-
-    def __init__(self, *args, **kwargs):
-        def from_nested_dict(data):
-            """Construct nested AttrDicts from nested dictionaries."""
-            if not isinstance(data, dict):
-                return data
-            else:
-                return AttrDict({key: from_nested_dict(data[key]) for key in data})
-
-        super(AttrDict, self).__init__(*args, **kwargs)
-        self.__dict__ = self
-
-        for key in self.keys():
-            self[key] = from_nested_dict(self[key])
+from .config import load_config
 
 
 class BIDCellModel:
     """The BIDCellModel class, which provides an interface for preprocessing, training and predicting all the cell types for a datset."""
 
     def __init__(self, config_file: str, n_processes: Optional[int] = None) -> None:
-        self.config = self.__parse_config(config_file)
+        self.config = load_config(config_file)
 
         if n_processes is None:
             self.n_processes = cpu_count()
@@ -92,30 +72,6 @@ class BIDCellModel:
         # config.files.dir_output_matrices
         # config.files.fp_seg
         # config.cgm_params.only_expr (False for cells)
-
-    def __parse_config(self, config_file_path: str) -> Config:
-        if not os.path.exists(config_file_path):
-            FileNotFoundError(
-                f"Config file at {config_file_path} could not be found. Please check if the filepath is valid."
-            )
-
-        with open(config_file_path) as config_file:
-            try:
-                config = yaml.safe_load(config_file)
-            except Exception:
-                ValueError(
-                    "The inputted YAML config was invalid, try looking at the example config."
-                )
-
-        if not isinstance(config, dict):
-            ValueError(
-                "The inputted YAML config was invalid, try looking at the example config."
-            )
-
-        # validate the configuration schema
-        config = Config(**config)
-
-        return config
 
     def set_config() -> None:
         # TODO: Document all config options and allow setting single or
