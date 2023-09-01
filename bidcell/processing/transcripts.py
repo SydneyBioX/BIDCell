@@ -108,26 +108,26 @@ def generate_expression_maps(config) -> str:
 
     """
 
-    dir_dataset = os.path.join(config.data_dir, config.dataset)
-    dir_out_maps = dir_dataset + "/" + config.dir_out_maps
+    dir_dataset = os.path.join(config.files.data_dir, config.files.dataset)
+    dir_out_maps = dir_dataset + "/" + config.files.dir_out_maps
     if not os.path.exists(dir_out_maps):
         os.makedirs(dir_out_maps)
 
-    fp_transcripts_processed = dir_dataset + "/" + config.fp_transcripts_processed
+    fp_transcripts_processed = dir_dataset + "/" + config.files.fp_transcripts_processed
 
     # Names to filter out
-    fp_transcripts_to_filter = os.path.join(config.data_dir, config.fp_transcripts_to_filter)
+    fp_transcripts_to_filter = os.path.join(config.files.data_dir, config.files.fp_transcripts_to_filter)
     with open(fp_transcripts_to_filter) as file:
         transcripts_to_filter = [line.rstrip() for line in file]
 
     # Column names in the transcripts csv
-    x_col = config.x_col
-    y_col = config.y_col
-    gene_col = config.gene_col
+    x_col = config.transcript_params.x_col
+    y_col = config.transcript_params.y_col
+    gene_col = config.transcript_params.gene_col
 
     if not os.path.exists(fp_transcripts_processed):
         print("Loading transcripts file")
-        fp_transcripts = config.fp_transcripts
+        fp_transcripts = config.files.fp_transcripts
         if pathlib.Path(fp_transcripts).suffixes[-1] == ".gz":
             if ".tsv" in fp_transcripts:
                 df = pd.read_csv(fp_transcripts, sep="\t", compression="gzip")
@@ -143,36 +143,36 @@ def generate_expression_maps(config) -> str:
         print("Filtering transcripts")
         if "qv" in df.columns:
             df = df[
-                (df["qv"] >= config.min_qv)
+                (df["qv"] >= config.transcript_params.min_qv)
                 & (~df[gene_col].str.startswith(tuple(transcripts_to_filter)))
             ]
         else:
             df = df[(~df[gene_col].str.startswith(tuple(transcripts_to_filter)))]
 
-        if config.fp_selected_genes is not None:
-            with open(dir_dataset + "/" + config.fp_selected_genes) as file:
+        if config.files.fp_selected_genes is not None:
+            with open(dir_dataset + "/" + config.files.fp_selected_genes) as file:
                 selected_genes = [line.rstrip() for line in file]
             df = df[(df[gene_col].isin(selected_genes))]
 
         # Scale
         print(df[x_col].min(), df[x_col].max(), df[y_col].min(), df[y_col].max())
-        df[x_col] = df[x_col].mul(config.scale_ts_x)
-        df[y_col] = df[y_col].mul(config.scale_ts_y)
+        df[x_col] = df[x_col].mul(config.affine_params.scale_ts_x)
+        df[y_col] = df[y_col].mul(config.affine_params.scale_ts_y)
         print(df[x_col].min(), df[x_col].max(), df[y_col].min(), df[y_col].max())
 
         # Shift
         min_x = df[x_col].min()
         min_y = df[y_col].min()
-        if config.shift_to_origin:
+        if config.transcript_params.shift_to_origin:
             with pd.option_context("mode.chained_assignment", None):
-                df.loc[:, x_col] = df[x_col] - min_x + config.global_shift_x
-                df.loc[:, y_col] = df[y_col] - min_y + config.global_shift_y
+                df.loc[:, x_col] = df[x_col] - min_x + config.affine_params.global_shift_x
+                df.loc[:, y_col] = df[y_col] - min_y + config.affine_params.global_shift_y
 
         size_x = df[x_col].max() + 1
         size_y = df[y_col].max() + 1
 
         # Write transform parameters to file
-        fp_affine = os.path.join(dir_dataset, config.fp_affine)
+        fp_affine = os.path.join(dir_dataset, config.files.fp_affine)
         params = [
             "scale_ts_x",
             "scale_ts_y",
@@ -185,15 +185,15 @@ def generate_expression_maps(config) -> str:
             "origin",
         ]
         vals = [
-            config.scale_ts_x,
-            config.scale_ts_y,
+            config.affine_params.scale_ts_x,
+            config.affine_params.scale_ts_y,
             min_x,
             min_y,
             size_x,
             size_y,
-            config.global_shift_x,
-            config.global_shift_y,
-            config.shift_to_origin,
+            config.affine_params.global_shift_x,
+            config.affine_params.global_shift_y,
+            config.transcript_params.shift_to_origin,
         ]
         with open(fp_affine, "w") as f:
             writer = csv.writer(f, delimiter="\t")
@@ -223,7 +223,7 @@ def generate_expression_maps(config) -> str:
     gene_names = df[gene_col].unique()
     print("%d unique genes" % len(gene_names))
     gene_names = natsort.natsorted(gene_names)
-    with open(dir_dataset + "/" + config.fp_gene_names, "w") as f:
+    with open(dir_dataset + "/" + config.files.fp_gene_names, "w") as f:
         for line in gene_names:
             f.write(f"{line}\n")
 
@@ -231,7 +231,7 @@ def generate_expression_maps(config) -> str:
     total_height_t = int(np.ceil(df[y_col].max())) + 1
     total_width_t = int(np.ceil(df[x_col].max())) + 1
 
-    fp_nuclei = os.path.join(dir_dataset, config.fp_nuclei)
+    fp_nuclei = os.path.join(dir_dataset, config.files.fp_nuclei)
     if os.path.exists(fp_nuclei):
         nuclei_img = tifffile.imread(fp_nuclei)
         nuclei_h = nuclei_img.shape[0]
@@ -253,13 +253,13 @@ def generate_expression_maps(config) -> str:
     print(f"Total height {total_height}, width {total_width}")
 
     # Start and end coordinates of patches
-    h_coords, img_height = get_patches_coords(total_height, config.max_height)
-    w_coords, img_width = get_patches_coords(total_width, config.max_width)
+    h_coords, img_height = get_patches_coords(total_height, config.transcript_params.max_height)
+    w_coords, img_width = get_patches_coords(total_width, config.transcript_params.max_width)
     hw_coords = [(hs, he, ws, we) for (hs, he) in h_coords for (ws, we) in w_coords]
 
     print("Converting to maps")
 
-    n_processes = get_n_processes(config.n_processes)
+    n_processes = get_n_processes(config.cpus)
     gene_names_chunks = np.array_split(gene_names, n_processes)
 
     for hs, he, ws, we in tqdm(hw_coords):
@@ -289,7 +289,7 @@ def generate_expression_maps(config) -> str:
                     gene_col,
                     x_col,
                     y_col,
-                    config.counts_col,
+                    config.transcript_params.counts_col,
                 ),
             )
             processes.append(p)
@@ -330,142 +330,142 @@ def generate_expression_maps(config) -> str:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    parser.add_argument(
-        "--data_dir", default="../../data/", type=str, help="root data directory"
-    )
-    parser.add_argument(
-        "--dataset",
-        default="dataset_merscope_melanoma2",
-        type=str,
-        help="name of dataset",
-    )
-    parser.add_argument(
-        "--n_processes",
-        default=None,
-        type=int,
-        help="number of CPUs for multiprocessing",
-    )
-    parser.add_argument(
-        "--fp_transcripts",
-        default="HumanMelanomaPatient2_detected_transcripts.csv",
-        type=str,
-        help="name of transcripts file",
-    )
-    parser.add_argument(
-        "--min_qv",
-        default=20,
-        type=int,
-        help="for Xenium - transcripts with qv below this value will be filtered out",
-    )
-    parser.add_argument(
-        "--fp_transcripts_to_filter",
-        default="transcripts_to_filter.txt",
-        type=str,
-        help="txt file containing names of transcripts to filter out",
-    )
-    parser.add_argument(
-        "--dir_out_maps",
-        default="expr_maps",
-        type=str,
-        help="directory containing processed gene expression maps",
-    )
-    parser.add_argument(
-        "--fp_transcripts_processed",
-        default="transcripts_processed.csv",
-        type=str,
-        help="processed transcripts file",
-    )
-    parser.add_argument(
-        "--fp_gene_names",
-        default="all_gene_names.txt",
-        type=str,
-        help="txt file containing names of all the genes",
-    )
-    parser.add_argument(
-        "--scale_ts_x",
-        default=1.0,
-        type=float,
-        help="conversion between transcript location values and segmentation pixel resolution along width",
-    )
-    parser.add_argument(
-        "--scale_ts_y",
-        default=1.0,
-        type=float,
-        help="conversion between transcript location values and segmentation pixel resolution along height",
-    )
-    parser.add_argument(
-        "--max_height",
-        default=3500,
-        type=int,
-        help="divide into sections if too large - height of patches",
-    )
-    parser.add_argument(
-        "--max_width",
-        default=4000,
-        type=int,
-        help="divide into sections if too large - width of patches",
-    )
-    parser.add_argument(
-        "--fp_nuclei",
-        default="nuclei.tif",
-        type=str,
-        help="file name of nuclei tif file",
-    )
-    parser.add_argument(
-        "--fp_affine",
-        default="affine.csv",
-        type=str,
-        help="file of affine transformation",
-    )
-    parser.add_argument(
-        "--shift_to_origin",
-        action="store_true",
-        help="shift to origin, making min(x) and min(y) (0,0)",
-    )
-    parser.set_defaults(shift_to_origin=False)
+    # parser.add_argument(
+    #     "--data_dir", default="../../data/", type=str, help="root data directory"
+    # )
+    # parser.add_argument(
+    #     "--dataset",
+    #     default="dataset_merscope_melanoma2",
+    #     type=str,
+    #     help="name of dataset",
+    # )
+    # parser.add_argument(
+    #     "--n_processes",
+    #     default=None,
+    #     type=int,
+    #     help="number of CPUs for multiprocessing",
+    # )
+    # parser.add_argument(
+    #     "--fp_transcripts",
+    #     default="HumanMelanomaPatient2_detected_transcripts.csv",
+    #     type=str,
+    #     help="name of transcripts file",
+    # )
+    # parser.add_argument(
+    #     "--min_qv",
+    #     default=20,
+    #     type=int,
+    #     help="for Xenium - transcripts with qv below this value will be filtered out",
+    # )
+    # parser.add_argument(
+    #     "--fp_transcripts_to_filter",
+    #     default="transcripts_to_filter.txt",
+    #     type=str,
+    #     help="txt file containing names of transcripts to filter out",
+    # )
+    # parser.add_argument(
+    #     "--dir_out_maps",
+    #     default="expr_maps",
+    #     type=str,
+    #     help="directory containing processed gene expression maps",
+    # )
+    # parser.add_argument(
+    #     "--fp_transcripts_processed",
+    #     default="transcripts_processed.csv",
+    #     type=str,
+    #     help="processed transcripts file",
+    # )
+    # parser.add_argument(
+    #     "--fp_gene_names",
+    #     default="all_gene_names.txt",
+    #     type=str,
+    #     help="txt file containing names of all the genes",
+    # )
+    # parser.add_argument(
+    #     "--scale_ts_x",
+    #     default=1.0,
+    #     type=float,
+    #     help="conversion between transcript location values and segmentation pixel resolution along width",
+    # )
+    # parser.add_argument(
+    #     "--scale_ts_y",
+    #     default=1.0,
+    #     type=float,
+    #     help="conversion between transcript location values and segmentation pixel resolution along height",
+    # )
+    # parser.add_argument(
+    #     "--max_height",
+    #     default=3500,
+    #     type=int,
+    #     help="divide into sections if too large - height of patches",
+    # )
+    # parser.add_argument(
+    #     "--max_width",
+    #     default=4000,
+    #     type=int,
+    #     help="divide into sections if too large - width of patches",
+    # )
+    # parser.add_argument(
+    #     "--fp_nuclei",
+    #     default="nuclei.tif",
+    #     type=str,
+    #     help="file name of nuclei tif file",
+    # )
+    # parser.add_argument(
+    #     "--fp_affine",
+    #     default="affine.csv",
+    #     type=str,
+    #     help="file of affine transformation",
+    # )
+    # parser.add_argument(
+    #     "--shift_to_origin",
+    #     action="store_true",
+    #     help="shift to origin, making min(x) and min(y) (0,0)",
+    # )
+    # parser.set_defaults(shift_to_origin=False)
 
-    parser.add_argument(
-        "--global_shift_x",
-        default=0,
-        type=int,
-        help="additional adjustment to align transcripts to DAPI in target pixels along image width",
-    )
-    parser.add_argument(
-        "--global_shift_y",
-        default=0,
-        type=int,
-        help="additional adjustment to align transcripts to DAPI in target pixels along image height",
-    )
-    parser.add_argument(
-        "--x_col",
-        default="global_x",
-        type=str,
-        help="name of x location column in transcripts file",
-    )
-    parser.add_argument(
-        "--y_col",
-        default="global_y",
-        type=str,
-        help="name of y location column in transcripts file",
-    )
-    parser.add_argument(
-        "--gene_col",
-        default="gene",
-        type=str,
-        help="name of genes column in transcripts file",
-    )
-    parser.add_argument(
-        "--fp_selected_genes",
-        default=None,
-        type=str,
-        help="name of file containing genes to use, eg selected_genes.txt",
-    )
-    parser.add_argument(
-        "--counts_col",
-        default=None,
-        type=str,
-        help="name of counts column in transcripts file, eg MIDCounts",
-    )
+    # parser.add_argument(
+    #     "--global_shift_x",
+    #     default=0,
+    #     type=int,
+    #     help="additional adjustment to align transcripts to DAPI in target pixels along image width",
+    # )
+    # parser.add_argument(
+    #     "--global_shift_y",
+    #     default=0,
+    #     type=int,
+    #     help="additional adjustment to align transcripts to DAPI in target pixels along image height",
+    # )
+    # parser.add_argument(
+    #     "--x_col",
+    #     default="global_x",
+    #     type=str,
+    #     help="name of x location column in transcripts file",
+    # )
+    # parser.add_argument(
+    #     "--y_col",
+    #     default="global_y",
+    #     type=str,
+    #     help="name of y location column in transcripts file",
+    # )
+    # parser.add_argument(
+    #     "--gene_col",
+    #     default="gene",
+    #     type=str,
+    #     help="name of genes column in transcripts file",
+    # )
+    # parser.add_argument(
+    #     "--fp_selected_genes",
+    #     default=None,
+    #     type=str,
+    #     help="name of file containing genes to use, eg selected_genes.txt",
+    # )
+    # parser.add_argument(
+    #     "--counts_col",
+    #     default=None,
+    #     type=str,
+    #     help="name of counts column in transcripts file, eg MIDCounts",
+    # )
 
     config = parser.parse_args()
     generate_expression_maps(config)

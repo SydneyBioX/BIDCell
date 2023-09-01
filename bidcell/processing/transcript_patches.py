@@ -14,9 +14,9 @@ def generate_patches(config):
     Divides transcriptomic maps of all genes into patches for input to the CNN
 
     """
-    dir_dataset = os.path.join(config.data_dir, config.dataset, config.dir_out_maps)
+    dir_dataset = os.path.join(config.files.data_dir, config.files.dataset, config.files.dir_out_maps)
 
-    patch_size = config.patch_size
+    patch_size = config.model_params.patch_size
     shift = [0, int(patch_size / 2)]
 
     fp_maps = glob.glob(dir_dataset + "/all_genes_*.hdf5")
@@ -54,7 +54,7 @@ def generate_patches(config):
 
             dir_output = os.path.join(
                 dir_dataset,
-                config.dir_patches
+                config.files.dir_patches
                 + "%dx%d_shift_%d" % (patch_size, patch_size, shift_patches),
             )
             if not os.path.exists(dir_output):
@@ -94,30 +94,30 @@ def generate_patches(config):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    parser.add_argument(
-        "--data_dir", default="../../data/", type=str, help="root data directory"
-    )
-    parser.add_argument(
-        "--dataset",
-        default="dataset_merscope_melanoma2",
-        type=str,
-        help="name of dataset",
-    )
-    parser.add_argument(
-        "--dir_out_maps",
-        default="expr_maps",
-        type=str,
-        help="directory containing processed gene expression maps",
-    )
-    parser.add_argument(
-        "--dir_patches",
-        default="expr_maps_input_patches_",
-        type=str,
-        help="directory prefix of saved patches",
-    )
-    parser.add_argument(
-        "--patch_size", default=64, type=int, help="size of patches to crop"
-    )
+    # parser.add_argument(
+    #     "--data_dir", default="../../data/", type=str, help="root data directory"
+    # )
+    # parser.add_argument(
+    #     "--dataset",
+    #     default="dataset_merscope_melanoma2",
+    #     type=str,
+    #     help="name of dataset",
+    # )
+    # parser.add_argument(
+    #     "--dir_out_maps",
+    #     default="expr_maps",
+    #     type=str,
+    #     help="directory containing processed gene expression maps",
+    # )
+    # parser.add_argument(
+    #     "--dir_patches",
+    #     default="expr_maps_input_patches_",
+    #     type=str,
+    #     help="directory prefix of saved patches",
+    # )
+    # parser.add_argument(
+    #     "--patch_size", default=64, type=int, help="size of patches to crop"
+    # )
 
     config = parser.parse_args()
     generate_patches(config)

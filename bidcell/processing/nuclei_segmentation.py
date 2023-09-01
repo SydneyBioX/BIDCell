@@ -27,17 +27,17 @@ def segment_dapi(img, diameter=None, use_cpu=False):
 
 
 def segment_nuclei(config) -> str:
-    dir_dataset = os.path.join(config.data_dir, config.dataset)
+    dir_dataset = os.path.join(config.files.data_dir, config.files.dataset)
 
     print("Reading DAPI image")
-    fp_dapi = config.fp_dapi
+    fp_dapi = config.files.fp_dapi
     print(fp_dapi)
     dapi = tifffile.imread(fp_dapi)
 
     # Crop to size of transcript map (requires getting transcript maps first)
-    if config.crop_nuclei_to_ts:
+    if config.nuclei_params.crop_nuclei_to_ts:
         # Get starting coordinates
-        fp_affine = os.path.join(dir_dataset, config.fp_affine)
+        fp_affine = os.path.join(dir_dataset, config.files.fp_affine)
 
         affine = pd.read_csv(fp_affine, index_col=0, header=None, sep="\t")
 
@@ -52,30 +52,21 @@ def segment_nuclei(config) -> str:
     dapi_w = dapi.shape[1]
     print(f"DAPI shape h: {dapi_h} w: {dapi_w}")
 
-    # if config.max_height == None:
-    # max_height = dapi_h
-    # else:
-    # max_height = config.max_height
-    # if config.max_width == None:
-    # max_width = dapi_w
-    # else:
-    # max_width = config.max_width
-
     # Process patch-wise if too large
     if (
-        dapi_h > config.max_height
-        or dapi_w > config.max_width
-        or config.scale_pix_x != 1.0
-        or config.scale_pix_y != 1.0
+        dapi_h > config.nuclei_params.max_height
+        or dapi_w > config.nuclei_params.max_width
+        or config.affine_params.scale_pix_x != 1.0
+        or config.affine_params.scale_pix_y != 1.0
     ):
-        if config.max_height is None:
+        if config.nuclei_params.max_height is None:
             max_height = dapi_h
         else:
-            max_height = config.max_height if config.max_height < dapi_h else dapi_h
-        if config.max_width is None:
+            max_height = config.nuclei_params.max_height if config.nuclei_params.max_height < dapi_h else dapi_h
+        if config.nuclei_params.max_width is None:
             max_width = dapi_w
         else:
-            max_width = config.max_width if config.max_width < dapi_w else dapi_w
+            max_width = config.nuclei_params.max_width if config.nuclei_params.max_width < dapi_w else dapi_w
 
         print(f"Segmenting DAPI patches h: {max_height} w: {max_width}")
 
@@ -89,8 +80,8 @@ def segment_nuclei(config) -> str:
         w_patch_sizes = [we - ws for (ws, we) in w_coords]
 
         # Determine the resized patch sizes
-        rh_patch_sizes = [round(y * config.scale_pix_y) for y in h_patch_sizes]
-        rw_patch_sizes = [round(x * config.scale_pix_x) for x in w_patch_sizes]
+        rh_patch_sizes = [round(y * config.affine_params.scale_pix_y) for y in h_patch_sizes]
+        rw_patch_sizes = [round(x * config.affine_params.scale_pix_x) for x in w_patch_sizes]
         rhw_patch_sizes = [
             (hsize, wsize) for hsize in rh_patch_sizes for wsize in rw_patch_sizes
         ]
@@ -122,7 +113,7 @@ def segment_nuclei(config) -> str:
             rdapi[h : h + hsize, w : w + wsize] = patch_resized
 
             # Segment nuclei in each patch and place into final segmentation with unique ID
-            patch_nuclei = segment_dapi(patch_resized, config.diameter, config.use_cpu)
+            patch_nuclei = segment_dapi(patch_resized, config.nuclei_params.diameter, config.nuclei_params.use_cpu)
             nuclei_mask = np.where(patch_nuclei > 0, 1, 0)
             nuclei[h : h + hsize, w : w + wsize] = patch_nuclei + total_n * nuclei_mask
             unique_ids = np.unique(patch_nuclei)
@@ -135,92 +126,92 @@ def segment_nuclei(config) -> str:
     print(f"Finished segmenting, found {len(np.unique(nuclei))-1} nuclei")
 
     # Save nuclei segmentation
-    fp_nuclei = os.path.join(dir_dataset, config.fp_nuclei)
+    fp_nuclei = os.path.join(dir_dataset, config.files.fp_nuclei)
     tifffile.imwrite(fp_nuclei, nuclei.astype(np.uint32), photometric="minisblack")
 
     # Save resized DAPI
-    fp_rdapi = os.path.join(dir_dataset, config.fp_rdapi)
+    fp_rdapi = os.path.join(dir_dataset, config.files.fp_rdapi)
     tifffile.imwrite(fp_rdapi, rdapi, photometric="minisblack")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    parser.add_argument(
-        "--data_dir", default="../../data/", type=str, help="root data directory"
-    )
-    parser.add_argument(
-        "--dataset",
-        default="dataset_merscope_melanoma2",
-        type=str,
-        help="name of dataset",
-    )
-    parser.add_argument(
-        "--fp_dapi",
-        default="HumanMelanomaPatient2_images_mosaic_DAPI_z0.tif",
-        type=str,
-        help="file name of DAPI image",
-    )
-    parser.add_argument(
-        "--fp_nuclei",
-        default="nuclei.tif",
-        type=str,
-        help="file name of nuclei tif file",
-    )
-    parser.add_argument(
-        "--fp_rdapi",
-        default="dapi_resized.tif",
-        type=str,
-        help="file name of resized DAPI image",
-    )
-    parser.add_argument(
-        "--scale_pix_x",
-        default=0.107999132774,
-        type=float,
-        help="original pixel resolution to segmentation pixel resolution (e.g., microns) along image width",
-    )
-    parser.add_argument(
-        "--scale_pix_y",
-        default=0.107997631125,
-        type=float,
-        help="original pixel resolution to segmentation pixel resolution (e.g., microns) along image height",
-    )
-    parser.add_argument(
-        "--max_height",
-        default=24000,
-        type=int,
-        help="divide into sections if too large - maximum height to process in original resolution",
-    )
-    parser.add_argument(
-        "--max_width",
-        default=32000,
-        type=int,
-        help="divide into sections if too large - maximum width to process in original resolution",
-    )
-    parser.add_argument(
-        "--diameter",
-        default=None,
-        type=int,
-        help="estimated diameter of nuclei for Cellpose - or None to automatically compute",
-    )
-    parser.add_argument(
-        "--use_cpu",
-        action="store_true",
-        help="use CPU for Cellpose if no GPU available",
-    )
-    parser.set_defaults(use_cpu=False)
-    parser.add_argument(
-        "--crop_nuclei_to_ts",
-        action="store_true",
-        help="crop nuclei to size of transcript maps",
-    )
-    parser.set_defaults(crop_nuclei_to_ts=False)
-    parser.add_argument(
-        "--fp_affine",
-        default="affine.csv",
-        type=str,
-        help="file of affine transformation - needed if cropping to align DAPI to transcripts",
-    )
+    # parser.add_argument(
+    #     "--data_dir", default="../../data/", type=str, help="root data directory"
+    # )
+    # parser.add_argument(
+    #     "--dataset",
+    #     default="dataset_merscope_melanoma2",
+    #     type=str,
+    #     help="name of dataset",
+    # )
+    # parser.add_argument(
+    #     "--fp_dapi",
+    #     default="HumanMelanomaPatient2_images_mosaic_DAPI_z0.tif",
+    #     type=str,
+    #     help="file name of DAPI image",
+    # )
+    # parser.add_argument(
+    #     "--fp_nuclei",
+    #     default="nuclei.tif",
+    #     type=str,
+    #     help="file name of nuclei tif file",
+    # )
+    # parser.add_argument(
+    #     "--fp_rdapi",
+    #     default="dapi_resized.tif",
+    #     type=str,
+    #     help="file name of resized DAPI image",
+    # )
+    # parser.add_argument(
+    #     "--scale_pix_x",
+    #     default=0.107999132774,
+    #     type=float,
+    #     help="original pixel resolution to segmentation pixel resolution (e.g., microns) along image width",
+    # )
+    # parser.add_argument(
+    #     "--scale_pix_y",
+    #     default=0.107997631125,
+    #     type=float,
+    #     help="original pixel resolution to segmentation pixel resolution (e.g., microns) along image height",
+    # )
+    # parser.add_argument(
+    #     "--max_height",
+    #     default=24000,
+    #     type=int,
+    #     help="divide into sections if too large - maximum height to process in original resolution",
+    # )
+    # parser.add_argument(
+    #     "--max_width",
+    #     default=32000,
+    #     type=int,
+    #     help="divide into sections if too large - maximum width to process in original resolution",
+    # )
+    # parser.add_argument(
+    #     "--diameter",
+    #     default=None,
+    #     type=int,
+    #     help="estimated diameter of nuclei for Cellpose - or None to automatically compute",
+    # )
+    # parser.add_argument(
+    #     "--use_cpu",
+    #     action="store_true",
+    #     help="use CPU for Cellpose if no GPU available",
+    # )
+    # parser.set_defaults(use_cpu=False)
+    # parser.add_argument(
+    #     "--crop_nuclei_to_ts",
+    #     action="store_true",
+    #     help="crop nuclei to size of transcript maps",
+    # )
+    # parser.set_defaults(crop_nuclei_to_ts=False)
+    # parser.add_argument(
+    #     "--fp_affine",
+    #     default="affine.csv",
+    #     type=str,
+    #     help="file of affine transformation - needed if cropping to align DAPI to transcripts",
+    # )
 
     config = parser.parse_args()
     segment_nuclei(config)

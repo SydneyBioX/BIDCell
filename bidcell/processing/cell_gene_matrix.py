@@ -90,23 +90,23 @@ def read_expr_csv(fp):
 
 
 def make_cell_gene_mat(config):
-    dir_dataset = os.path.join(config.data_dir, config.dataset)
-    output_dir = os.path.join(dir_dataset, config.output_dir)
+    dir_dataset = os.path.join(config.files.data_dir, config.files.dataset)
+    output_dir = os.path.join(dir_dataset, config.files.dir_output_matrices)
     fp_transcripts_processed = os.path.join(
-        dir_dataset, config.fp_transcripts_processed
+        dir_dataset, config.files.fp_transcripts_processed
     )
-    fp_gene_names = os.path.join(dir_dataset, config.fp_gene_names)
-    fp_affine = os.path.join(dir_dataset, config.fp_affine)
+    fp_gene_names = os.path.join(dir_dataset, config.files.fp_gene_names)
+    fp_affine = os.path.join(dir_dataset, config.files.fp_affine)
 
-    if config.fp_seg == "nuclei.tif":
-        fp_seg = os.path.join(dir_dataset, config.fp_seg)
+    if config.files.fp_seg == "nuclei.tif":
+        fp_seg = os.path.join(dir_dataset, config.files.fp_seg)
     else:
-        fp_seg = config.fp_seg
+        fp_seg = config.files.fp_seg
 
     # Column names in the transcripts csv
-    x_col = config.x_col
-    y_col = config.y_col
-    gene_col = config.gene_col
+    x_col = config.transcript_params.x_col
+    y_col = config.transcript_params.y_col
+    gene_col = config.transcript_params.gene_col
 
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
@@ -126,7 +126,7 @@ def make_cell_gene_mat(config):
     col_names = ["cell_id"] + gene_names
 
     # Divide the dataframe into chunks for multiprocessing
-    n_processes = get_n_processes(config.n_processes)
+    n_processes = get_n_processes(config.cpus)
     print(f"Number of splits for multiprocessing: {n_processes}")
 
     # Scale factor to pixel resolution of platform
@@ -136,15 +136,15 @@ def make_cell_gene_mat(config):
     # affine = pd.read_csv(fp_affine, index_col=0, header=None, sep='\t')
     # scale_x_tr = float(affine.loc["scale_x"].item())
     # scale_y_tr = float(affine.loc["scale_y"].item())
-    # scale_pix_x = (scale_x_tr*config.scale_pix_x)
-    # scale_pix_y = (scale_y_tr*config.scale_pix_y)
-    scale_pix_x = config.scale_pix_x
-    scale_pix_y = config.scale_pix_y
+    # scale_pix_x = (scale_x_tr*config.affine_params.scale_pix_x)
+    # scale_pix_y = (scale_y_tr*config.affine_params.scale_pix_y)
+    scale_pix_x = config.affine_params.scale_pix_x
+    scale_pix_y = config.affine_params.scale_pix_y
 
-    if not os.path.exists(output_dir + "/" + config.fp_expr):
+    if not os.path.exists(output_dir + "/" + config.files.fp_expr):
         # Rescale to pixel size
-        height_pix = np.round(height / config.scale_pix_y).astype(int)
-        width_pix = np.round(width / config.scale_pix_x).astype(int)
+        height_pix = np.round(height / config.affine_params.scale_pix_y).astype(int)
+        width_pix = np.round(width / config.affine_params.scale_pix_x).astype(int)
 
         seg_map = cv2.resize(
             seg_map_mi.astype(np.int32),
@@ -162,9 +162,9 @@ def make_cell_gene_mat(config):
         df_out["cell_id"] = cell_ids_unique.copy()
 
         # Divide into patches for large datasets that exceed memory capacity
-        if (height_pix + width_pix) > config.max_sum_hw:
-            patch_h = int(config.max_sum_hw / 2)
-            patch_w = config.max_sum_hw - patch_h
+        if (height_pix + width_pix) > config.cgm_params.max_sum_hw:
+            patch_h = int(config.cgm_params.max_sum_hw / 2)
+            patch_w = config.cgm_params.max_sum_hw - patch_h
         else:
             patch_h = height_pix
             patch_w = width_pix
@@ -243,7 +243,7 @@ def make_cell_gene_mat(config):
                 df_i = pd.read_csv(fpc, index_col=0)
                 df_out.iloc[:, 1:] = df_out.iloc[:, 1:].add(df_i.iloc[:, 1:])
 
-            df_out.to_csv(output_dir + "/" + config.fp_expr)
+            df_out.to_csv(output_dir + "/" + config.files.fp_expr)
 
             # Clean up
             for fpc in fp_chunks:
@@ -255,9 +255,9 @@ def make_cell_gene_mat(config):
         del df_expr
 
     else:
-        df_out = pd.read_csv(output_dir + "/" + config.fp_expr, index_col=0)
+        df_out = pd.read_csv(output_dir + "/" + config.files.fp_expr, index_col=0)
 
-    if not config.only_expr:
+    if not config.cgm_params.only_expr:
         print("Computing cell locations and sizes")
 
         matrix_all = df_out.to_numpy().astype(np.float32)
@@ -296,95 +296,95 @@ def make_cell_gene_mat(config):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    parser.add_argument(
-        "--data_dir", default="../../data/", type=str, help="root data directory"
-    )
-    parser.add_argument(
-        "--dataset",
-        default="dataset_merscope_melanoma2",
-        type=str,
-        help="name of dataset",
-    )
-    parser.add_argument(
-        "--fp_seg",
-        default="bidcell/model/experiments/2023_July_06_09_41_41/test_output/epoch_1_step_4000_connected.tif",
-        type=str,
-        help="segmentation tif file",
-    )
-    parser.add_argument(
-        "--output_dir",
-        default="cell_gene_matrices/2023_July_06_09_41_41",
-        type=str,
-        help="output directory of cell-gene matrix and cell metadata",
-    )
-    parser.add_argument(
-        "--fp_expr", default="cell_expr.csv", type=str, help="output file containing only cell-gene matrix"
-    )
-    parser.add_argument(
-        "--fp_transcripts_processed",
-        default="transcripts_processed.csv",
-        type=str,
-        help="filtered and xy-scaled transcripts data",
-    )
-    parser.add_argument(
-        "--fp_gene_names",
-        default="all_gene_names.txt",
-        type=str,
-        help="txt file containing list of gene names",
-    )
-    parser.add_argument(
-        "--fp_affine",
-        default="affine.csv",
-        type=str,
-        help="csv file containing affine transformation of transcript maps",
-    )
-    parser.add_argument(
-        "--scale_pix_x",
-        default=0.107999132774,
-        type=float,
-        help="original pixel resolution to segmentation pixel resolution (e.g., microns) along image width",
-    )
-    parser.add_argument(
-        "--scale_pix_y",
-        default=0.107997631125,
-        type=float,
-        help="original pixel resolution to segmentation pixel resolution (e.g., microns) along image height",
-    )
-    parser.add_argument(
-        "--max_sum_hw",
-        default=50000,
-        type=int,
-        help="max h+w for resized segmentation to extract expressions from",
-    )
-    parser.add_argument(
-        "--n_processes",
-        default=None,
-        type=int,
-        help="number of CPUs for multiprocessing",
-    )
-    parser.add_argument(
-        "--x_col",
-        default="global_x",
-        type=str,
-        help="name of x location column in transcripts file",
-    )
-    parser.add_argument(
-        "--y_col",
-        default="global_y",
-        type=str,
-        help="name of y location column in transcripts file",
-    )
-    parser.add_argument(
-        "--gene_col",
-        default="gene",
-        type=str,
-        help="name of genes column in transcripts file",
-    )
-    parser.add_argument(
-        "--only_expr",
-        action="store_true",
-        help="only get cell expressions, no additional info",
-    )
-    parser.set_defaults(only_expr=False)
+    # parser.add_argument(
+    #     "--data_dir", default="../../data/", type=str, help="root data directory"
+    # )
+    # parser.add_argument(
+    #     "--dataset",
+    #     default="dataset_merscope_melanoma2",
+    #     type=str,
+    #     help="name of dataset",
+    # )
+    # parser.add_argument(
+    #     "--fp_seg",
+    #     default="bidcell/model/experiments/2023_July_06_09_41_41/test_output/epoch_1_step_4000_connected.tif",
+    #     type=str,
+    #     help="segmentation tif file",
+    # )
+    # parser.add_argument(
+    #     "--output_dir",
+    #     default="cell_gene_matrices/2023_July_06_09_41_41",
+    #     type=str,
+    #     help="output directory of cell-gene matrix and cell metadata",
+    # )
+    # parser.add_argument(
+    #     "--fp_expr", default="cell_expr.csv", type=str, help="output file containing only cell-gene matrix"
+    # )
+    # parser.add_argument(
+    #     "--fp_transcripts_processed",
+    #     default="transcripts_processed.csv",
+    #     type=str,
+    #     help="filtered and xy-scaled transcripts data",
+    # )
+    # parser.add_argument(
+    #     "--fp_gene_names",
+    #     default="all_gene_names.txt",
+    #     type=str,
+    #     help="txt file containing list of gene names",
+    # )
+    # parser.add_argument(
+    #     "--fp_affine",
+    #     default="affine.csv",
+    #     type=str,
+    #     help="csv file containing affine transformation of transcript maps",
+    # )
+    # parser.add_argument(
+    #     "--scale_pix_x",
+    #     default=0.107999132774,
+    #     type=float,
+    #     help="original pixel resolution to segmentation pixel resolution (e.g., microns) along image width",
+    # )
+    # parser.add_argument(
+    #     "--scale_pix_y",
+    #     default=0.107997631125,
+    #     type=float,
+    #     help="original pixel resolution to segmentation pixel resolution (e.g., microns) along image height",
+    # )
+    # parser.add_argument(
+    #     "--max_sum_hw",
+    #     default=50000,
+    #     type=int,
+    #     help="max h+w for resized segmentation to extract expressions from",
+    # )
+    # parser.add_argument(
+    #     "--n_processes",
+    #     default=None,
+    #     type=int,
+    #     help="number of CPUs for multiprocessing",
+    # )
+    # parser.add_argument(
+    #     "--x_col",
+    #     default="global_x",
+    #     type=str,
+    #     help="name of x location column in transcripts file",
+    # )
+    # parser.add_argument(
+    #     "--y_col",
+    #     default="global_y",
+    #     type=str,
+    #     help="name of y location column in transcripts file",
+    # )
+    # parser.add_argument(
+    #     "--gene_col",
+    #     default="gene",
+    #     type=str,
+    #     help="name of genes column in transcripts file",
+    # )
+    # parser.add_argument(
+    #     "--only_expr",
+    #     action="store_true",
+    #     help="only get cell expressions, no additional info",
+    # )
+    # parser.set_defaults(only_expr=False)
 
     config = parser.parse_args()

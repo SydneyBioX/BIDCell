@@ -81,15 +81,15 @@ def process_chunk_corr(matrix, dir_output, sc_expr, sc_labels, n_atlas_types):
 
 
 def preannotate(config):
-    dir_dataset = os.path.join(config.data_dir, config.dataset)
-    expr_dir = os.path.join(dir_dataset, config.expr_dir)
+    dir_dataset = os.path.join(config.files.data_dir, config.files.dataset)
+    expr_dir = os.path.join(dir_dataset, config.dir_expr_nuclei)
 
     # Cell expressions - order of gene names (columns) will be in same order as all_gene_names.txt
-    df_cells = pd.read_csv(os.path.join(expr_dir, config.fp_expr), index_col=0)
+    df_cells = pd.read_csv(os.path.join(expr_dir, config.files.fp_expr), index_col=0)
     print(f"Number of cells: {df_cells.shape[0]}")
 
     # Reference data - no requirement of column orders - ensure same order as df_cells
-    df_ref_orig = pd.read_csv(config.fp_ref, index_col=0)
+    df_ref_orig = pd.read_csv(config.files.fp_ref, index_col=0)
 
     # Ensure the order of genes match
     genes_cells = df_cells.columns[1:].tolist()
@@ -115,7 +115,7 @@ def preannotate(config):
     sc_names = df_ref.iloc[:, -2].to_list()
 
     # Divide the data into chunks for multiprocessing
-    n_processes = get_n_processes(config.n_processes)
+    n_processes = get_n_processes(config.cpus)
     print(f"Number of splits for multiprocessing: {n_processes}")
 
     matrix_all = df_cells.to_numpy().astype(np.float32)
@@ -145,7 +145,7 @@ def preannotate(config):
     cell_type_col = cell_df["cell_type"].to_numpy()
     cell_id_col = cell_df["cell_id"].to_numpy()
 
-    h5f = h5py.File(dir_dataset + "/" + config.fp_nuclei_anno, "w")
+    h5f = h5py.File(dir_dataset + "/" + config.files.fp_nuclei_anno, "w")
     h5f.create_dataset("data", data=cell_type_col)
     h5f.create_dataset("ids", data=cell_id_col)
     h5f.close()
@@ -158,42 +158,42 @@ def preannotate(config):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    parser.add_argument(
-        "--data_dir", default="../../data/", type=str, help="root data directory"
-    )
-    parser.add_argument(
-        "--dataset", default="dataset_xenium_breast1", type=str, help="name of dataset"
-    )
-    parser.add_argument(
-        "--expr_dir",
-        default="cell_gene_matrices/nuclei",
-        type=str,
-        help="directory to load nuclei expression matrices from",
-    )
-    parser.add_argument(
-        "--fp_expr",
-        default="cell_expr.csv",
-        type=str,
-        help="file name of nuclei expression matrices",
-    )
-    parser.add_argument(
-        "--fp_nuclei_anno",
-        default="nuclei_cell_type.h5",
-        type=str,
-        help="file name to save nuclei annotations",
-    )
-    parser.add_argument(
-        "--fp_ref",
-        default="../../data/sc_references/sc_breast.csv",
-        type=str,
-        help="single cell reference",
-    )
-    parser.add_argument(
-        "--n_processes",
-        default=None,
-        type=int,
-        help="number of CPUs for multiprocessing",
-    )
+    # parser.add_argument(
+    #     "--data_dir", default="../../data/", type=str, help="root data directory"
+    # )
+    # parser.add_argument(
+    #     "--dataset", default="dataset_xenium_breast1", type=str, help="name of dataset"
+    # )
+    # parser.add_argument(
+    #     "--expr_dir",
+    #     default="cell_gene_matrices/nuclei",
+    #     type=str,
+    #     help="directory to load nuclei expression matrices from",
+    # )
+    # parser.add_argument(
+    #     "--fp_expr",
+    #     default="cell_expr.csv",
+    #     type=str,
+    #     help="file name of nuclei expression matrices",
+    # )
+    # parser.add_argument(
+    #     "--fp_nuclei_anno",
+    #     default="nuclei_cell_type.h5",
+    #     type=str,
+    #     help="file name to save nuclei annotations",
+    # )
+    # parser.add_argument(
+    #     "--fp_ref",
+    #     default="../../data/sc_references/sc_breast.csv",
+    #     type=str,
+    #     help="single cell reference",
+    # )
+    # parser.add_argument(
+    #     "--n_processes",
+    #     default=None,
+    #     type=int,
+    #     help="number of CPUs for multiprocessing",
+    # )
 
     config = parser.parse_args()
     preannotate(config)

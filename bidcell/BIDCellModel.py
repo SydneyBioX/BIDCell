@@ -65,14 +65,18 @@ class FileParams(BaseModel):
     # directory prefix of transcript patches
     dir_patches: str = "expr_maps_input_patches_"
     # directory for nuclei expression matrices
-    expr_dir: str = "cell_gene_matrices/nuclei"
+    dir_expr_nuclei: str = "cell_gene_matrices/nuclei"
     # file name of nuclei expression matrices
     fp_expr: str = "cell_expr.csv"
-    # file path of nuclei annotations
+    # file name of nuclei annotations
     fp_nuclei_anno: str = "nuclei_cell_type.h5"
+    # file name of text file containing selected gene names
+    fp_selected_genes: str | None = None
 
     # Internal
     fp_stitched: str | None = None
+    fp_seg: str
+    dir_output_matrices: str
 
 
 class NucleiFovParams(BaseModel):
@@ -119,7 +123,6 @@ class TranscriptParams(BaseModel):
     x_col: str = "x_location"
     y_col: str = "y_location"
     gene_col: str = "feature_name"
-    fp_selected_genes: str | None = None
     counts_col: str | None = None
 
 
@@ -132,12 +135,21 @@ class AffineParams(BaseModel):
     global_shift_x: int = 0
     global_shift_y: int = 0
 
+    # TODO: does this work?
+    # Scaling images
+    scale_pix_x: float = base_pix_x/target_pix_um
+    scale_pix_y: float = base_pix_y/target_pix_um
+    # Scaling transcript locations
+    scale_ts_x: float = base_ts_x/target_pix_um
+    scale_ts_y: float = base_ts_y/target_pix_um
+
 
 class CellGeneMatParams(BaseModel):
-    fp_seg: str
-    output_dir: str
     # max h+w for resized segmentation to extract expressions from
     max_sum_hw: int = 50000
+
+    # Internal
+    only_expr: bool
 
 
 class ModelParams(BaseModel):
@@ -202,6 +214,7 @@ class Config(BaseModel):
     cpus: int
     postprocess: PostprocessParams
     experiment_dirs: ExperimentDirs
+    cgm_params: CellGeneMatParams
 
 
 class BIDCellModel:
@@ -221,7 +234,7 @@ class BIDCellModel:
         self.config["fp_rdapi"] = segment_nuclei(self.config)
         self.config["fp_maps"] = generate_expression_maps(self.config)
         generate_patches(self.config)
-        make_cell_gene_mat(self.config)
+        make_cell_gene_mat(self.config) # TODO: set config.cgm_params.only_expr (True for nuclei)
         preannotate(self.config)
         # TODO: Which information do the end users need from the process?
 
@@ -235,6 +248,9 @@ class BIDCellModel:
             self.config.postprocess.dir_id = get_newest_id()
         postprocess_predictions(self.config)
         # TODO: Figure out final cell_gene_matrix call
+        # config.files.dir_output_matrices
+        # config.files.fp_seg
+        # config.cgm_params.only_expr (False for cells)
 
     def __parse_config(self, config_file_path: str) -> Config:
         if not os.path.exists(config_file_path):
