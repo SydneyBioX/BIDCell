@@ -1,5 +1,5 @@
 import os
-from pydantic import BaseModel
+from pydantic import BaseModel, computed_field
 from typing import Literal
 from pathlib import Path
 
@@ -104,13 +104,27 @@ class AffineParams(BaseModel):
     global_shift_x: int = 0
     global_shift_y: int = 0
 
-    # TODO: does this work?
     # Scaling images
-    # scale_pix_x: float = base_pix_x/target_pix_um
-    # scale_pix_y: float = base_pix_y/target_pix_um
+    @computed_field
+    @property
+    def scale_pix_x(self) -> float:
+        return self.base_pix_x / self.target_pix_um
+
+    @computed_field
+    @property
+    def scale_pix_y(self) -> float:
+        return self.base_pix_y / self.target_pix_um
+
     # Scaling transcript locations
-    # scale_ts_x: float = base_ts_x/target_pix_um
-    # scale_ts_y: float = base_ts_y/target_pix_um
+    @computed_field
+    @property
+    def scale_ts_x(self) -> float:
+        return self.base_ts_x / self.target_pix_um
+
+    @computed_field
+    @property
+    def scale_ts_y(self) -> float:
+        return self.base_ts_y / self.target_pix_um
 
 
 class CellGeneMatParams(BaseModel):
