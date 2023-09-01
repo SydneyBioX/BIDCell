@@ -59,6 +59,24 @@ class BIDCellModel:
         preannotate(self.config)
         # TODO: Which information do the end users need from the process?
 
+    def stitch_nuclei(self):
+        stitch_nuclei(self.config)
+
+    def segment_nuclei(self):
+        segment_nuclei(self.config)
+
+    def generate_expression_maps(self):
+        generate_expression_maps(self.config)
+
+    def generate_patches(self):
+        generate_patches(self.config)
+
+    def make_cell_gene_mat(self, is_cell=True):
+        make_cell_gene_mat(self.config, is_cell)
+
+    def preannotate():
+        preannotate(self.config)
+
     def train(self) -> None:
         train(self.config)
 
