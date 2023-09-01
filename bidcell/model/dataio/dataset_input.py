@@ -22,14 +22,13 @@ warnings.filterwarnings("ignore", category=np.VisibleDeprecationWarning)
 class DataProcessing(data.Dataset):
     def __init__(
         self,
-        data_sources,
-        data_params,
+        config,
         isTraining=True,
         all_patches=True,
         shift_patches=0,
         total_steps=None,
     ):
-        self.patch_size = data_params.patch_size
+        self.patch_size = config.model_params.patch_size
         self.isTraining = isTraining
 
         self.expr_fp = (
@@ -82,7 +81,6 @@ class DataProcessing(data.Dataset):
         print("Loaded nuclei")
         print(self.nuclei.shape)
 
-        # expr_fp_ext = data_sources.expr_fp_ext
         expr_fp_ext = ".hdf5"
         fp_patches_all = glob.glob(self.expr_fp + "/*" + expr_fp_ext)
         fp_patches_all = natsort.natsorted(fp_patches_all)
@@ -135,8 +133,6 @@ class DataProcessing(data.Dataset):
         self.nuclei_types_ids = list(h5f["ids"][:])
         h5f.close()
 
-        # type_names = data_params.cell_types
-
         # Get order of cell-types from sc reference
         atlas_exprs = pd.read_csv(self.ref_fp, index_col=0)
         ct_idx_ref = atlas_exprs["ct_idx"].tolist()
@@ -148,7 +144,7 @@ class DataProcessing(data.Dataset):
         self.type_names = list(dict.fromkeys(type_names))
         print(f"Cell types: {self.type_names}")
 
-        types_elong = data_params.elongated
+        types_elong = config.model_params.elongated
         idx_elong = [self.type_names.index(x) for x in types_elong]
         nuclei_types_elong = [1 if x in idx_elong else 0 for x in self.nuclei_types_idx]
         self.nuclei_ids_elong = [

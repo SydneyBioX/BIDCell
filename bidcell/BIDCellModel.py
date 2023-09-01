@@ -200,8 +200,8 @@ class Config(BaseModel):
     training_params: TrainingParams
     testing_params: TestingParams
     cpus: int
-    # postprocess: PostprocessParams
-    # experiment_dirs: ExperimentDirs
+    postprocess: PostprocessParams
+    experiment_dirs: ExperimentDirs
 
 
 class BIDCellModel:

@@ -21,14 +21,12 @@ from .model.losses import (
 from .model.model import SegmentationModel as Network
 from .utils.utils import (
     get_experiment_id,
-    json_file_to_pyobj,
     make_dir,
     save_fig_outputs,
 )
 
 
 def train(config):
-    json_opts = json_file_to_pyobj(config.config_file)
 
     logging.basicConfig(
         format="%(asctime)s %(levelname)s %(message)s",
@@ -40,14 +38,16 @@ def train(config):
     device = torch.device("cuda" if use_cuda else "cpu")
 
     # Create experiment directories
-    if config.resume_epoch is None:
+    resume_epoch = None # could be added
+    resume_step = 0
+    if resume_epoch is None:
         make_new = True
     else:
         make_new = False
-    timestamp = get_experiment_id(make_new, json_opts.experiment_dirs.load_dir)
+    timestamp = get_experiment_id(make_new, config.experiment_dirs.load_dir)
     experiment_path = "experiments" + "/" + timestamp
-    make_dir(experiment_path + "/" + json_opts.experiment_dirs.model_dir)
-    make_dir(experiment_path + "/" + json_opts.experiment_dirs.samples_dir)
+    make_dir(experiment_path + "/" + config.experiment_dirs.model_dir)
+    make_dir(experiment_path + "/" + config.experiment_dirs.samples_dir)
 
     # Set up the model
     logging.info("Initialising model")
@@ -56,9 +56,9 @@ def train(config):
     n_genes = atlas_exprs.shape[1] - 3
     print("Number of genes: %d" % n_genes)
 
-    if json_opts.model_params.name != "custom":
+    if config.model_params.name != "custom":
         model = smp.Unet(
-            encoder_name=json_opts.model_params.name,
+            encoder_name=config.model_params.name,
             encoder_weights=None,
             in_channels=n_genes,
             classes=2,
@@ -72,10 +72,9 @@ def train(config):
     logging.info("Preparing data")
 
     train_dataset = DataProcessing(
-        json_opts.data_sources,
-        json_opts.data_params,
+        config,
         isTraining=True,
-        total_steps=config.total_steps,
+        total_steps=config.training_params.total_steps,
     )
     train_loader = DataLoader(
         dataset=train_dataset, batch_size=1, shuffle=True, num_workers=0, drop_last=True
@@ -85,29 +84,29 @@ def train(config):
     logging.info("Total number of training examples: %d" % n_train_examples)
 
     # Loss functions
-    criterion_ne = NucleiEncapsulationLoss(json_opts.training_params.ne_weight, device)
-    criterion_os = Oversegmentation(json_opts.training_params.os_weight, device)
-    criterion_cc = CellCallingLoss(json_opts.training_params.cc_weight, device)
-    criterion_ov = OverlapLoss(json_opts.training_params.ov_weight, device)
+    criterion_ne = NucleiEncapsulationLoss(config.training_params.ne_weight, device)
+    criterion_os = Oversegmentation(config.training_params.os_weight, device)
+    criterion_cc = CellCallingLoss(config.training_params.cc_weight, device)
+    criterion_ov = OverlapLoss(config.training_params.ov_weight, device)
     criterion_pn = PosNegMarkerLoss(
-        json_opts.training_params.pos_weight,
-        json_opts.training_params.neg_weight,
+        config.training_params.pos_weight,
+        config.training_params.neg_weight,
         device,
     )
 
     # Optimiser
-    if json_opts.training_params.optimizer == "rmsprop":
+    if config.training_params.optimizer == "rmsprop":
         optimizer = torch.optim.RMSprop(
             model.parameters(),
-            lr=json_opts.training_params.learning_rate,
+            lr=config.training_params.learning_rate,
             weight_decay=1e-8,
         )
-    elif json_opts.training_params.optimizer == "adam":
+    elif config.training_params.optimizer == "adam":
         optimizer = torch.optim.Adam(
             model.parameters(),
-            lr=json_opts.training_params.learning_rate,
-            betas=(json_opts.training_params.beta1, json_opts.training_params.beta2),
-            weight_decay=json_opts.training_params.weight_decay,
+            lr=config.training_params.learning_rate,
+            betas=(config.training_params.beta1, config.training_params.beta2),
+            weight_decay=config.training_params.weight_decay,
         )
     else:
         sys.exit("Select optimiser from rmsprop or adam")
@@ -117,7 +116,7 @@ def train(config):
     # Scheduler https://arxiv.org/pdf/1812.01187.pdf
     lf = (
         lambda x: (
-            ((1 + math.cos(x * math.pi / json_opts.training_params.total_epochs)) / 2)
+            ((1 + math.cos(x * math.pi / config.training_params.total_epochs)) / 2)
             ** 1.0
         )
         * 0.95
@@ -127,24 +126,24 @@ def train(config):
     scheduler.last_epoch = global_step
 
     # Starting epoch
-    if config.resume_epoch is not None:
-        initial_epoch = config.resume_epoch
+    if resume_epoch is not None:
+        initial_epoch = resume_epoch
     else:
         initial_epoch = 0
 
     # Restore saved model
-    if config.resume_epoch is not None:
+    if resume_epoch is not None:
         load_path = (
             experiment_path
             + "/"
-            + json_opts.experiment_dirs.model_dir
-            + "/epoch_%d_step_%d.pth" % (config.resume_epoch, config.resume_step)
+            + config.experiment_dirs.model_dir
+            + "/epoch_%d_step_%d.pth" % (resume_epoch, resume_step)
         )
         checkpoint = torch.load(load_path)
         model.load_state_dict(checkpoint["model_state_dict"])
         optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
         epoch = checkpoint["epoch"]
-        assert epoch == config.resume_epoch
+        assert epoch == resume_epoch
         print("Resume training, successfully loaded " + load_path)
 
     logging.info("Begin training")
@@ -153,7 +152,7 @@ def train(config):
 
     lrs = []
 
-    for epoch in range(initial_epoch, json_opts.training_params.total_epochs):
+    for epoch in range(initial_epoch, config.training_params.total_epochs):
         cur_lr = optimizer.param_groups[0]["lr"]
         print("\nEpoch =", (epoch + 1), " lr =", cur_lr)
 
@@ -177,11 +176,11 @@ def train(config):
             batch_n = batch_n.permute(3, 0, 1, 2)
 
             if batch_x313.shape[0] == 0:
-                if (step_epoch % json_opts.save_freqs.model_freq) == 0:
+                if (step_epoch % config.training_params.model_freq) == 0:
                     save_path = (
                         experiment_path
                         + "/"
-                        + json_opts.experiment_dirs.model_dir
+                        + config.experiment_dirs.model_dir
                         + "/epoch_%d_step_%d.pth" % (epoch + 1, step_epoch)
                     )
                     torch.save(
@@ -233,7 +232,7 @@ def train(config):
 
             step_train_loss = loss.detach().cpu().numpy()
 
-            if (global_step % json_opts.save_freqs.sample_freq) == 0:
+            if (global_step % config.training_params.sample_freq) == 0:
                 coords_h1 = coords_h1.detach().cpu().squeeze().numpy()
                 coords_w1 = coords_w1.detach().cpu().squeeze().numpy()
                 sample_seg = seg_pred.detach().cpu().numpy()
@@ -243,7 +242,7 @@ def train(config):
                 patch_fp = (
                     experiment_path
                     + "/"
-                    + json_opts.experiment_dirs.samples_dir
+                    + config.experiment_dirs.samples_dir
                     + "/epoch_%d_%d_%d_%d.png"
                     % (epoch + 1, step_epoch, coords_h1, coords_w1)
                 )
@@ -253,7 +252,7 @@ def train(config):
                 print(
                     "Epoch[{}/{}], Step[{}], Loss:{:.4f}".format(
                         epoch + 1,
-                        json_opts.training_params.total_epochs,
+                        config.training_params.total_epochs,
                         step_epoch,
                         step_train_loss,
                     )
@@ -265,11 +264,11 @@ def train(config):
                 #                                                                     step_pn_loss))
 
             # Save model
-            if (step_epoch % json_opts.save_freqs.model_freq) == 0:
+            if (step_epoch % config.training_params.model_freq) == 0:
                 save_path = (
                     experiment_path
                     + "/"
-                    + json_opts.experiment_dirs.model_dir
+                    + config.experiment_dirs.model_dir
                     + "/epoch_%d_step_%d.pth" % (epoch + 1, step_epoch)
                 )
                 torch.save(
@@ -301,24 +300,24 @@ def train(config):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    parser.add_argument(
-        "--config_file",
-        default="configs/config.json",
-        type=str,
-        help="config file path",
-    )
-    parser.add_argument(
-        "--resume_epoch",
-        default=None,
-        type=int,
-        help="resume training from this epoch, set to None for new training",
-    )
-    parser.add_argument(
-        "--resume_step", default=0, type=int, help="resume training from this step"
-    )
-    parser.add_argument(
-        "--total_steps", default=6000, type=int, help="total number of steps to train"
-    )
+    # parser.add_argument(
+    #     "--config_file",
+    #     default="configs/config.json",
+    #     type=str,
+    #     help="config file path",
+    # )
+    # parser.add_argument(
+    #     "--resume_epoch",
+    #     default=None,
+    #     type=int,
+    #     help="resume training from this epoch, set to None for new training",
+    # )
+    # parser.add_argument(
+    #     "--resume_step", default=0, type=int, help="resume training from this step"
+    # )
+    # parser.add_argument(
+    #     "--total_steps", default=6000, type=int, help="total number of steps to train"
+    # )
 
     config = parser.parse_args()
     train(config)

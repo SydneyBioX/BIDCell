@@ -20,7 +20,6 @@ from .utils.utils import (
     get_experiment_id,
     get_files_list,
     get_seg_mask,
-    json_file_to_pyobj,
     make_dir,
     save_fig_outputs,
     sorted_alphanumeric,
@@ -28,7 +27,6 @@ from .utils.utils import (
 
 
 def predict(config):
-    json_opts = json_file_to_pyobj(config.config_file)
 
     logging.basicConfig(
         format="%(asctime)s %(levelname)s %(message)s",
@@ -41,10 +39,10 @@ def predict(config):
 
     # Create experiment directories
     make_new = False
-    timestamp = get_experiment_id(make_new, json_opts.experiment_dirs.load_dir)
+    timestamp = get_experiment_id(make_new, config.experiment_dirs.load_dir)
     experiment_path = "experiments" + "/" + timestamp
-    model_dir = experiment_path + "/" + json_opts.experiment_dirs.model_dir
-    test_output_dir = experiment_path + "/" + json_opts.experiment_dirs.test_output_dir
+    model_dir = experiment_path + "/" + config.experiment_dirs.model_dir
+    test_output_dir = experiment_path + "/" + config.experiment_dirs.test_output_dir
     make_dir(test_output_dir)
 
     # Set up the model
@@ -54,9 +52,9 @@ def predict(config):
     n_genes = atlas_exprs.shape[1] - 3
     print("Number of genes: %d" % n_genes)
 
-    if json_opts.model_params.name != "custom":
+    if config.model_params.name != "custom":
         model = smp.Unet(
-            encoder_name=json_opts.model_params.name,
+            encoder_name=config.model_params.name,
             encoder_weights=None,
             in_channels=n_genes,
             classes=2,
@@ -67,7 +65,7 @@ def predict(config):
     model = model.to(device)
 
     # Get list of model files
-    if config.test_epoch < 0:
+    if config.testing_params.test_epoch < 0:
         saved_model_paths, _ = get_files_list(model_dir, [".pth"])
         saved_model_paths = sorted_alphanumeric(saved_model_paths)
         saved_model_names = [
@@ -75,26 +73,25 @@ def predict(config):
         ]
         saved_model_epochs = [x.split("_")[1] for x in saved_model_names]
         saved_model_steps = [x.split("_")[-1] for x in saved_model_names]
-        if config.test_epoch is None:
+        if config.testing_params.test_epoch is None:
             saved_model_epochs = np.array(saved_model_epochs, dtype="int")
             saved_model_steps = np.array(saved_model_steps, dtype="int")
-        elif config.test_epoch == -1:
+        elif config.testing_params.test_epoch == -1:
             saved_model_epochs = np.array(saved_model_epochs[-1], dtype="int")
             saved_model_epochs = [saved_model_epochs]
             saved_model_steps = np.array(saved_model_steps[-1], dtype="int")
             saved_model_steps = [saved_model_steps]
     else:
-        saved_model_epochs = [config.test_epoch]
-        saved_model_steps = [config.test_step]
+        saved_model_epochs = [config.testing_params.test_epoch]
+        saved_model_steps = [config.testing_params.test_step]
 
-    shifts = [0, int(json_opts.data_params.patch_size / 2)]
+    shifts = [0, int(config.model_params.patch_size / 2)]
 
     for shift_patches in shifts:
         # Dataloader
         logging.info("Preparing data")
         test_dataset = DataProcessing(
-            json_opts.data_sources,
-            json_opts.data_params,
+            config,
             isTraining=False,
             shift_patches=shift_patches,
         )
@@ -155,8 +152,8 @@ def predict(config):
                 if batch_x313.shape[0] == 0:
                     seg_patch = np.zeros(
                         (
-                            json_opts.data_params.patch_size,
-                            json_opts.data_params.patch_size,
+                            config.model_params.patch_size,
+                            config.model_params.patch_size,
                         ),
                         dtype=np.uint32,
                     )
@@ -178,7 +175,7 @@ def predict(config):
                     sample_expr = expr_aug_sum.detach().cpu().numpy()
                     patch_fp = current_dir + "/%d_%d.png" % (coords_h1, coords_w1)
 
-                    if (batch_idx % json_opts.save_freqs.sample_freq) == 0:
+                    if (batch_idx % config.training_params.sample_freq) == 0:
                         save_fig_outputs(
                             sample_seg, sample_n, sample_sa, sample_expr, patch_fp
                         )
@@ -189,8 +186,8 @@ def predict(config):
                 # tifffile.imwrite(seg_patch_fp, seg_patch.astype(np.uint32), photometric='minisblack')
 
                 whole_seg[
-                    coords_h1: coords_h1 + json_opts.data_params.patch_size,
-                    coords_w1: coords_w1 + json_opts.data_params.patch_size,
+                    coords_h1: coords_h1 + config.model_params.patch_size,
+                    coords_w1: coords_w1 + config.model_params.patch_size,
                 ] = seg_patch.copy()
 
             seg_fp = (
@@ -232,8 +229,7 @@ def fill_grid(config, dir_id):
 
     print("Combining predictions")
 
-    json_opts = json_file_to_pyobj(config.config_file)
-    patch_size = json_opts.data_params.patch_size
+    patch_size = config.model_params.patch_size
     shift = int(patch_size / 2)
 
     expr_fp = (
@@ -244,24 +240,23 @@ def fill_grid(config, dir_id):
         + config.files.dir_out_maps 
         + '/'
         + config.files.dir_patches
-        + str(json_opts.data_params.patch_size)
+        + str(config.model_params.patch_size)
         + "x"
-        + str(json_opts.data_params.patch_size)
+        + str(config.model_params.patch_size)
         + "_shift_"
         + str(shift)
     )
-    # expr_fp_ext = json_opts.data_sources.expr_fp_ext
     expr_fp_ext = ".hdf5"
 
     pred_fp = "%s/epoch_%d_step_%d_seg_shift0.tif" % (
         dir_id,
-        config.test_epoch,
-        config.test_step,
+        config.testing_params.test_epoch,
+        config.testing_params.test_step,
     )
     pred_fp_sf = "%s/epoch_%d_step_%d_seg_shift%d.tif" % (
         dir_id,
-        config.test_epoch,
-        config.test_step,
+        config.testing_params.test_epoch,
+        config.testing_params.test_step,
         shift,
     )
 
@@ -311,21 +306,21 @@ def fill_grid(config, dir_id):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    parser.add_argument(
-        "--config_file",
-        default="configs/config.json",
-        type=str,
-        help="config file path",
-    )
-    parser.add_argument(
-        "--test_epoch",
-        default=1,
-        type=int,
-        help="test model from this epoch, -1 for last, None for all",
-    )
-    parser.add_argument(
-        "--test_step", default=4000, type=int, help="test model from this step"
-    )
+    # parser.add_argument(
+    #     "--config_file",
+    #     default="configs/config.json",
+    #     type=str,
+    #     help="config file path",
+    # )
+    # parser.add_argument(
+    #     "--test_epoch",
+    #     default=1,
+    #     type=int,
+    #     help="test model from this epoch, -1 for last, None for all",
+    # )
+    # parser.add_argument(
+    #     "--test_step", default=4000, type=int, help="test model from this step"
+    # )
 
     config = parser.parse_args()
 

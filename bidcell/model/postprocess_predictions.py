@@ -30,13 +30,13 @@ def sorted_alphanumeric(data):
 
 
 def get_exp_dir(config):
-    if config.dir_id == "last":
+    if config.files.dir_id == "last":
         folders = next(os.walk("experiments"))[1]
         folders = sorted_alphanumeric(folders)
         folder_last = folders[-1]
         dir_id = folder_last.replace("\\", "/")
     else:
-        dir_id = config.dir_id
+        dir_id = config.files.dir_id
 
     return dir_id
 
@@ -211,8 +211,8 @@ def combine(config, dir_id, patch_size, nuclei_img):
     Combine the patches previously output by the connect function
     """
 
-    fp_dir = dir_id + "epoch_%d_step_%d_connected" % (config.epoch, config.step)
-    fp_unconnected = dir_id + "epoch_%d_step_%d.tif" % (config.epoch, config.step)
+    fp_dir = dir_id + "epoch_%d_step_%d_connected" % (config.testing_params.test_epoch, config.testing_params.test_step)
+    fp_unconnected = dir_id + "epoch_%d_step_%d.tif" % (config.testing_params.test_epoch, config.testing_params.test_step)
     fp_output_seg = fp_dir + ".tif"
 
     dl_pred = tifffile.imread(fp_unconnected)
@@ -335,10 +335,10 @@ def process_check_splits(config, dir_id, nuclei_img, seg_final, chunk_ids):
 def postprocess_predictions(config):
     dir_id = "experiments/" + get_exp_dir(config) + "/test_output/"
 
-    pred_fp = dir_id + "epoch_%d_step_%d.tif" % (config.epoch, config.step)
-    output_dir = dir_id + "epoch_%d_step_%d_connected/" % (config.epoch, config.step)
+    pred_fp = dir_id + "epoch_%d_step_%d.tif" % (config.testing_params.test_epoch, config.testing_params.test_step)
+    output_dir = dir_id + "epoch_%d_step_%d_connected/" % (config.testing_params.test_epoch, config.testing_params.test_step)
 
-    nucleus_fp = os.path.join(config.data_dir, config.dataset, config.nucleus_fp)
+    nucleus_fp = os.path.join(config.files.data_dir, config.files.dataset, config.files.fp_nuclei)
     nuclei_img = tifffile.imread(nucleus_fp)
 
     if not os.path.exists(output_dir):
@@ -346,7 +346,7 @@ def postprocess_predictions(config):
 
     img_whole = tifffile.imread(pred_fp)
 
-    patch_size = config.patch_size_mp
+    patch_size = config.postprocess.patch_size_mp
     h_starts = list(np.arange(0, img_whole.shape[0] - patch_size, patch_size))
     w_starts = list(np.arange(0, img_whole.shape[1] - patch_size, patch_size))
     h_starts.append(img_whole.shape[0] - patch_size)
@@ -355,7 +355,7 @@ def postprocess_predictions(config):
     print("%d patches available" % len(coords_starts))
 
     # num_processes = mp.cpu_count()
-    num_processes = get_n_processes(config.n_processes)
+    num_processes = get_n_processes(config.cpus)
     print("Num multiprocessing splits: %d" % num_processes)
 
     coords_splits = np.array_split(coords_starts, num_processes)
@@ -403,7 +403,7 @@ def postprocess_predictions(config):
 
     # print(len(np.unique(seg_final)))
 
-    fp_dir = dir_id + "epoch_%d_step_%d_connected" % (config.epoch, config.step)
+    fp_dir = dir_id + "epoch_%d_step_%d_connected" % (config.testing_params.test_epoch, config.testing_params.test_step)
     fp_output_seg = fp_dir + ".tif"
     print("Saved segmentation to %s" % fp_output_seg)
     tifffile.imwrite(
@@ -414,51 +414,51 @@ def postprocess_predictions(config):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    parser.add_argument(
-        "--data_dir", default="../../data/", type=str, help="root data directory"
-    )
-    parser.add_argument(
-        "--dataset",
-        default="dataset_merscope_melanoma2",
-        type=str,
-        help="name of dataset",
-    )
-    parser.add_argument(
-        "--dir_id",
-        default="last",
-        type=str,
-        help="name of experiment directory - either date format (e.g., 2023_08_23_06_45_38) or set to last for most recent",
-    )
-    parser.add_argument(
-        "--epoch",
-        default=1,
-        type=int,
-        help="the epoch of the model that generated the predictions",
-    )
-    parser.add_argument(
-        "--step",
-        default=4000,
-        type=int,
-        help="the step of the model that generated the prediction",
-    )
-    parser.add_argument(
-        "--nucleus_fp",
-        default="nuclei.tif",
-        type=str,
-        help="file path of nuclei .tif file",
-    )
-    parser.add_argument(
-        "--patch_size_mp",
-        default=1024,
-        type=int,
-        help="size of patches to perform morphological processing",
-    )
-    parser.add_argument(
-        "--n_processes",
-        default=None,
-        type=int,
-        help="number of CPUs for multiprocessing",
-    )
+    # parser.add_argument(
+    #     "--data_dir", default="../../data/", type=str, help="root data directory"
+    # )
+    # parser.add_argument(
+    #     "--dataset",
+    #     default="dataset_merscope_melanoma2",
+    #     type=str,
+    #     help="name of dataset",
+    # )
+    # parser.add_argument(
+    #     "--dir_id",
+    #     default="last",
+    #     type=str,
+    #     help="name of experiment directory - either date format (e.g., 2023_08_23_06_45_38) or set to last for most recent",
+    # )
+    # parser.add_argument(
+    #     "--epoch",
+    #     default=1,
+    #     type=int,
+    #     help="the epoch of the model that generated the predictions",
+    # )
+    # parser.add_argument(
+    #     "--step",
+    #     default=4000,
+    #     type=int,
+    #     help="the step of the model that generated the prediction",
+    # )
+    # parser.add_argument(
+    #     "--nucleus_fp",
+    #     default="nuclei.tif",
+    #     type=str,
+    #     help="file path of nuclei .tif file",
+    # )
+    # parser.add_argument(
+    #     "--patch_size_mp",
+    #     default=1024,
+    #     type=int,
+    #     help="size of patches to perform morphological processing",
+    # )
+    # parser.add_argument(
+    #     "--n_processes",
+    #     default=None,
+    #     type=int,
+    #     help="number of CPUs for multiprocessing",
+    # )
 
     config = parser.parse_args()
     postprocess_predictions(config)
