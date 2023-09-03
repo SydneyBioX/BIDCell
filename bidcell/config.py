@@ -7,7 +7,7 @@ import yaml
 
 
 class FileParams(BaseModel):
-    data_dir: str #TODO: absolute path - user will specify this relative to their current notebook/script, or can give absolute path
+    data_dir: str #TODO: absolute path - user will specify this relative to their current notebook/script, or can give absolute path os.path.abspath(data_dir)
     fp_dapi: str
     fp_transcripts: str
     fp_ref: str
