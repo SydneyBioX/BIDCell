@@ -32,9 +32,7 @@ class BIDCellModel:
         segment_nuclei(self.config)
         generate_expression_maps(self.config)
         generate_patches(self.config)
-        make_cell_gene_mat(
-            self.config, is_cell=True
-        )  # TODO: set config.cgm_params.only_expr (True for nuclei)
+        make_cell_gene_mat(self.config, is_cell=False)
         preannotate(self.config)
         # TODO: Which information do the end users need from the process?
 
@@ -61,14 +59,15 @@ class BIDCellModel:
 
     def predict(self) -> None:
         predict(self.config)
-        # TODO: figure out the most recent experiment. get_lastest_id()
-        if self.config.postprocess.dir_id == "last":
-            self.config.postprocess.dir_id = get_newest_id()
+
+        if self.config.experiment_dirs.dir_id == "last":
+            self.config.experiment_dirs.dir_id = get_newest_id(
+                False, self.config.experiment_dirs.dir_id, data_dir
+            )
+
         postprocess_predictions(self.config)
-        # TODO: Figure out final cell_gene_matrix call
-        # config.files.dir_output_matrices
-        # config.files.fp_seg
-        # config.cgm_params.only_expr (False for cells)
+
+        make_cell_gene_mat(self.config, is_cell=False)
 
     def set_config() -> None:
         # TODO: Document all config options and allow setting single or

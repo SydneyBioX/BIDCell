@@ -82,19 +82,21 @@ def get_newest_id(exp_dir="model_outputs"):
         Name of the latest experiment directory
     """
     folders = next(os.walk(exp_dir))[1]
+    if len(folders) == 0:
+        sys.exit(f"No model output folders found in {exp_dir}")
     folders = natsort.natsorted(folders)
     folder_last = folders[-1]
     exp_id = folder_last.replace("\\", "/")
     return exp_id
 
 
-def get_experiment_id(make_new, load_dir, exp_dir="model_outputs"):
+def get_experiment_id(make_new, load_dir, data_dir):
     """
     Get timestamp ID of current experiment
     """
     if make_new is False:
         if load_dir == "last":
-            timestamp = get_newest_id(exp_dir)
+            timestamp = get_newest_id(os.path.join(data_dir, "model_outputs"))
         else:
             timestamp = load_dir
     else:

@@ -48,7 +48,7 @@ def train(config: Config):
     timestamp = get_experiment_id(
         make_new,
         config.experiment_dirs.load_dir,
-        os.path.join(config.files.data_dir, "model_outputs"),
+        config.files.data_dir,
     )
     experiment_path = os.path.join(config.files.data_dir, "model_outputs", timestamp)
     make_dir(experiment_path + "/" + config.experiment_dirs.model_dir)

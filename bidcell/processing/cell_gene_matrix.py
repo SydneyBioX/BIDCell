@@ -92,17 +92,37 @@ def read_expr_csv(fp):
 
 def make_cell_gene_mat(config: Config, is_cell: bool):
     dir_dataset = config.files.data_dir
-    output_dir = os.path.join(dir_dataset, config.files.dir_output_matrices)
+
+    if is_cell == False:
+        output_dir = os.path.join(dir_dataset, dir_cgm, "nuclei")
+    else:
+        output_dir = os.path.join(dir_dataset, dir_cgm, config.experiment_dirs.dir_id)
+
     fp_transcripts_processed = os.path.join(
         dir_dataset, config.files.fp_transcripts_processed
     )
+
     fp_gene_names = os.path.join(dir_dataset, config.files.fp_gene_names)
+
     fp_affine = os.path.join(dir_dataset, config.files.fp_affine)
 
-    if config.files.fp_seg == "nuclei.tif":
-        fp_seg = os.path.join(dir_dataset, config.files.fp_seg)
+    if is_cell == False:
+        fp_seg = os.path.join(dir_dataset, config.files.fp_nuclei)
     else:
-        fp_seg = config.files.fp_seg
+        fp_seg_name = [
+            "epoch_"
+            + config.testing_params.test_epoch
+            + "_step_"
+            + config.testing_params.test_step
+            + "_connected.tif"
+        ]
+        fp_seg = os.path.join(
+            config.files.data_dir,
+            "model_outputs",
+            config.experiment_dirs.dir_id,
+            config.experiment_dirs.test_output_dir,
+            "".join(fp_seg_name),
+        )
 
     # Column names in the transcripts csv
     x_col = config.transcript_params.x_col
@@ -258,7 +278,7 @@ def make_cell_gene_mat(config: Config, is_cell: bool):
     else:
         df_out = pd.read_csv(output_dir + "/" + config.files.fp_expr, index_col=0)
 
-    if not config.cgm_params.only_expr:
+    if is_cell:
         print("Computing cell locations and sizes")
 
         matrix_all = df_out.to_numpy().astype(np.float32)
@@ -297,8 +317,8 @@ def make_cell_gene_mat(config: Config, is_cell: bool):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
+    parser.add_argument("--config_dir", type=str, help="path to config")
     parser.add_argument(
-        "--config_dir", type=str, help="path to config"
         "--is_cell", type=bool, help="whether to segment cells or nuclei"
     )
 

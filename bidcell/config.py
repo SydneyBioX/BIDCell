@@ -7,7 +7,7 @@ import yaml
 
 
 class FileParams(BaseModel):
-    data_dir: str #TODO: convert this to absolute path? - user will specify this relative to their current notebook/script, or give absolute path
+    data_dir: str #TODO: absolute path - user will specify this relative to their current notebook/script, or can give absolute path
     fp_dapi: str
     fp_transcripts: str
     fp_ref: str
@@ -29,8 +29,8 @@ class FileParams(BaseModel):
     fp_gene_names: str = "all_gene_names.txt"
     # directory prefix of transcript patches
     dir_patches: str = "expr_maps_input_patches_"
-    # directory for nuclei expression matrices
-    dir_expr_nuclei: str = "cell_gene_matrices/nuclei"
+    # directory for cell-gene expression matrices
+    dir_cgm: str = "cell_gene_matrices"
     # file name of nuclei expression matrices
     fp_expr: str = "cell_expr.csv"
     # file name of nuclei annotations
@@ -40,9 +40,6 @@ class FileParams(BaseModel):
 
     # Internal
     fp_stitched: str | None = None
-    # TODO: Compute based on newest exp dir.
-    # fp_seg: str
-    # dir_output_matrices: str
 
 
 class NucleiFovParams(BaseModel):
@@ -53,7 +50,6 @@ class NucleiFovParams(BaseModel):
     pattern_f: str = "F###"
     channel_first: bool = False
     channel_dapi: int = -1
-    fp_dapi_stitched: str = "dapi_preprocessed.tif"
     n_fov: int | None = None
     min_fov: int | None = None
     n_fov_h: int | None = None
@@ -172,12 +168,11 @@ class TestingParams(BaseModel):
 class PostprocessParams(BaseModel):
     # size of patches to perform morphological processing
     patch_size_mp: int = 1024
-    dir_id: str | None = None
 
 
 class ExperimentDirs(BaseModel):
     # directory names for each experiment 
-    load_dir: str = "last"
+    dir_id: str = "last"
     model_dir: str = "models"
     test_output_dir: str = "test_output"
     samples_dir: str = "samples"
