@@ -68,13 +68,13 @@ def json_file_to_pyobj(filename):
     return json2obj(open(filename).read())
 
 
-def get_newest_id(exp_dir="experiments"):
+def get_newest_id(exp_dir="model_outputs"):
     """Get the latest experiment ID based on its timestamp
 
     Parameters
     ----------
     exp_dir : str, optional
-        Name of the directory that contains all the experiment directories, by default 'experiments'
+        Name of the directory that contains all the experiment directories
 
     Returns
     -------
@@ -88,13 +88,13 @@ def get_newest_id(exp_dir="experiments"):
     return exp_id
 
 
-def get_experiment_id(make_new, load_dir):
+def get_experiment_id(make_new, load_dir, exp_dir="model_outputs"):
     """
     Get timestamp ID of current experiment
     """
     if make_new is False:
         if load_dir == "last":
-            timestamp = get_newest_id("experiments")
+            timestamp = get_newest_id(exp_dir)
         else:
             timestamp = load_dir
     else:

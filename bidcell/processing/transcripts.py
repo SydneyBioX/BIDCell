@@ -109,7 +109,7 @@ def generate_expression_maps(config: Config):
 
     """
 
-    dir_dataset = os.path.join(config.files.data_dir, config.files.dataset)
+    dir_dataset = config.files.data_dir
     dir_out_maps = dir_dataset + "/" + config.files.dir_out_maps
     if not os.path.exists(dir_out_maps):
         os.makedirs(dir_out_maps)
@@ -117,9 +117,10 @@ def generate_expression_maps(config: Config):
     fp_transcripts_processed = dir_dataset + "/" + config.files.fp_transcripts_processed
 
     # Names to filter out
-    fp_transcripts_to_filter = os.path.join(config.files.data_dir, config.files.fp_transcripts_to_filter)
-    with open(fp_transcripts_to_filter) as file:
-        transcripts_to_filter = [line.rstrip() for line in file]
+    # fp_transcripts_to_filter = os.path.join(config.files.data_dir, config.files.fp_transcripts_to_filter)
+    # with open(fp_transcripts_to_filter) as file:
+    #     transcripts_to_filter = [line.rstrip() for line in file]
+    transcripts_to_filter = config.transcripts.transcripts_to_filter
 
     # Column names in the transcripts csv
     x_col = config.transcript_params.x_col

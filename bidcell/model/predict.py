@@ -41,8 +41,12 @@ def predict(config):
 
     # Create experiment directories
     make_new = False
-    timestamp = get_experiment_id(make_new, config.experiment_dirs.load_dir)
-    experiment_path = "experiments" + "/" + timestamp
+    timestamp = get_experiment_id(
+        make_new,
+        config.experiment_dirs.load_dir,
+        os.path.join(config.files.data_dir, "model_outputs"),
+    )
+    experiment_path = os.path.join(config.files.data_dir, "model_outputs", timestamp)
     model_dir = experiment_path + "/" + config.experiment_dirs.model_dir
     test_output_dir = experiment_path + "/" + config.experiment_dirs.test_output_dir
     make_dir(test_output_dir)
@@ -236,8 +240,6 @@ def fill_grid(config, dir_id):
 
     expr_fp = (
         config.files.data_dir 
-        + '/' 
-        + config.files.dataset
         + '/' 
         + config.files.dir_out_maps 
         + '/'

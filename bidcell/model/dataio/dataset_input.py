@@ -34,8 +34,6 @@ class DataProcessing(data.Dataset):
         self.expr_fp = (
             config.files.data_dir
             + "/"
-            + config.files.dataset
-            + "/"
             + config.files.dir_out_maps
             + "/"
             + config.files.dir_patches
@@ -47,13 +45,13 @@ class DataProcessing(data.Dataset):
         )
 
         self.nuclei_fp = os.path.join(
-            config.files.data_dir, config.files.dataset, config.files.fp_nuclei
+            config.files.data_dir, config.files.fp_nuclei
         )
         self.nuclei_types_fp = os.path.join(
-            config.files.data_dir, config.files.dataset, config.files.fp_nuclei_anno
+            config.files.data_dir, config.files.fp_nuclei_anno
         )
         self.gene_names_fp = os.path.join(
-            config.files.data_dir, config.files.dataset, config.files.fp_gene_names
+            config.files.data_dir, config.files.fp_gene_names
         )
 
         self.pos_markers_fp = config.files.fp_pos_markers

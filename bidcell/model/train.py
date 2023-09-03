@@ -28,7 +28,6 @@ from ..config import load_config, Config
 
 
 def train(config: Config):
-
     logging.basicConfig(
         format="%(asctime)s %(levelname)s %(message)s",
         level=logging.INFO,
@@ -39,14 +38,19 @@ def train(config: Config):
     device = torch.device("cuda" if use_cuda else "cpu")
 
     # Create experiment directories
-    resume_epoch = None # could be added
+    resume_epoch = None  # could be added
     resume_step = 0
     if resume_epoch is None:
         make_new = True
     else:
         make_new = False
-    timestamp = get_experiment_id(make_new, config.experiment_dirs.load_dir)
-    experiment_path = "experiments" + "/" + timestamp
+
+    timestamp = get_experiment_id(
+        make_new,
+        config.experiment_dirs.load_dir,
+        os.path.join(config.files.data_dir, "model_outputs"),
+    )
+    experiment_path = os.path.join(config.files.data_dir, "model_outputs", timestamp)
     make_dir(experiment_path + "/" + config.experiment_dirs.model_dir)
     make_dir(experiment_path + "/" + config.experiment_dirs.samples_dir)
 
@@ -301,9 +305,7 @@ def train(config: Config):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    parser.add_argument(
-        "--config_dir", type=str, help="path to config"
-    )
+    parser.add_argument("--config_dir", type=str, help="path to config")
 
     args = parser.parse_args()
     config = load_config(args.config_dir)

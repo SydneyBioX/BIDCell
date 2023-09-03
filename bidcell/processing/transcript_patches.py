@@ -17,7 +17,7 @@ def generate_patches(config: Config):
 
     """
     dir_dataset = os.path.join(
-        config.files.data_dir, config.files.dataset, config.files.dir_out_maps
+        config.files.data_dir, config.files.dir_out_maps
     )
 
     patch_size = config.model_params.patch_size

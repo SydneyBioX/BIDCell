@@ -82,7 +82,7 @@ def process_chunk_corr(matrix, dir_output, sc_expr, sc_labels, n_atlas_types):
 
 
 def preannotate(config: Config):
-    dir_dataset = os.path.join(config.files.data_dir, config.files.dataset)
+    dir_dataset = config.files.data_dir
     expr_dir = os.path.join(dir_dataset, config.dir_expr_nuclei)
 
     # Cell expressions - order of gene names (columns) will be in same order as all_gene_names.txt

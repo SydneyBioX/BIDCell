@@ -91,7 +91,7 @@ def read_expr_csv(fp):
 
 
 def make_cell_gene_mat(config: Config, is_cell: bool):
-    dir_dataset = os.path.join(config.files.data_dir, config.files.dataset)
+    dir_dataset = config.files.data_dir
     output_dir = os.path.join(dir_dataset, config.files.dir_output_matrices)
     fp_transcripts_processed = os.path.join(
         dir_dataset, config.files.fp_transcripts_processed

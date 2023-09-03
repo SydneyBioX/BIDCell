@@ -7,8 +7,7 @@ import yaml
 
 
 class FileParams(BaseModel):
-    data_dir: str
-    dataset: str
+    data_dir: str #TODO: convert this to absolute path? - user will specify this relative to their current notebook/script, or give absolute path
     fp_dapi: str
     fp_transcripts: str
     fp_ref: str
@@ -22,8 +21,6 @@ class FileParams(BaseModel):
     fp_nuclei: str = "nuclei.tif"
     # file name of resized DAPI image
     fp_rdapi: str = "dapi_resized.tif"
-    # txt file containing names of transcripts to filter out
-    fp_transcripts_to_filter: str = "transcripts_to_filter.txt"
     # directory containing processed gene expression maps
     dir_out_maps: str = "expr_maps"
     # filtered and xy-scaled transcripts data
@@ -93,6 +90,7 @@ class TranscriptParams(BaseModel):
     y_col: str = "y_location"
     gene_col: str = "feature_name"
     counts_col: str | None = None
+    transcripts_to_filter: list[str]
 
 
 class AffineParams(BaseModel):
@@ -178,7 +176,7 @@ class PostprocessParams(BaseModel):
 
 
 class ExperimentDirs(BaseModel):
-    # directory names for each experiment under bidcell/model/experiments
+    # directory names for each experiment 
     load_dir: str = "last"
     model_dir: str = "models"
     test_output_dir: str = "test_output"

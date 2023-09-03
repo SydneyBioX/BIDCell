@@ -30,7 +30,7 @@ def sorted_alphanumeric(data):
 
 def get_exp_dir(config):
     if config.files.dir_id == "last":
-        folders = next(os.walk("experiments"))[1]
+        folders = next(os.walk("model_outputs"))[1]
         folders = sorted_alphanumeric(folders)
         folder_last = folders[-1]
         dir_id = folder_last.replace("\\", "/")
@@ -332,12 +332,12 @@ def process_check_splits(config, dir_id, nuclei_img, seg_final, chunk_ids):
 
 
 def postprocess_predictions(config: Config):
-    dir_id = "experiments/" + get_exp_dir(config) + "/test_output/"
+    dir_id = config.files.data_dir + "/model_outputs/" + get_exp_dir(config.files.data_dir) + "/test_output/"
 
     pred_fp = dir_id + "epoch_%d_step_%d.tif" % (config.testing_params.test_epoch, config.testing_params.test_step)
     output_dir = dir_id + "epoch_%d_step_%d_connected/" % (config.testing_params.test_epoch, config.testing_params.test_step)
 
-    nucleus_fp = os.path.join(config.files.data_dir, config.files.dataset, config.files.fp_nuclei)
+    nucleus_fp = os.path.join(config.files.data_dir, config.files.fp_nuclei)
     nuclei_img = tifffile.imread(nucleus_fp)
 
     if not os.path.exists(output_dir):

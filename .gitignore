@@ -1,6 +1,6 @@
 **/__pycache__
 **/cell_gene_matrices
-bidcell/model/experiments
+**/model_outputs
 *.tif
 *.pbs
 *.csv

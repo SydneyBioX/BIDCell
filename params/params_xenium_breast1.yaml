@@ -4,8 +4,7 @@
 cpus: 16 # number of CPUs for multiprocessing
 
 files:
-  data_dir: ../../data/ # root data directory for processed/output data
-  dataset: dataset_xenium_breast1 # name of dataset under data/
+  data_dir: ../../data/dataset_xenium_breast1 # data directory for processed/output data
   fp_dapi: ../../data/dataset_xenium_breast1/morphology_mip.ome.tif # name of DAPI image
   fp_transcripts: ../../data/dataset_xenium_breast1/transcripts.csv.gz # path of transcripts file
   fp_ref: ../../data/sc_references/sc_breast.csv # file path of reference data
@@ -40,6 +39,13 @@ transcripts:
   y_col: y_location # name of y location column in transcripts file
   gene_col: feature_name # name of genes column in transcripts file
   # counts_col: MIDCounts # name of counts column in transcripts file, eg MIDCounts, default: None
+  transcripts_to_filter: 
+  - NegControlProbe_
+  - antisense_
+  - NegControlCodeword_
+  - BLANK_
+  - Blank-
+  - NegPrb
 
 affine:
   target_pix_um: 1.0 # microns per pixel to perform segmentation; default: 1.0

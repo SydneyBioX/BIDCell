@@ -28,7 +28,7 @@ def segment_dapi(img, diameter=None, use_cpu=False):
 
 
 def segment_nuclei(config: Config):
-    dir_dataset = os.path.join(config.files.data_dir, config.files.dataset)
+    dir_dataset = config.files.data_dir
 
     print("Reading DAPI image")
     fp_dapi = config.files.fp_dapi

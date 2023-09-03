@@ -67,7 +67,7 @@ def read_dapi(fp, channel_first, channel_dapi):
 
 
 def stitch_nuclei(config: Config):
-    dir_dataset = os.path.join(config.files.data_dir, config.files.dataset)
+    dir_dataset = config.files.data_dir
 
     if not config.nuclei_fovs.dir_dapi:
         dir_dapi = dir_dataset
