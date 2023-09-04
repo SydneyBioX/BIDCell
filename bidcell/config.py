@@ -4,7 +4,7 @@ from typing import Literal
 from typing_extensions import Annotated
 
 import yaml
-from pydantic import BaseModel, computed_field, model_validator
+from pydantic import BaseModel, computed_field, model_validator, ConfigDict
 from pydantic.functional_validators import AfterValidator
 
 
@@ -15,7 +15,7 @@ def validate_path(v: str | None) -> str:
     path = Path(v)
 
     assert (
-        not path.exists()
+        path.exists()
     ), f"Invalid path {v}: Ensure you have the correct path in your config file."
 
     return str(path.resolve())
@@ -78,7 +78,7 @@ class NucleiFovParams(BaseModel):
     mip: bool = False
     flip_ud: bool = False
 
-    @model_validator
+    @model_validator(mode='after')
     def check_dapi(self):
         if not self.stitch_nuclei_fovs:
             return self
@@ -165,9 +165,6 @@ class CellGeneMatParams(BaseModel):
     # max h+w for resized segmentation to extract expressions from
     max_sum_hw: int = 50000
 
-    # Internal
-    only_expr: bool
-
 
 class ModelParams(BaseModel):
     name: str = "custom"  # TODO: Validate this field
@@ -176,6 +173,7 @@ class ModelParams(BaseModel):
 
 
 class TrainingParams(BaseModel):
+    model_config = ConfigDict(protected_namespaces=())
     total_epochs: int = 1
     total_steps: int = 4000
     # learning rate of DL model
@@ -211,6 +209,7 @@ class PostprocessParams(BaseModel):
 
 
 class ExperimentDirs(BaseModel):
+    model_config = ConfigDict(protected_namespaces=())
     # directory names for each experiment
     dir_id: str = "last"
     model_dir: str = "models"
@@ -219,6 +218,7 @@ class ExperimentDirs(BaseModel):
 
 
 class Config(BaseModel):
+    model_config = ConfigDict(protected_namespaces=())
     files: FileParams
     nuclei_fovs: NucleiFovParams
     nuclei: NucleiParams
@@ -228,9 +228,9 @@ class Config(BaseModel):
     training_params: TrainingParams
     testing_params: TestingParams
     cpus: int
-    postprocess: PostprocessParams
+    postprocess: PostprocessParams = PostprocessParams()
     experiment_dirs: ExperimentDirs = ExperimentDirs()
-    cgm_params: CellGeneMatParams
+    cgm_params: CellGeneMatParams = CellGeneMatParams()
 
 
 def load_config(path: str) -> Config:
