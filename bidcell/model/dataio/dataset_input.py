@@ -289,7 +289,7 @@ class DataProcessing(data.Dataset):
                     search_areas[:, :, i_cell] = cv2.dilate(
                         nucl_split[:, :, i_cell], kernel_elong, iterations=1
                     )
-                except:
+                except Exception:
                     search_areas[:, :, i_cell] = cv2.dilate(
                         nucl_split[:, :, i_cell], kernel, iterations=1
                     )

@@ -2,6 +2,7 @@ import argparse
 import logging
 import math
 import sys
+import os
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -229,11 +230,11 @@ def train(config: Config):
             loss.backward()
             optimizer.step()
 
-            step_ne_loss = loss_ne.detach().cpu().numpy()
-            step_os_loss = loss_os.detach().cpu().numpy()
-            step_cc_loss = loss_cc.detach().cpu().numpy()
-            step_ov_loss = loss_ov.detach().cpu().numpy()
-            step_pn_loss = loss_pn.detach().cpu().numpy()
+            step_ne_loss = loss_ne.detach().cpu().numpy() # noqa
+            step_os_loss = loss_os.detach().cpu().numpy() # noqa
+            step_cc_loss = loss_cc.detach().cpu().numpy() # noqa
+            step_ov_loss = loss_ov.detach().cpu().numpy() # noqa
+            step_pn_loss = loss_pn.detach().cpu().numpy() # noqa
 
             step_train_loss = loss.detach().cpu().numpy()
 

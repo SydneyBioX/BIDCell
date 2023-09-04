@@ -226,7 +226,7 @@ def gap_coords(coords, patcsize):
     return gap
 
 
-def fill_grid(config, dir_id):
+def fill_grid(config: Config, dir_id: str):
     """
     Combine predictions from unshifted and shifted patches to remove
     border effects
@@ -316,4 +316,4 @@ if __name__ == "__main__":
 
     test_output_dir = predict(config)
 
-    fill_grid(config, test_output_dir)  # TODO: why fill gird and not predict!
+    fill_grid(config, test_output_dir)

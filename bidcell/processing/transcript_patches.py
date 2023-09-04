@@ -91,7 +91,7 @@ def generate_patches(config: Config):
                 fp_output = f"{dir_output}/{h+map_coords[0]}_{w+map_coords[2]}.hdf5"
 
                 h = h5py.File(fp_output, "w")
-                dset = h.create_dataset("data", data=patch, dtype=np.uint8)
+                _ = h.create_dataset("data", data=patch, dtype=np.uint8)
                 h.close()
 
 

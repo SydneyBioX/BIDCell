@@ -80,7 +80,7 @@ def stitch_patches(dir_patches, fp_pattern):
     whole = np.zeros((height, width), dtype=np.uint16)
 
     for i, fp in enumerate(fp_patches):
-        hs, he, ws, we = coords[i, 0], coords[i, 1], coords[i, 2], coords[i, 3]
+        hs, _, ws, _ = coords[i, 0], coords[i, 1], coords[i, 2], coords[i, 3]
         whole[hs : hs + height_patch, ws : ws + width_patch] = tifffile.imread(fp)
 
     height_trim = np.max(coords[:, 1])
@@ -321,7 +321,7 @@ def generate_expression_maps(config: Config):
         # Save to hdf5
         fp_out_map = f"all_genes_{hs}_{he}_{ws}_{we}.hdf5"
         h = h5py.File(dir_out_maps + "/" + fp_out_map, "w")
-        dset = h.create_dataset("data", data=map_all_genes, dtype=np.uint8)
+        _ = h.create_dataset("data", data=map_all_genes, dtype=np.uint8)
 
     print("Saved all maps")
 
