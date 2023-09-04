@@ -63,7 +63,7 @@ def process_chunk_meta(
 
                 # cell_size
                 output[cur_i, 3] = len(coords[0]) / (scale_pix_x * scale_pix_y)
-            except:
+            except Exception:
                 output[cur_i, 1] = -1
                 output[cur_i, 2] = -1
                 output[cur_i, 3] = -1
@@ -86,14 +86,14 @@ def read_expr_csv(fp):
     try:
         print("Reading filtered transcripts")
         return pd.read_csv(fp)
-    except:
+    except Exception:
         sys.exit(f"Cannot read {fp}")
 
 
 def make_cell_gene_mat(config: Config, is_cell: bool):
     dir_dataset = config.files.data_dir
 
-    if is_cell == False:
+    if is_cell is False:
         output_dir = os.path.join(dir_dataset, dir_cgm, "nuclei")
     else:
         output_dir = os.path.join(dir_dataset, dir_cgm, config.experiment_dirs.dir_id)
@@ -104,9 +104,7 @@ def make_cell_gene_mat(config: Config, is_cell: bool):
 
     fp_gene_names = os.path.join(dir_dataset, config.files.fp_gene_names)
 
-    fp_affine = os.path.join(dir_dataset, config.files.fp_affine)
-
-    if is_cell == False:
+    if is_cell is False:
         fp_seg = os.path.join(dir_dataset, config.files.fp_nuclei)
     else:
         fp_seg_name = [
