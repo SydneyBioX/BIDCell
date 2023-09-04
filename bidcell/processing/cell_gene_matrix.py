@@ -92,6 +92,7 @@ def read_expr_csv(fp):
 
 def make_cell_gene_mat(config: Config, is_cell: bool):
     dir_dataset = config.files.data_dir
+    dir_cgm = config.files.dir_cgm
 
     if is_cell is False:
         output_dir = os.path.join(dir_dataset, dir_cgm, "nuclei")
