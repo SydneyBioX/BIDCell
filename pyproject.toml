@@ -23,7 +23,7 @@ opencv-python = "^4.8.0.76"
 pillow = "^10.0.0"
 pyyaml = "^6.0.1"
 pydantic = "^2.3.0"
-torch = "^2.0.1"
+torch = {version = "^2.0.1+cpu", source = "pytorch"}
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.7.0"
@@ -31,6 +31,12 @@ ipykernel = "^6.25.1"
 deptry = "^0.12.0"
 flake8 = "^6.1.0"
 ipython = "^8.14.0"
+
+[[tool.poetry.source]]
+name = "pytorch"
+url = "https://download.pytorch.org/whl/cpu"
+priority = "explicit"
+
 
 [build-system]
 requires = ["poetry-core"]
