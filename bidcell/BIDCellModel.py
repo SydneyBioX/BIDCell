@@ -61,7 +61,7 @@ class BIDCellModel:
 
         if self.config.experiment_dirs.dir_id == "last":
             self.config.experiment_dirs.dir_id = get_newest_id(
-                self.config.files.data_dir
+                os.path.join(self.config.files.data_dir, "model_outputs")
             )
 
         postprocess_predictions(self.config)
