@@ -1,9 +1,10 @@
 """BIDCellModel class module"""
 from typing import Optional
 from multiprocessing import cpu_count
+import os
 
 from .model.postprocess_predictions import postprocess_predictions
-from .model.predict import predict
+from .model.predict import predict, fill_grid
 from .model.train import train
 from .processing.cell_gene_matrix import make_cell_gene_mat
 from .processing.nuclei_segmentation import segment_nuclei
@@ -59,10 +60,11 @@ class BIDCellModel:
     def predict(self) -> None:
         predict(self.config)
 
-        if self.config.experiment_dirs.dir_id == "last":
-            self.config.experiment_dirs.dir_id = get_newest_id(
-                self.config.files.data_dir
-            )
+        last = get_newest_id(
+            os.path.join(self.config.files.data_dir, "model_outputs")
+        )
+
+        fill_grid(self.config, last)
 
         postprocess_predictions(self.config)
 
