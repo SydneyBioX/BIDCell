@@ -60,9 +60,13 @@ class BIDCellModel:
     def predict(self) -> None:
         predict(self.config)
 
-        last = get_newest_id(
-            os.path.join(self.config.files.data_dir, "model_outputs")
-        )
+        if self.config.experiment_dirs.dir_id == "last":
+            last = get_newest_id(
+                os.path.join(self.config.files.data_dir, "model_outputs")
+            )
+        else:
+            last = self.config.experiment_dirs.dir_id
+            # TODO: check if it is a valid experiement dir
 
         fill_grid(self.config, last)
 
