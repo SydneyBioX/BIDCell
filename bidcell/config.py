@@ -1,18 +1,36 @@
 import os
-from pydantic import BaseModel, computed_field
-from typing import Literal
 from pathlib import Path
+from typing import Literal
+from typing_extensions import Annotated
 
 import yaml
+from pydantic import BaseModel, computed_field, model_validator
+from pydantic.functional_validators import AfterValidator
+
+
+def validate_path(v: str | None) -> str:
+    if v is None:
+        return v
+
+    path = Path(v)
+
+    assert (
+        not path.exists()
+    ), f"Invalid path {v}: Ensure you have the correct path in your config file."
+
+    return str(path.resolve())
+
+
+PathString = Annotated[str, AfterValidator(validate_path)]
 
 
 class FileParams(BaseModel):
-    data_dir: str #TODO: absolute path - user will specify this relative to their current notebook/script, or can give absolute path os.path.abspath(data_dir)
-    fp_dapi: str
-    fp_transcripts: str
-    fp_ref: str
-    fp_pos_markers: str
-    fp_neg_markers: str
+    data_dir: PathString
+    fp_dapi: PathString | None = None
+    fp_transcripts: PathString
+    fp_ref: PathString
+    fp_pos_markers: PathString
+    fp_neg_markers: PathString
 
     # Internal defaults
     # file of affine transformation - needed if cropping to align DAPI to transcripts
@@ -59,7 +77,29 @@ class NucleiFovParams(BaseModel):
     z_level: int = 1
     mip: bool = False
     flip_ud: bool = False
-    # TODO: Add validator for class which checks if dir_dapi is present if stitch_nuclei_fovs is True
+
+    @model_validator
+    def check_dapi(self):
+        if not self.stitch_nuclei_fovs:
+            return self
+
+        if self.dir_dapi is None:
+            raise ValueError(
+                "dir_dapi must be specified if stitch_nuclei_fovs is True."
+            )
+
+        p = Path(self.dir_dapi)
+
+        if not p.exists():
+            raise ValueError(
+                "Invalid value for dir_dapi ({self.dir_dapi}): Check the config file and ensure the correct directory is specified."
+            )
+
+        if not p.is_dir():
+            raise ValueError(
+                "dir_dapi is not a directory: dir_dapi must point to a directory containing the FOVs to be stitched together."
+            )
+        return self
 
 
 class NucleiParams(BaseModel):
@@ -171,7 +211,7 @@ class PostprocessParams(BaseModel):
 
 
 class ExperimentDirs(BaseModel):
-    # directory names for each experiment 
+    # directory names for each experiment
     dir_id: str = "last"
     model_dir: str = "models"
     test_output_dir: str = "test_output"
