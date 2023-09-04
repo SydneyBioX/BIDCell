@@ -34,7 +34,6 @@ class BIDCellModel:
         generate_patches(self.config)
         make_cell_gene_mat(self.config, is_cell=False)
         preannotate(self.config)
-        # TODO: Which information do the end users need from the process?
 
     def stitch_nuclei(self):
         stitch_nuclei(self.config)
@@ -62,24 +61,9 @@ class BIDCellModel:
 
         if self.config.experiment_dirs.dir_id == "last":
             self.config.experiment_dirs.dir_id = get_newest_id(
-                False, self.config.experiment_dirs.dir_id, data_dir
+                self.config.files.data_dir
             )
 
         postprocess_predictions(self.config)
 
         make_cell_gene_mat(self.config, is_cell=False)
-
-    def set_config() -> None:
-        # TODO: Document all config options and allow setting single or
-        #       multiple options at a time.
-        raise NotImplementedError()
-
-    def __repr__(self) -> str:
-        """Returns formatted BIDCellModel as a string with
-        key configuration options listed as well as information about completed
-        steps.
-
-        Returns
-        -------
-        str"""
-        return "Not implemented yet!"
