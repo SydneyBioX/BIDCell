@@ -28,8 +28,7 @@ from .utils.utils import (
 from ..config import load_config, Config
 
 
-def predict(config):
-
+def predict(config: Config) -> str:
     logging.basicConfig(
         format="%(asctime)s %(levelname)s %(message)s",
         level=logging.INFO,
@@ -192,8 +191,8 @@ def predict(config):
                 # tifffile.imwrite(seg_patch_fp, seg_patch.astype(np.uint32), photometric='minisblack')
 
                 whole_seg[
-                    coords_h1: coords_h1 + config.model_params.patch_size,
-                    coords_w1: coords_w1 + config.model_params.patch_size,
+                    coords_h1 : coords_h1 + config.model_params.patch_size,
+                    coords_w1 : coords_w1 + config.model_params.patch_size,
                 ] = seg_patch.copy()
 
             seg_fp = (
@@ -239,10 +238,10 @@ def fill_grid(config, dir_id):
     shift = int(patch_size / 2)
 
     expr_fp = (
-        config.files.data_dir 
-        + '/' 
-        + config.files.dir_out_maps 
-        + '/'
+        config.files.data_dir
+        + "/"
+        + config.files.dir_out_maps
+        + "/"
         + config.files.dir_patches
         + str(config.model_params.patch_size)
         + "x"
@@ -310,9 +309,7 @@ def fill_grid(config, dir_id):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    parser.add_argument(
-        "--config_dir", type=str, help="path to config"
-    )
+    parser.add_argument("--config_dir", type=str, help="path to config")
 
     args = parser.parse_args()
     config = load_config(args.config_dir)
