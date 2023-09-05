@@ -124,9 +124,9 @@ def make_cell_gene_mat(config: Config, is_cell: bool):
         )
 
     # Column names in the transcripts csv
-    x_col = config.transcript_params.x_col
-    y_col = config.transcript_params.y_col
-    gene_col = config.transcript_params.gene_col
+    x_col = config.transcripts.x_col
+    y_col = config.transcripts.y_col
+    gene_col = config.transcripts.gene_col
 
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
@@ -156,15 +156,15 @@ def make_cell_gene_mat(config: Config, is_cell: bool):
     # affine = pd.read_csv(fp_affine, index_col=0, header=None, sep='\t')
     # scale_x_tr = float(affine.loc["scale_x"].item())
     # scale_y_tr = float(affine.loc["scale_y"].item())
-    # scale_pix_x = (scale_x_tr*config.affine_params.scale_pix_x)
-    # scale_pix_y = (scale_y_tr*config.affine_params.scale_pix_y)
-    scale_pix_x = config.affine_params.scale_pix_x
-    scale_pix_y = config.affine_params.scale_pix_y
+    # scale_pix_x = (scale_x_tr*config.affine.scale_pix_x)
+    # scale_pix_y = (scale_y_tr*config.affine.scale_pix_y)
+    scale_pix_x = config.affine.scale_pix_x
+    scale_pix_y = config.affine.scale_pix_y
 
     if not os.path.exists(output_dir + "/" + config.files.fp_expr):
         # Rescale to pixel size
-        height_pix = np.round(height / config.affine_params.scale_pix_y).astype(int)
-        width_pix = np.round(width / config.affine_params.scale_pix_x).astype(int)
+        height_pix = np.round(height / config.affine.scale_pix_y).astype(int)
+        width_pix = np.round(width / config.affine.scale_pix_x).astype(int)
 
         seg_map = cv2.resize(
             seg_map_mi.astype(np.int32),
