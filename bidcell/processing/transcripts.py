@@ -123,9 +123,9 @@ def generate_expression_maps(config: Config):
     transcripts_to_filter = config.transcripts.transcripts_to_filter
 
     # Column names in the transcripts csv
-    x_col = config.transcript_params.x_col
-    y_col = config.transcript_params.y_col
-    gene_col = config.transcript_params.gene_col
+    x_col = config.transcripts.x_col
+    y_col = config.transcripts.y_col
+    gene_col = config.transcripts.gene_col
 
     if not os.path.exists(fp_transcripts_processed):
         print("Loading transcripts file")
@@ -145,7 +145,7 @@ def generate_expression_maps(config: Config):
         print("Filtering transcripts")
         if "qv" in df.columns:
             df = df[
-                (df["qv"] >= config.transcript_params.min_qv)
+                (df["qv"] >= config.transcripts.min_qv)
                 & (~df[gene_col].str.startswith(tuple(transcripts_to_filter)))
             ]
         else:
@@ -158,17 +158,17 @@ def generate_expression_maps(config: Config):
 
         # Scale
         print(df[x_col].min(), df[x_col].max(), df[y_col].min(), df[y_col].max())
-        df[x_col] = df[x_col].mul(config.affine_params.scale_ts_x)
-        df[y_col] = df[y_col].mul(config.affine_params.scale_ts_y)
+        df[x_col] = df[x_col].mul(config.affine.scale_ts_x)
+        df[y_col] = df[y_col].mul(config.affine.scale_ts_y)
         print(df[x_col].min(), df[x_col].max(), df[y_col].min(), df[y_col].max())
 
         # Shift
         min_x = df[x_col].min()
         min_y = df[y_col].min()
-        if config.transcript_params.shift_to_origin:
+        if config.transcripts.shift_to_origin:
             with pd.option_context("mode.chained_assignment", None):
-                df.loc[:, x_col] = df[x_col] - min_x + config.affine_params.global_shift_x
-                df.loc[:, y_col] = df[y_col] - min_y + config.affine_params.global_shift_y
+                df.loc[:, x_col] = df[x_col] - min_x + config.affine.global_shift_x
+                df.loc[:, y_col] = df[y_col] - min_y + config.affine.global_shift_y
 
         size_x = df[x_col].max() + 1
         size_y = df[y_col].max() + 1
@@ -187,15 +187,15 @@ def generate_expression_maps(config: Config):
             "origin",
         ]
         vals = [
-            config.affine_params.scale_ts_x,
-            config.affine_params.scale_ts_y,
+            config.affine.scale_ts_x,
+            config.affine.scale_ts_y,
             min_x,
             min_y,
             size_x,
             size_y,
-            config.affine_params.global_shift_x,
-            config.affine_params.global_shift_y,
-            config.transcript_params.shift_to_origin,
+            config.affine.global_shift_x,
+            config.affine.global_shift_y,
+            config.transcripts.shift_to_origin,
         ]
         with open(fp_affine, "w") as f:
             writer = csv.writer(f, delimiter="\t")
@@ -255,8 +255,8 @@ def generate_expression_maps(config: Config):
     print(f"Total height {total_height}, width {total_width}")
 
     # Start and end coordinates of patches
-    h_coords, img_height = get_patches_coords(total_height, config.transcript_params.max_height)
-    w_coords, img_width = get_patches_coords(total_width, config.transcript_params.max_width)
+    h_coords, img_height = get_patches_coords(total_height, config.transcripts.max_height)
+    w_coords, img_width = get_patches_coords(total_width, config.transcripts.max_width)
     hw_coords = [(hs, he, ws, we) for (hs, he) in h_coords for (ws, we) in w_coords]
 
     print("Converting to maps")
@@ -291,7 +291,7 @@ def generate_expression_maps(config: Config):
                     gene_col,
                     x_col,
                     y_col,
-                    config.transcript_params.counts_col,
+                    config.transcripts.counts_col,
                 ),
             )
             processes.append(p)

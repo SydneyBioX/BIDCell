@@ -36,7 +36,7 @@ def segment_nuclei(config: Config):
     dapi = tifffile.imread(fp_dapi)
 
     # Crop to size of transcript map (requires getting transcript maps first)
-    if config.nuclei_params.crop_nuclei_to_ts:
+    if config.nuclei.crop_nuclei_to_ts:
         # Get starting coordinates
         fp_affine = os.path.join(dir_dataset, config.files.fp_affine)
 
@@ -55,19 +55,19 @@ def segment_nuclei(config: Config):
 
     # Process patch-wise if too large
     if (
-        dapi_h > config.nuclei_params.max_height
-        or dapi_w > config.nuclei_params.max_width
-        or config.affine_params.scale_pix_x != 1.0
-        or config.affine_params.scale_pix_y != 1.0
+        dapi_h > config.nuclei.max_height
+        or dapi_w > config.nuclei.max_width
+        or config.affine.scale_pix_x != 1.0
+        or config.affine.scale_pix_y != 1.0
     ):
-        if config.nuclei_params.max_height is None:
+        if config.nuclei.max_height is None:
             max_height = dapi_h
         else:
-            max_height = config.nuclei_params.max_height if config.nuclei_params.max_height < dapi_h else dapi_h
-        if config.nuclei_params.max_width is None:
+            max_height = config.nuclei.max_height if config.nuclei.max_height < dapi_h else dapi_h
+        if config.nuclei.max_width is None:
             max_width = dapi_w
         else:
-            max_width = config.nuclei_params.max_width if config.nuclei_params.max_width < dapi_w else dapi_w
+            max_width = config.nuclei.max_width if config.nuclei.max_width < dapi_w else dapi_w
 
         print(f"Segmenting DAPI patches h: {max_height} w: {max_width}")
 
@@ -81,8 +81,8 @@ def segment_nuclei(config: Config):
         w_patch_sizes = [we - ws for (ws, we) in w_coords]
 
         # Determine the resized patch sizes
-        rh_patch_sizes = [round(y * config.affine_params.scale_pix_y) for y in h_patch_sizes]
-        rw_patch_sizes = [round(x * config.affine_params.scale_pix_x) for x in w_patch_sizes]
+        rh_patch_sizes = [round(y * config.affine.scale_pix_y) for y in h_patch_sizes]
+        rw_patch_sizes = [round(x * config.affine.scale_pix_x) for x in w_patch_sizes]
         rhw_patch_sizes = [
             (hsize, wsize) for hsize in rh_patch_sizes for wsize in rw_patch_sizes
         ]
@@ -114,7 +114,7 @@ def segment_nuclei(config: Config):
             rdapi[h : h + hsize, w : w + wsize] = patch_resized
 
             # Segment nuclei in each patch and place into final segmentation with unique ID
-            patch_nuclei = segment_dapi(patch_resized, config.nuclei_params.diameter, config.nuclei_params.use_cpu)
+            patch_nuclei = segment_dapi(patch_resized, config.nuclei.diameter, config.nuclei.use_cpu)
             nuclei_mask = np.where(patch_nuclei > 0, 1, 0)
             nuclei[h : h + hsize, w : w + wsize] = patch_nuclei + total_n * nuclei_mask
             unique_ids = np.unique(patch_nuclei)
