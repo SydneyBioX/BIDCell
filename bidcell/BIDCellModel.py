@@ -51,7 +51,7 @@ class BIDCellModel:
         """  
         if self.config.nuclei_fovs.stitch_nuclei_fovs:
             stitch_nuclei(self.config)
-        if self.nuclei.crop_nuclei_to_ts:
+        if self.config.nuclei.crop_nuclei_to_ts:
             generate_expression_maps(self.config)
             segment_nuclei(self.config)
         else:

@@ -163,7 +163,7 @@ class AffineParams(BaseModel):
 
 class CellGeneMatParams(BaseModel):
     # max h+w for resized segmentation to extract expressions from
-    max_sum_hw: int = 10000
+    max_sum_hw: int = 30000
 
 
 class ModelParams(BaseModel):
