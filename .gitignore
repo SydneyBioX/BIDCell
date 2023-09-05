@@ -11,6 +11,7 @@
 **/check.py
 example_data/
 dist
+params_small_example.yaml
 
 !morphology_mip_small.tif
 !transcripts_small.csv

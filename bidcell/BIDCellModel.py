@@ -148,7 +148,7 @@ class BIDCellModel:
         copytree(data_path, Path().cwd() / "example_data")
         if with_config:
             copyfile(
-                root / "example_params" / "params_small_example.yaml",
+                root / "example_params" / "small_example.yaml",
                 Path().cwd() / "params_small_example.yaml"
             )
 

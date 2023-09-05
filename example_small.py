@@ -1,8 +1,8 @@
 from bidcell import BIDCellModel
 
-model = BIDCellModel("params_small_example.yaml")
+# BIDCellModel.get_example_data()
 
-model.get_example_data()
+model = BIDCellModel("params_small_example.yaml")
 
 model.run_pipeline()
 
