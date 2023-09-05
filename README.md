@@ -66,7 +66,7 @@ Or, functions in `preprocess` can be called individually:
 
         from bidcell import BIDCellModel
         model = BIDCellModel("xenium_example_config.yaml")
-        # model.stitch_nuclei() # for CosMx if nuclei separated into FOVs
+        # model.stitch_nuclei() # for when nuclei images are separated into FOVs (e.g., CosMx)
         model.segment_nuclei()
         model.generate_expression_maps()
         model.generate_patches()
@@ -89,7 +89,7 @@ Only <1,000 genes are needed to perform segmentation. Specify a selection of gen
 
 
 ## Segmentation architectures:
-The default is UNet3+ https://arxiv.org/abs/2004.08790, and we have found it to perform well across different technologies and tissue types
+The default is UNet3+ https://arxiv.org/abs/2004.08790, and we have found it to perform well across different technologies and tissue types.
 To use a different architecture, select from a list of popular backbones or define your own:
   - Set `model_params.name` in the .yaml file with an encoder from https://segmentation-modelspytorch.readthedocs.io/en/latest/index.html
   - Or, modify `SegmentationModel` class in [`model.py`](bidcell/model/model/model.py)
@@ -97,7 +97,7 @@ To use a different architecture, select from a list of popular backbones or defi
 
 ## Additional information
 
-If you receive the error: ``pickle.UnpicklingError: pickle data was truncated``, try reducing `--n_processes`
+If you receive the error: ``pickle.UnpicklingError: pickle data was truncated``, try reducing `cpus`
 
 Performing segmentation at a higher resolution requires a larger patch size, thus more GPU memory.
 
