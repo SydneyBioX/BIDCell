@@ -187,7 +187,7 @@ def stitch_nuclei(config: Config):
         stitched[h_start:h_end, w_start:w_end] = fov_img.copy()
 
     # Save
-    fp_output = dir_dataset + "/" + config.nuclei_fovs.fp_dapi
+    fp_output = os.path.join(dir_dataset, "dapi_stitched.tif")
     tifffile.imwrite(fp_output, stitched, photometric="minisblack")
     print(f"Saved {fp_output}")
 

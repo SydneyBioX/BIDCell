@@ -57,7 +57,7 @@ class FileParams(BaseModel):
     fp_selected_genes: str | None = None
 
     # Internal
-    fp_stitched: str | None = None
+    # fp_stitched: str | None = None
 
 
 class NucleiFovParams(BaseModel):
