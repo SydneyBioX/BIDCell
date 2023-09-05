@@ -26,22 +26,53 @@ We ran BIDCell on a Linux system with a 12GB NVIDIA GTX Titan V GPU, Intel(R) Co
 Installation of dependencies typically requires a few minutes. 
 
 
-## Demo data
+## Demo
 
-A small subset of Xenium breast cancer data is provided as a demo. Use the following to run all the steps to check installation:
+A small subset of Xenium breast cancer data is provided as a demo. Use the following to run all the steps to verify installation:
 
         python example_small.py
 
-The full dataset (Xenium Output Bundle In Situ Replicate 1) may be downloaded from https://www.10xgenomics.com/products/xenium-in-situ/preview-dataset-human-breast. Place `morphology_mip.ome.tif` and `transcripts.csv.gz` under 
-
-4 major platforms, including Xenium, CosMx, MERSCOPE, and Stereo-seq
-
 ## Parameters
 
+Parameters are defined in .yaml files. Examples are provided for 4 major platforms, including Xenium, CosMx, MERSCOPE, and Stereo-seq. BIDCell may also be applied to data from other technologies such as MERFISH. To view examples, run: 
 
+        from bidcell import BIDCellModel
+        BIDCellModel.get_example_config("xenium")
+        BIDCellModel.get_example_config("cosmx")
+        BIDCellModel.get_example_config("merscope")
+        BIDCellModel.get_example_config("stereoseq")
 
+This will copy the .yaml for the respective vendor into your working directory, for example `xenium_example_config.yaml`. 
 
+## Example usage
 
+The full dataset (Xenium Output Bundle In Situ Replicate 1) may be downloaded from https://www.10xgenomics.com/products/xenium-in-situ/preview-dataset-human-breast. The breast cancer reference data are provided with this package under `data/sc_references`, or `./example_data/sc_references` if you have run `example_small.py`. Please ensure the correct paths are provided for the parameters under `files` in `xenium_example_config.yaml`, in particular, the paths for the transcripts (`transcripts.csv.gz`) and DAPI (`morphology_mip.ome.tif`) files.
+
+To run the entire pipeline (data processing, training, prediction, and extracting the cell-gene matrix):
+
+        from bidcell import BIDCellModel
+        model = BIDCellModel("xenium_example_config.yaml")
+        model.run_pipeline()
+
+Alternatively, the pipeline can be broken down into 3 main stages:
+
+        from bidcell import BIDCellModel
+        model = BIDCellModel("xenium_example_config.yaml")
+        model.preprocess()
+        model.train()
+        model.predict()
+
+Or, functions in `preprocess` can be called individually:
+
+        from bidcell import BIDCellModel
+        model = BIDCellModel("xenium_example_config.yaml")
+        model.segment_nuclei()
+        model.generate_expression_maps()
+        model.generate_patches()
+        model.make_cell_gene_mat(is_cell=False)
+        model.preannotate()
+        model.train()
+        model.predict()
 
 ## Single-cell reference and markers
 
@@ -56,59 +87,18 @@ The positive and negative markers files contain the respective marker genes for 
 Only <1,000 genes are needed to perform segmentation. Specify a selection of genes in a file (see Stero-seq example).
 
 
-<!-- ## Running BIDCell for your dataset
-
-Several steps are involved in the entire pipeline to generate segmentations and cell-gene matrices from DAPI images and detected transcripts. These steps can be grouped into:
-
-1. Data preprocessing
-    - Nuclei segmentation
-    - Preparing transcriptomic images and patches
-    - Preannotation of nuclei
-2. Model training
-3. Prediction and extracting cell expressions
-
-### Config files
-
-In `bidcell/model/configs` create a config file, e.g., `config_cosmx_nsclc.json`
-- Update `data_sources` for current dataset
-- Specify `elongated` cell types
-- The weights of losses typically can all be left at 1.0, but if cells are too small or big, try adjusting `cc_weight` to 0.5 (to reduce size) or 2.0 (to increase size)
-
-Segmentation architectures:
-- The default is UNet3+ https://arxiv.org/abs/2004.08790, and we have found it to perform well across different technologies and tissue types
-- To use a different architecture, select from a list of popular backbones or define your own:
-  - Set `model_params.name` in the config file with an encoder from https://segmentation-modelspytorch.readthedocs.io/en/latest/index.html
-  - Or, modify `SegmentationModel` class in [`model.py`](bidcell/model/model.py)
-
-### Setting up the script to run all steps
-
-Example scripts are provided for different datasets/platforms to run all steps. BIDCell may also be applied to data from other technologies such as MERFISH. The format of different datasets varies. Please take note of the arguments:
-
-- `dataset`: name of dataset
-- `fp_dapi`: name of DAPI image
-- `fp_transcripts`: name of transcripts file
-- `x_col`: name of x location column in transcripts file
-- `y_col`: name of y location column in transcripts file
-- `gene_col`: name of genes column in transcripts file
-- `fp_config`: name of config file under `bidcell/model/configs`
-- `n_processes`: number of CPUs for multiprocessing
-
-If you receive the error: ``pickle.UnpicklingError: pickle data was truncated``, try reducing `--n_processes`
-
-Scaling and alignment arguments:
-- `target_pix_um`: microns per pixel to perform segmentation 
-- `base_pix_x`: convert to microns along width by multiplying the original pixels by base_pix_x microns per pixel
-- `base_pix_y`: convert to microns along height by multiplying the original pixels by base_pix_y microns per pixel
-- `base_ts_x`: convert between transcript locations and target pixels along width
-- `base_ts_y`: convert between transcript locations and target pixels along height
-- `global_shift_x`: additional adjustment to align transcripts to DAPI in target pixels along image width
-- `global_shift_y`: additional adjustment to align transcripts to DAPI in target pixels along image height
-- `patch_size`: size of input patches to segmentation model
-
-Performing segmentation at a higher resolution requires a larger patch size, thus more GPU memory.  -->
+## Segmentation architectures:
+The default is UNet3+ https://arxiv.org/abs/2004.08790, and we have found it to perform well across different technologies and tissue types
+To use a different architecture, select from a list of popular backbones or define your own:
+  - Set `model_params.name` in the .yaml file with an encoder from https://segmentation-modelspytorch.readthedocs.io/en/latest/index.html
+  - Or, modify `SegmentationModel` class in [`model.py`](bidcell/model/model/model.py)
 
 
 ## Additional information
+
+If you receive the error: ``pickle.UnpicklingError: pickle data was truncated``, try reducing `--n_processes`
+
+Performing segmentation at a higher resolution requires a larger patch size, thus more GPU memory.
 
 Expected outputs:
 - .tif file of segmented cells, where the value corresponds to cell IDs

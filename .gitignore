@@ -14,6 +14,7 @@ data_large/
 dist
 params_small_example.yaml
 *_example_config.yaml
+example_large.py
 
 !morphology_mip_small.tif
 !transcripts_small.csv

@@ -12,7 +12,7 @@ files:
   fp_neg_markers: ./data_large/sc_references/sc_nsclc_markers_neg.csv # file path of negative markers
 
 nuclei_fovs:
-  stitch_nuclei_fovs: False # set True to stitch separate FOVs of DAPI together in 1 image
+  stitch_nuclei_fovs: True # set True to stitch separate FOVs of DAPI together in 1 image
   dir_dapi: ./data_large/dataset_cosmx_nsclc/Lung5_Rep1-RawMorphologyImages # name of directory containing the DAPI FOV images
   ext_dapi: tif # extension of the DAPI images
   pattern_z: Z### # String pattern to find in the file names for the Z number, or None for no Z component
