@@ -78,7 +78,7 @@ class NucleiFovParams(BaseModel):
     mip: bool = False
     flip_ud: bool = False
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def check_dapi(self):
         if not self.stitch_nuclei_fovs:
             return self
