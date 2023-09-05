@@ -66,7 +66,7 @@ model_params:
 
 training_params:
   total_epochs: 1 # number of training epochs; default: 1
-  total_steps: 20 # number of training steps; default: 4000
+  total_steps: 60 # number of training steps; default: 4000
   ne_weight: 1.0 # weight for nuclei encapsulation loss; default: 1.0
   os_weight: 1.0 # weight for oversegmentation loss; default: 1.0
   cc_weight: 1.0 # weight for cell-calling loss; default: 1.0
@@ -76,7 +76,7 @@ training_params:
 
 testing_params:
   test_epoch: 1 # epoch to test; default: 1
-  test_step: 10 # step number to test; default: 4000
+  test_step: 60 # step number to test; default: 4000
 
 experiment_dirs:
   dir_id: last # specify timestamp of output dir or leave blank to use latest dir, default: last

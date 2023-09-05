@@ -345,7 +345,12 @@ def postprocess_predictions(config: Config, dir_id: str):
 
     img_whole = tifffile.imread(pred_fp)
 
-    patch_size = config.postprocess.patch_size_mp
+    smallest_dim = np.min(img_whole.shape)
+    if config.postprocess.patch_size_mp < smallest_dim:
+        patch_size = config.postprocess.patch_size_mp
+    else:
+        patch_size = smallest_dim
+
     h_starts = list(np.arange(0, img_whole.shape[0] - patch_size, patch_size))
     w_starts = list(np.arange(0, img_whole.shape[1] - patch_size, patch_size))
     h_starts.append(img_whole.shape[0] - patch_size)
