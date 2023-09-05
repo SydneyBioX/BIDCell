@@ -70,16 +70,16 @@ class BIDCellModel:
 
     def generate_expression_maps(self):
         """Generate the expression maps. Runs inside preprocess by default.
-        """        
+        """
         generate_expression_maps(self.config)
 
     def generate_patches(self):
-        """Generate patches for training. Runs inside preprocess by default
+        """Generate patches for training. Runs inside preprocess by default.
         """
         generate_patches(self.config)
 
     def make_cell_gene_mat(self, is_cell: bool, timestamp: str = "last"):
-        """Make a matrix containing counts for each cell.
+        """Make a matrix containing counts for each cell. Runs inside preprocess and predict by default.
 
         Args:
             is_cell (bool): If False, uses nuclei masks for creation, other wise it uses `timestamp` to chose a directory containing segmented cells outputted by BIDCell which can be in the data directory under `model_outputs`. Defaults to 'last', in which case it uses the folder with the most recent timestamp.
@@ -88,33 +88,46 @@ class BIDCellModel:
             timestamp = get_newest_id(
                 os.path.join(self.config.files.data_dir, "model_outputs")
             )
-        make_cell_gene_mat(self.config, is_cell, last=timestamp)
+        else:
+            self.__check_valid_timestamp(timestamp)
+        make_cell_gene_mat(self.config, is_cell, timestamp=timestamp)
 
     def preannotate(self):
+        """Preannotate the cells. Runs inside preprocess by default.
+        """
         preannotate(self.config)
 
     def train(self) -> None:
+        """Train the model.
+        """
         train(self.config)
 
     def predict(self) -> None:
+        """Segment and annotate the cells.
+        """
         predict(self.config)
 
         if self.config.experiment_dirs.dir_id == "last":
-            last = get_newest_id(
+            timestamp = get_newest_id(
                 os.path.join(self.config.files.data_dir, "model_outputs")
             )
         else:
-            last = self.config.experiment_dirs.dir_id
-            # TODO: check if it is a valid experiement dir
+            timestamp = self.config.experiment_dirs.dir_id
+            self.__check_valid_timestamp(timestamp)
 
-        fill_grid(self.config, last)
+        fill_grid(self.config, timestamp)
 
-        postprocess_predictions(self.config, last)
+        postprocess_predictions(self.config, timestamp)
 
-        make_cell_gene_mat(self.config, is_cell=True, last=last)
+        make_cell_gene_mat(self.config, is_cell=True, timestamp=timestamp)
 
     @staticmethod
     def get_example_config(vendor: str) -> None:
+        """Gets an example configuration for a given vendor and places it in the working directory.
+
+        Args:
+            vendor (str): The vendor of the equiptment used to produce the dataset.
+        """
         # TODO: Check if the vendor is valid
         params_path = (
             importlib.resources.files("bidcell") / "example_params" / f"{vendor}.yaml"
@@ -123,6 +136,11 @@ class BIDCellModel:
 
     @staticmethod
     def get_example_data(with_config: bool = True) -> None:
+        """Gets the small example data included in the package and places it in the current working directory.
+
+        Args:
+            with_config (bool, optional): Whether to get the configuration for the example data. Defaults to True.
+        """
         root: Path = importlib.resources.files("bidcell")
         data_path = (
             root.parent / "data"
