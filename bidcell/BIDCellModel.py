@@ -84,11 +84,11 @@ class BIDCellModel:
         Args:
             is_cell (bool): If False, uses nuclei masks for creation, other wise it uses `timestamp` to chose a directory containing segmented cells outputted by BIDCell which can be in the data directory under `model_outputs`. Defaults to 'last', in which case it uses the folder with the most recent timestamp.
         """
-        if timestamp == "last":
+        if is_cell == True and timestamp == "last":
             timestamp = get_newest_id(
                 os.path.join(self.config.files.data_dir, "model_outputs")
             )
-        else:
+        elif is_cell == True:
             self.__check_valid_timestamp(timestamp)
         make_cell_gene_mat(self.config, is_cell, timestamp=timestamp)
 
