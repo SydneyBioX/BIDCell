@@ -151,3 +151,18 @@ class BIDCellModel:
                 root / "example_params" / "params_xenium_breast1.yaml",
                 Path().cwd() / "example_data_params.yaml"
             )
+
+    def __check_valid_timestamp(self, timestamp: str) -> None:
+        outputs_path = Path(self.config.files.data_dir / "model_outputs")
+        outputs = list(outputs_path.iterdir())
+        if len(outputs) == 0:
+            raise ValueError(
+                f"There are no outputs yet under {str(outputs_path)}. Run BIDCell at least once with this dataset to get some."
+            )
+        if not any(
+            [timestamp == x for x in outputs if x.is_dir()]
+        ):
+            valid_dirs = "\n".join(["\t" + str(x) for x in outputs])
+            raise ValueError(
+                f"{timestamp} is not a valid model output directory (set in configuration YAML under `experiment_dirs.dir_id`). Choose one of the following:\n{valid_dirs}"
+            )
