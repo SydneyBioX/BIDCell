@@ -1,6 +1,6 @@
 from bidcell import BIDCellModel
 
-model = BIDCellModel("params/params_xenium_breast1_small.yaml")
+model = BIDCellModel("params/params_small.yaml")
 
 model.preprocess()
 

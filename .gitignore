@@ -9,7 +9,7 @@
 **/check_cells.py
 **/show_cells_by_id.py
 **/check.py
-data/
+data/*
 dist
 
 !dataset_xenium_breast1_small.zip
