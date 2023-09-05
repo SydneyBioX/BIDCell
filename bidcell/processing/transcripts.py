@@ -157,10 +157,10 @@ def generate_expression_maps(config: Config):
         df = df[(df[gene_col].isin(selected_genes))]
 
     # Scale
-    print(df[x_col].min(), df[x_col].max(), df[y_col].min(), df[y_col].max())
+    # print(df[x_col].min(), df[x_col].max(), df[y_col].min(), df[y_col].max())
     df[x_col] = df[x_col].mul(config.affine.scale_ts_x)
     df[y_col] = df[y_col].mul(config.affine.scale_ts_y)
-    print(df[x_col].min(), df[x_col].max(), df[y_col].min(), df[y_col].max())
+    # print(df[x_col].min(), df[x_col].max(), df[y_col].min(), df[y_col].max())
 
     # Shift
     min_x = df[x_col].min()
@@ -197,7 +197,7 @@ def generate_expression_maps(config: Config):
         config.affine.global_shift_y,
         config.transcripts.shift_to_origin,
     ]
-    print(vals)
+    # print(vals)
     with open(fp_affine, "w") as f:
         writer = csv.writer(f, delimiter="\t")
         writer.writerows(zip(params, vals))

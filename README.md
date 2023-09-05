@@ -28,13 +28,11 @@ Installation of dependencies typically requires a few minutes.
 
 ## Demo data
 
-small subset of the Xenium breast cancer dataset, run to check installation 
+A small subset of Xenium breast cancer data is provided as a demo. Use the following to run all the steps to check installation:
 
         python example_small.py
 
-Full sized datasets
-
-For example, the Xenium breast cancer dataset (Xenium Output Bundle In Situ Replicate 1) may be downloaded from https://www.10xgenomics.com/products/xenium-in-situ/preview-dataset-human-breast. Place `morphology_mip.ome.tif` and `transcripts.csv.gz` under 
+The full dataset (Xenium Output Bundle In Situ Replicate 1) may be downloaded from https://www.10xgenomics.com/products/xenium-in-situ/preview-dataset-human-breast. Place `morphology_mip.ome.tif` and `transcripts.csv.gz` under 
 
 4 major platforms, including Xenium, CosMx, MERSCOPE, and Stereo-seq
 
