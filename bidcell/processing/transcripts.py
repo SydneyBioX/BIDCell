@@ -152,7 +152,7 @@ def generate_expression_maps(config: Config):
         df = df[(~df[gene_col].str.startswith(tuple(transcripts_to_filter)))]
 
     if config.files.fp_selected_genes is not None:
-        with open(dir_dataset + "/" + config.files.fp_selected_genes) as file:
+        with open(config.files.fp_selected_genes) as file:
             selected_genes = [line.rstrip() for line in file]
         df = df[(df[gene_col].isin(selected_genes))]
 

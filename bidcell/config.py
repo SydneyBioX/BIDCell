@@ -53,7 +53,7 @@ class FileParams(BaseModel):
     fp_expr: str = "cell_expr.csv"
     # file name of nuclei annotations
     fp_nuclei_anno: str = "nuclei_cell_type.h5"
-    # file name of text file containing selected gene names
+    # file name of text file containing selected gene names, e.g. selected_genes.txt
     fp_selected_genes: str | None = None
 
     # Internal
@@ -193,7 +193,7 @@ class TrainingParams(BaseModel):
     pos_weight: float = 1.0
     neg_weight: float = 1.0
     # number of training steps per model save
-    model_freq: int = 10
+    model_freq: int = 1000
     # number of training steps per sample save
     sample_freq: int = 100
 
@@ -205,7 +205,7 @@ class TestingParams(BaseModel):
 
 class PostprocessParams(BaseModel):
     # size of patches to perform morphological processing
-    patch_size_mp: int = 200
+    patch_size_mp: int = 1024
 
 
 class ExperimentDirs(BaseModel):
