@@ -54,6 +54,11 @@ def train(config: Config):
     experiment_path = os.path.join(config.files.data_dir, "model_outputs", timestamp)
     make_dir(experiment_path + "/" + config.experiment_dirs.model_dir)
     make_dir(experiment_path + "/" + config.experiment_dirs.samples_dir)
+    
+    if config.training_params.model_freq <= config.testing_params.test_step:
+        model_freq = config.training_params.model_freq  
+    else:
+        model_freq = config.testing_params.test_step
 
     # Set up the model
     logging.info("Initialising model")
@@ -182,7 +187,7 @@ def train(config: Config):
             batch_n = batch_n.permute(3, 0, 1, 2)
 
             if batch_x313.shape[0] == 0:
-                if (step_epoch % config.training_params.model_freq) == 0:
+                if (step_epoch % model_freq) == 0:
                     save_path = (
                         experiment_path
                         + "/"
@@ -230,11 +235,11 @@ def train(config: Config):
             loss.backward()
             optimizer.step()
 
-            step_ne_loss = loss_ne.detach().cpu().numpy() # noqa
-            step_os_loss = loss_os.detach().cpu().numpy() # noqa
-            step_cc_loss = loss_cc.detach().cpu().numpy() # noqa
-            step_ov_loss = loss_ov.detach().cpu().numpy() # noqa
-            step_pn_loss = loss_pn.detach().cpu().numpy() # noqa
+            # step_ne_loss = loss_ne.detach().cpu().numpy() # noqa
+            # step_os_loss = loss_os.detach().cpu().numpy() # noqa
+            # step_cc_loss = loss_cc.detach().cpu().numpy() # noqa
+            # step_ov_loss = loss_ov.detach().cpu().numpy() # noqa
+            # step_pn_loss = loss_pn.detach().cpu().numpy() # noqa
 
             step_train_loss = loss.detach().cpu().numpy()
 
@@ -270,7 +275,7 @@ def train(config: Config):
                 #                                                                     step_pn_loss))
 
             # Save model
-            if (step_epoch % config.training_params.model_freq) == 0:
+            if (step_epoch % model_freq) == 0:
                 save_path = (
                     experiment_path
                     + "/"
