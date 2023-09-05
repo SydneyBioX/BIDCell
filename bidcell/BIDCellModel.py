@@ -148,7 +148,7 @@ class BIDCellModel:
         copytree(data_path, Path().cwd() / "example_data")
         if with_config:
             copyfile(
-                root / "example_params" / "params_xenium_breast1.yaml",
+                root / "example_params" / "params_small_example.yaml",
                 Path().cwd() / "example_data_params.yaml"
             )
 

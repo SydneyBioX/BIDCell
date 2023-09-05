@@ -12,7 +12,9 @@
 data/*
 dist
 
-!dataset_xenium_breast1_small.zip
+!morphology_mip_small.tif
+!transcripts_small.csv
+# !dataset_xenium_breast1_small.zip
 !sc_breast.csv
 !sc_breast_markers_neg.csv
 !sc_breast_markers_pos.csv

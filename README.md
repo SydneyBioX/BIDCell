@@ -1,7 +1,5 @@
 # BIDCell: Biologically-informed self-supervised learning for segmentation of subcellular spatial transcriptomics data
 
-> **Note**: This version of the code was tested across 4 major platforms, including Xenium, CosMx, MERSCOPE, and Stereo-seq. Please take care with the appropriate arguments that need to be provided. Also, we are in the the process of making a Python package for BIDCell.
-
 For more details of our method, please refer to: https://doi.org/10.1101/2023.06.13.544733
 
 Recent advances in subcellular imaging transcriptomics platforms have enabled spatial mapping of the expression of hundreds of genes at subcellular resolution and provide topographic context to the data. This has created a new data analytics challenge to correctly identify cells and accurately assign transcripts, ensuring that all available data can be utilised. To this end, we introduce BIDCell, a self-supervised deep learning-based framework that incorporates cell type and morphology information via novel biologically-informed loss functions. We also introduce CellSPA, a comprehensive evaluation framework consisting of metrics in five complementary categories for cell segmentation performance. We demonstrate that BIDCell outperforms other state-of-the-art methods according to many CellSPA metrics across a variety of tissue types of technology platforms, including 10x Genomics Xenium. Taken together, we find that BIDCell can facilitate single-cell spatial expression analyses, including cell-cell interactions, enabling great potential in biological discovery.
@@ -13,62 +11,38 @@ Recent advances in subcellular imaging transcriptomics platforms have enabled sp
 > **Note**: A GPU with at least 12GB VRAM is strongly recommended for the deep learning component, and 32GB RAM for data processing.
 We ran BIDCell on a Linux system with a 12GB NVIDIA GTX Titan V GPU, Intel(R) Core(TM) i9-9900K CPU @ 3.60GHz with 16 threads, and 64GB RAM.
 
-1. Clone repository:
+1. Create virtual environment (Python>=3.9,<3.13):
     
-        git clone https://github.com/SydneyBioX/BIDCell.git
-
-2. Create virtual environment:
+        conda create --name bidcell python=3.10
     
-        conda create --name BIDCell python=3.7
+2. Activate virtual environment:
     
-3. Activate virtual environment:
+        conda activate bidcell
+
+4. Install package:
     
-        conda activate BIDCell
+        python -m pip install bidcell
 
-4. Install dependencies:
-    
-        pip install -r requirements.txt
-
-        conda install pytorch==1.11.0 torchvision==0.12.0 torchaudio==0.11.0 cudatoolkit=11.3 -c pytorch
-
-    Installation of dependencies typically requires a few minutes. 
+Installation of dependencies typically requires a few minutes. 
 
 
-## Datasets
+## Demo data
 
-Under `data` create a folder for each dataset. In this folder, place the transcripts file and the DAPI-stained images. The preprocessed data and the extracted cell-gene matrices will be stored in this folder.
+small subset of the Xenium breast cancer dataset, run to check installation 
 
-Example folder structure and files for different datasets/platforms:
+        python example_small.py
 
-```
-├── BIDCell
-│   ├── bidcell
-│   │   ├── ...
-│   ├── data
-│   │   ├── dataset_xenium_breast1
-|   │   │   ├── morphology_mip.ome.tif
-|   │   │   ├── transcripts.csv.gz
-│   │   ├── dataset_cosmx_nsclc
-|   │   │   ├── Lung5_Rep1-RawMorphologyImages
-|   |   │   │   ├── *.TIF
-|   │   │   ├── Lung5_Rep1_tx_file.csv
-│   │   ├── dataset_merscope_melanoma2
-|   │   │   ├── HumanMelanomaPatient2_images_mosaic_DAPI_z0.tif
-|   │   │   ├── HumanMelanomaPatient2_detected_transcripts.csv
-│   │   ├── dataset_stereoseq_mousebrain
-|   │   │   ├── Mouse_brain_Adult.tif
-|   │   │   ├── Mouse_brain_Adult_GEM_bin1.tsv.gz
-|   │   │   ├── selected_genes.txt
-│   │   ├── sc_references
-|   │   │   ├── sc_breast.csv
-|   │   │   ├── sc_breast_markers_pos.csv
-|   │   │   ├── sc_breast_markers_neg.csv
-|   │   │   ├── ...
-│   │   ├── transcripts_to_filter.txt
-│   ├── ...
-```
+Full sized datasets
 
-For example, the Xenium breast cancer dataset (Xenium Output Bundle In Situ Replicate 1) may be downloaded from https://www.10xgenomics.com/products/xenium-in-situ/preview-dataset-human-breast. Place `morphology_mip.ome.tif` and `transcripts.csv.gz` under `data/dataset_xenium_breast1`
+For example, the Xenium breast cancer dataset (Xenium Output Bundle In Situ Replicate 1) may be downloaded from https://www.10xgenomics.com/products/xenium-in-situ/preview-dataset-human-breast. Place `morphology_mip.ome.tif` and `transcripts.csv.gz` under 
+
+4 major platforms, including Xenium, CosMx, MERSCOPE, and Stereo-seq
+
+## Parameters
+
+
+
+
 
 
 ## Single-cell reference and markers
@@ -81,17 +55,10 @@ The reference csv file contains average expressions for all of the genes in the 
 
 The positive and negative markers files contain the respective marker genes for each cell type. The positive and negative markers were those with expressions in the highest and lowest 10 percentile for each cell type of a tissue sample. We found that removing positive markers that were common to at least a third of cell types in each dataset was appropriate across various datasets. Using a larger number of positive markers tends to increase the size of predicted cells. Manual curation and alternative approaches to determine the marker genes can also be used.
 
-Only <1,000 genes are needed to perform segmentation. Specify a selection of genes in a file `selected_genes.txt` and place in the dataset folder (see Stero-seq example).
+Only <1,000 genes are needed to perform segmentation. Specify a selection of genes in a file (see Stero-seq example).
 
 
-## Running example dataset
-
-After installation, downloading the Xenium breast cancer dataset and placing the transcripts and DAPI files in appropriate locations (see [Datasets](#datasets)), run the example dataset:
-
-        python example_xenium.py
-
-
-## Running BIDCell for your dataset
+<!-- ## Running BIDCell for your dataset
 
 Several steps are involved in the entire pipeline to generate segmentations and cell-gene matrices from DAPI images and detected transcripts. These steps can be grouped into:
 
@@ -140,10 +107,10 @@ Scaling and alignment arguments:
 - `global_shift_y`: additional adjustment to align transcripts to DAPI in target pixels along image height
 - `patch_size`: size of input patches to segmentation model
 
-Performing segmentation at a higher resolution requires a larger patch size, thus more GPU memory. 
+Performing segmentation at a higher resolution requires a larger patch size, thus more GPU memory.  -->
 
 
-### Additional information
+## Additional information
 
 Expected outputs:
 - .tif file of segmented cells, where the value corresponds to cell IDs
