@@ -1,18 +1,34 @@
 from bidcell import BIDCellModel
+import argparse
 
-model = BIDCellModel("params/params_small.yaml")
+def main(args):
 
-model.preprocess()
+    BIDCellModel.get_example_config(args.vendor)
 
-# Alternatively, call individual functions
+    model = BIDCellModel(f"{args.vendor}_example_config.yaml")
 
-# model.segment_nuclei()
-# model.generate_expression_maps()
-# model.generate_patches()
-# model.make_cell_gene_mat(is_cell=False)
-# model.preannotate()
+    model.run_pipeline()
 
-model.train()
+    # Alternatively, call individual functions
 
-model.predict()
+    # model.preprocess()
 
+    # or call individual functions within preprocess
+
+    # # model.segment_nuclei()
+    # # model.generate_expression_maps()
+    # # model.generate_patches()
+    # # model.make_cell_gene_mat(is_cell=False)
+    # # model.preannotate()
+
+    # model.train()
+
+    # model.predict()
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('--vendor', default='xenium', type=str, help="name of vendor")
+
+    args = parser.parse_args()
+    main(args)

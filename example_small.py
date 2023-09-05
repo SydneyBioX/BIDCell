@@ -1,14 +1,16 @@
 from bidcell import BIDCellModel
 
-# BIDCellModel.get_example_data()
+BIDCellModel.get_example_data()
 
 model = BIDCellModel("params_small_example.yaml")
 
 model.run_pipeline()
 
+# Alternatively, call individual functions
+
 # model.preprocess()
 
-# # Alternatively, call individual functions
+# or call individual functions within preprocess
 
 # # model.segment_nuclei()
 # # model.generate_expression_maps()

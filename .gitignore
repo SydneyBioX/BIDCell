@@ -10,6 +10,7 @@
 **/show_cells_by_id.py
 **/check.py
 example_data/
+data_large/
 dist
 params_small_example.yaml
 
