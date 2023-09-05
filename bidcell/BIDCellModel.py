@@ -2,8 +2,7 @@
 import importlib.resources
 import os
 from pathlib import Path
-from shutil import copyfile
-from typing import Optional
+from shutil import copyfile, copytree
 
 from .config import load_config
 from .model.postprocess_predictions import postprocess_predictions
@@ -71,10 +70,23 @@ class BIDCellModel:
 
         make_cell_gene_mat(self.config, is_cell=True, last=last)
 
-    @classmethod
-    def get_example_config(cls, vendor: str) -> None:
+    @staticmethod
+    def get_example_config(vendor: str) -> None:
         # TODO: Check if the vendor is valid
         params_path = (
             importlib.resources.files("bidcell") / "example_params" / f"{vendor}.yaml"
         )
         copyfile(params_path, Path().cwd() / f"{vendor}_example_config.yaml")
+
+    @staticmethod
+    def get_example_data(with_config: bool = True) -> None:
+        root: Path = importlib.resources.files("bidcell")
+        data_path = (
+            root.parent / "data"
+        )
+        copytree(data_path, Path().cwd() / "example_data")
+        if with_config:
+            copyfile(
+                root / "example_params" / "params_xenium_breast1.yaml",
+                Path().cwd() / "example_data_params.yaml"
+            )
