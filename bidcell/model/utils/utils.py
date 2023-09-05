@@ -91,15 +91,15 @@ def get_newest_id(exp_dir="model_outputs"):
     return exp_id
 
 
-def get_experiment_id(make_new, load_dir, data_dir):
+def get_experiment_id(make_new, dir_id, data_dir):
     """
     Get timestamp ID of current experiment
     """
     if make_new is False:
-        if load_dir == "last":
+        if dir_id == "last":
             timestamp = get_newest_id(os.path.join(data_dir, "model_outputs"))
         else:
-            timestamp = load_dir
+            timestamp = dir_id
     else:
         timestamp = dt.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
 

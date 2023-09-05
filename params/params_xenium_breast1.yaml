@@ -33,7 +33,7 @@ nuclei:
   diameter: # estimated diameter of nuclei for Cellpose - or None to automatically compute, default: None
 
 transcripts:
-  shift_to_origin: False # shift to origin, making min(x) and min(y) (0,0)
+  shift_to_origin: True # shift to origin, making min(x) and min(y) (0,0)
   x_col: x_location # name of x location column in transcripts file
   y_col: y_location # name of y location column in transcripts file
   gene_col: feature_name # name of genes column in transcripts file

@@ -42,7 +42,7 @@ def predict(config: Config) -> str:
     make_new = False
     timestamp = get_experiment_id(
         make_new,
-        config.experiment_dirs.load_dir,
+        config.experiment_dirs.dir_id,
         config.files.data_dir,
     )
     experiment_path = os.path.join(config.files.data_dir, "model_outputs", timestamp)

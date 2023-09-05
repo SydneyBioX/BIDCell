@@ -127,92 +127,93 @@ def generate_expression_maps(config: Config):
     y_col = config.transcripts.y_col
     gene_col = config.transcripts.gene_col
 
-    if not os.path.exists(fp_transcripts_processed):
-        print("Loading transcripts file")
-        fp_transcripts = config.files.fp_transcripts
-        if pathlib.Path(fp_transcripts).suffixes[-1] == ".gz":
-            if ".tsv" in fp_transcripts:
-                df = pd.read_csv(fp_transcripts, sep="\t", compression="gzip")
-            else:
-                df = pd.read_csv(fp_transcripts, compression="gzip")
+    # if not os.path.exists(fp_transcripts_processed):
+    print("Loading transcripts file")
+    fp_transcripts = config.files.fp_transcripts
+    if pathlib.Path(fp_transcripts).suffixes[-1] == ".gz":
+        if ".tsv" in fp_transcripts:
+            df = pd.read_csv(fp_transcripts, sep="\t", compression="gzip")
         else:
-            if ".tsv" in fp_transcripts:
-                df = pd.read_csv(fp_transcripts, sep="\t")
-            else:
-                df = pd.read_csv(fp_transcripts)
-        print(df.head())
-
-        print("Filtering transcripts")
-        if "qv" in df.columns:
-            df = df[
-                (df["qv"] >= config.transcripts.min_qv)
-                & (~df[gene_col].str.startswith(tuple(transcripts_to_filter)))
-            ]
-        else:
-            df = df[(~df[gene_col].str.startswith(tuple(transcripts_to_filter)))]
-
-        if config.files.fp_selected_genes is not None:
-            with open(dir_dataset + "/" + config.files.fp_selected_genes) as file:
-                selected_genes = [line.rstrip() for line in file]
-            df = df[(df[gene_col].isin(selected_genes))]
-
-        # Scale
-        print(df[x_col].min(), df[x_col].max(), df[y_col].min(), df[y_col].max())
-        df[x_col] = df[x_col].mul(config.affine.scale_ts_x)
-        df[y_col] = df[y_col].mul(config.affine.scale_ts_y)
-        print(df[x_col].min(), df[x_col].max(), df[y_col].min(), df[y_col].max())
-
-        # Shift
-        min_x = df[x_col].min()
-        min_y = df[y_col].min()
-        if config.transcripts.shift_to_origin:
-            with pd.option_context("mode.chained_assignment", None):
-                df.loc[:, x_col] = df[x_col] - min_x + config.affine.global_shift_x
-                df.loc[:, y_col] = df[y_col] - min_y + config.affine.global_shift_y
-
-        size_x = df[x_col].max() + 1
-        size_y = df[y_col].max() + 1
-
-        # Write transform parameters to file
-        fp_affine = os.path.join(dir_dataset, config.files.fp_affine)
-        params = [
-            "scale_ts_x",
-            "scale_ts_y",
-            "min_x",
-            "min_y",
-            "size_x",
-            "size_y",
-            "global_shift_x",
-            "global_shift_y",
-            "origin",
-        ]
-        vals = [
-            config.affine.scale_ts_x,
-            config.affine.scale_ts_y,
-            min_x,
-            min_y,
-            size_x,
-            size_y,
-            config.affine.global_shift_x,
-            config.affine.global_shift_y,
-            config.transcripts.shift_to_origin,
-        ]
-        with open(fp_affine, "w") as f:
-            writer = csv.writer(f, delimiter="\t")
-            writer.writerows(zip(params, vals))
-
-        # Delete entries with negative coordinates
-        df = df[df[x_col] >= 0]
-        df = df[df[y_col] >= 0]
-
-        df.reset_index(inplace=True, drop=True)
-        print("Finished filtering")
-        print("Saving csv...")
-
-        df.to_csv(fp_transcripts_processed)
+            df = pd.read_csv(fp_transcripts, compression="gzip")
     else:
-        print("Loading filtered transcripts")
-        df = pd.read_csv(fp_transcripts_processed, index_col=0)
+        if ".tsv" in fp_transcripts:
+            df = pd.read_csv(fp_transcripts, sep="\t")
+        else:
+            df = pd.read_csv(fp_transcripts)
+    print(df.head())
+
+    print("Filtering transcripts")
+    if "qv" in df.columns:
+        df = df[
+            (df["qv"] >= config.transcripts.min_qv)
+            & (~df[gene_col].str.startswith(tuple(transcripts_to_filter)))
+        ]
+    else:
+        df = df[(~df[gene_col].str.startswith(tuple(transcripts_to_filter)))]
+
+    if config.files.fp_selected_genes is not None:
+        with open(dir_dataset + "/" + config.files.fp_selected_genes) as file:
+            selected_genes = [line.rstrip() for line in file]
+        df = df[(df[gene_col].isin(selected_genes))]
+
+    # Scale
+    print(df[x_col].min(), df[x_col].max(), df[y_col].min(), df[y_col].max())
+    df[x_col] = df[x_col].mul(config.affine.scale_ts_x)
+    df[y_col] = df[y_col].mul(config.affine.scale_ts_y)
+    print(df[x_col].min(), df[x_col].max(), df[y_col].min(), df[y_col].max())
+
+    # Shift
+    min_x = df[x_col].min()
+    min_y = df[y_col].min()
+    if config.transcripts.shift_to_origin:
+        with pd.option_context("mode.chained_assignment", None):
+            df.loc[:, x_col] = df[x_col] - min_x + config.affine.global_shift_x
+            df.loc[:, y_col] = df[y_col] - min_y + config.affine.global_shift_y
+
+    size_x = df[x_col].max() + 1
+    size_y = df[y_col].max() + 1
+
+    # Write transform parameters to file
+    fp_affine = os.path.join(dir_dataset, config.files.fp_affine)
+    params = [
+        "scale_ts_x",
+        "scale_ts_y",
+        "min_x",
+        "min_y",
+        "size_x",
+        "size_y",
+        "global_shift_x",
+        "global_shift_y",
+        "origin",
+    ]
+    vals = [
+        config.affine.scale_ts_x,
+        config.affine.scale_ts_y,
+        min_x,
+        min_y,
+        size_x,
+        size_y,
+        config.affine.global_shift_x,
+        config.affine.global_shift_y,
+        config.transcripts.shift_to_origin,
+    ]
+    print(vals)
+    with open(fp_affine, "w") as f:
+        writer = csv.writer(f, delimiter="\t")
+        writer.writerows(zip(params, vals))
+
+    # Delete entries with negative coordinates
+    df = df[df[x_col] >= 0]
+    df = df[df[y_col] >= 0]
+
+    df.reset_index(inplace=True, drop=True)
+    print("Finished filtering")
+    print("Saving csv...")
+
+    df.to_csv(fp_transcripts_processed)
+    # else:
+    #     print("Loading filtered transcripts")
+    #     df = pd.read_csv(fp_transcripts_processed, index_col=0)
 
     # Round locations and convert to integer
     df[x_col] = df[x_col].round().astype(int)

@@ -2,9 +2,8 @@ from bidcell import BIDCellModel
 
 model = BIDCellModel("params/params_xenium_breast1.yaml")
 
-model.preprocess()
+# model.preprocess()
 
-exit()
 # Alternatively
 # model.segment_nuclei()
 # model.generate_expression_maps()
@@ -14,7 +13,7 @@ exit()
 
 model.train()
 
-model.predict()
+# model.predict()
 
 
 # import os 
