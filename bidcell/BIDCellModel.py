@@ -51,8 +51,12 @@ class BIDCellModel:
         """  
         if self.config.nuclei_fovs.stitch_nuclei_fovs:
             stitch_nuclei(self.config)
-        segment_nuclei(self.config)
-        generate_expression_maps(self.config)
+        if self.nuclei.crop_nuclei_to_ts:
+            generate_expression_maps(self.config)
+            segment_nuclei(self.config)
+        else:
+            segment_nuclei(self.config)
+            generate_expression_maps(self.config)
         generate_patches(self.config)
         make_cell_gene_mat(self.config, is_cell=False)
         preannotate(self.config)

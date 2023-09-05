@@ -10,14 +10,14 @@ files:
   fp_ref: ./data_large/sc_references/sc_mousebrain.csv # file path of reference data
   fp_pos_markers: ./data_large/sc_references/sc_mousebrain_markers_pos.csv # file path of positive markers
   fp_neg_markers: ./data_large/sc_references/sc_mousebrain_markers_neg.csv # file path of negative markers
-  fp_selected_genes: ./data_large/dataset_stereoseq_mousebrain/stereoseq_mousebrain_genes.txt
+  fp_selected_genes: ./data_large/dataset_stereoseq_mousebrain/stereoseq_mousebrain_genes.txt # file containing names of genes to use
 
 nuclei_fovs:
   stitch_nuclei_fovs: False # set True to stitch separate FOVs of DAPI together in 1 image
 
 nuclei:
   diameter: 30 # estimated diameter of nuclei for Cellpose - or None to automatically compute, default: None
-  crop_nuclei_to_ts: True
+  crop_nuclei_to_ts: True # crop nuclei to region of transcript detections - run generate_expression_maps() before segment_nuclei()
 
 transcripts:
   shift_to_origin: True # shift to origin, making min(x) and min(y) (0,0)
