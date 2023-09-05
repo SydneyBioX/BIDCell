@@ -1,19 +1,21 @@
 """BIDCellModel class module"""
-from typing import Optional
-from multiprocessing import cpu_count
+import importlib.resources
 import os
+from pathlib import Path
+from shutil import copyfile
+from typing import Optional
 
+from .config import load_config
 from .model.postprocess_predictions import postprocess_predictions
-from .model.predict import predict, fill_grid
+from .model.predict import fill_grid, predict
 from .model.train import train
+from .model.utils.utils import get_newest_id
 from .processing.cell_gene_matrix import make_cell_gene_mat
 from .processing.nuclei_segmentation import segment_nuclei
 from .processing.nuclei_stitch_fov import stitch_nuclei
 from .processing.preannotate import preannotate
 from .processing.transcript_patches import generate_patches
 from .processing.transcripts import generate_expression_maps
-from .model.utils.utils import get_newest_id
-from .config import load_config
 
 
 class BIDCellModel:
@@ -21,11 +23,6 @@ class BIDCellModel:
 
     def __init__(self, config_file: str, n_processes: Optional[int] = None) -> None:
         self.config = load_config(config_file)
-
-        if n_processes is None:
-            self.n_processes = cpu_count()
-        else:
-            self.n_processes = n_processes
 
     def preprocess(self) -> None:
         if self.config.nuclei_fovs.stitch_nuclei_fovs:
@@ -73,3 +70,11 @@ class BIDCellModel:
         postprocess_predictions(self.config, last)
 
         make_cell_gene_mat(self.config, is_cell=True, last=last)
+
+    @classmethod
+    def get_example_config(cls, vendor: str) -> None:
+        # TODO: Check if the vendor is valid
+        params_path = (
+            importlib.resources.files("bidcell") / "example_params" / f"{vendor}.yaml"
+        )
+        copyfile(params_path, Path().cwd() / f"{vendor}_example_config.yaml")
