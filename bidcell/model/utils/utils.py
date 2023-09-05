@@ -165,7 +165,7 @@ def save_fig_outputs(sample_seg, sample_n, sample_sa, sample_expr, patch_fp):
     nuclei_mapped = np.vectorize(dictionary.get)(sample_n)
 
     # Plot
-    fig, axes = plt.subplots(ncols=4, figsize=(12, 3), sharex=True, sharey=True)
+    fig, axes = plt.subplots(ncols=3, figsize=(9, 3), sharex=True, sharey=True)
     ax = axes.ravel()
 
     ax[0].imshow(nuclei_mapped, cmap=plt.cm.nipy_spectral)
@@ -174,8 +174,8 @@ def save_fig_outputs(sample_seg, sample_n, sample_sa, sample_expr, patch_fp):
     ax[1].set_title("Cells")
     ax[2].imshow(sample_expr, cmap=plt.cm.gray)
     ax[2].set_title("Expressions")
-    ax[3].imshow(sample_sa, cmap=plt.cm.gray)
-    ax[3].set_title("Eligible")
+    # ax[3].imshow(sample_sa, cmap=plt.cm.gray)
+    # ax[3].set_title("Eligible")
 
     for a in ax:
         a.set_axis_off()

@@ -72,4 +72,4 @@ class BIDCellModel:
 
         postprocess_predictions(self.config)
 
-        make_cell_gene_mat(self.config, is_cell=False)
+        # make_cell_gene_mat(self.config, is_cell=True)

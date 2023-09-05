@@ -11,9 +11,11 @@ model = BIDCellModel("params/params_xenium_breast1.yaml")
 # model.make_cell_gene_mat(is_cell=False)
 # model.preannotate()
 
-model.train()
+# model.train()
 
-# model.predict()
+model.predict()
+
+# model.make_cell_gene_mat(is_cell=True)
 
 
 # import os 

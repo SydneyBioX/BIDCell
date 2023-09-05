@@ -193,7 +193,7 @@ class TrainingParams(BaseModel):
     pos_weight: float = 1.0
     neg_weight: float = 1.0
     # number of training steps per model save
-    model_freq: int = 1000
+    model_freq: int = 10
     # number of training steps per sample save
     sample_freq: int = 100
 
@@ -205,7 +205,7 @@ class TestingParams(BaseModel):
 
 class PostprocessParams(BaseModel):
     # size of patches to perform morphological processing
-    patch_size_mp: int = 1024
+    patch_size_mp: int = 200
 
 
 class ExperimentDirs(BaseModel):
