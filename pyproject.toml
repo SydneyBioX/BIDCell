@@ -1,43 +1,40 @@
-[tool.poetry]
+[tool.pdm.build]
+includes = []
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+[project]
 name = "bidcell"
 version = "0.1.0"
 description = "Biologically-informed deep learning for cell segmentation of subcelluar spatial transcriptomics data."
-authors = ["Helen Fu <xiaohang.fu@sydney.edu.au>"]
+authors = [
+    {name = "Helen Fu", email = "xiaohang.fu@sydney.edu.au"},
+]
+dependencies = [
+    "pandas>=2.1.0",
+    "numpy>=1.24.4",
+    "tifffile>=2023.8.30",
+    "imgaug>=0.4.0",
+    "h5py>=3.9.0",
+    "scipy>=1.11.2",
+    "matplotlib>=3.7.2",
+    "natsort>=8.4.0",
+    "cellpose>=2.2.3",
+    "scikit-image>=0.21.0",
+    "segmentation-models-pytorch>=0.3.3",
+    "opencv-python>=4.8.0.76",
+    "pillow>=10.0.0",
+    "pyyaml>=6.0.1",
+    "pydantic>=2.3.0",
+]
+requires-python = ">=3.9,<3.13"
 readme = "README.md"
-
-[tool.poetry.dependencies]
-python = ">=3.9,<3.13"
-pandas = "^2.0.3"
-numpy = "^1.25.2"
-tifffile = "^2023.8.12"
-imgaug = "^0.4.0"
-h5py = "^3.9.0"
-scipy = "^1.11.2"
-matplotlib = "^3.7.2"
-natsort = "^8.4.0"
-cellpose = "^2.2.2"
-scikit-image = "^0.21.0"
-segmentation-models-pytorch = "^0.3.3"
-tqdm = "^4.66.1"
-opencv-python = "^4.8.0.76"
-pillow = "^10.0.0"
-pyyaml = "^6.0.1"
-pydantic = "^2.3.0"
-torch = {version = "^2.0.1+cpu", source = "pytorch"}
-
-[tool.poetry.group.dev.dependencies]
-black = "^23.7.0"
-ipykernel = "^6.25.1"
-deptry = "^0.12.0"
-flake8 = "^6.1.0"
-ipython = "^8.14.0"
-
-[[tool.poetry.source]]
-name = "pytorch"
-url = "https://download.pytorch.org/whl/cpu"
-priority = "explicit"
+license = {text = "MIT"}
 
 
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+[project.group.dev.dependencies]
+black = "*"
+deptry = "*"
+flake8 = "*"
+ipython = "*"
