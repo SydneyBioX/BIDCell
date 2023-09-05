@@ -20,10 +20,35 @@ from .processing.transcripts import generate_expression_maps
 class BIDCellModel:
     """The BIDCellModel class, which provides an interface for preprocessing, training and predicting all the cell types for a datset."""
 
+    def __init__(self, config_file: str) -> None:
+        """Constructs a BIDCellModel instance using the user-supplied config file.\n
         The configuration is validated during construction.
+
+        Args:
+            config_file (str): Path to the YAML configuration file.
+        """
         self.config = load_config(config_file)
 
+    def run_pipeline(self):
+        """Runs the entire BIDCell pipeline using the settings defined in the configuration.
+        """
+        print("### Preprocessing ###")
+        print()
+        self.preprocess()
+        print()
+        print("### Training ###")
+        print()
+        self.train()
+        print()
+        print("### Predict ###")
+        print()
+        self.predict()
+        print()
+        print("### Done ###")
+
     def preprocess(self) -> None:
+        """Preprocess the dataset for training.
+        """  
         if self.config.nuclei_fovs.stitch_nuclei_fovs:
             stitch_nuclei(self.config)
         segment_nuclei(self.config)
@@ -33,19 +58,37 @@ class BIDCellModel:
         preannotate(self.config)
 
     def stitch_nuclei(self):
+        """Stich separate FOV files into a single one (e.g. CosMx data).\n
+        Runs inside preprocess by default, if nuclei_fovs.stitch_nuclei_fovs is True in the configuration file.
+        """
         stitch_nuclei(self.config)
 
     def segment_nuclei(self):
+        """Run the nucleus segmentation algorythm. Runs inside preprocess by default.
+        """
         segment_nuclei(self.config)
 
     def generate_expression_maps(self):
+        """Generate the expression maps. Runs inside preprocess by default.
+        """        
         generate_expression_maps(self.config)
 
     def generate_patches(self):
+        """Generate patches for training. Runs inside preprocess by default
+        """
         generate_patches(self.config)
 
-    def make_cell_gene_mat(self, is_cell=True):
-        make_cell_gene_mat(self.config, is_cell)
+    def make_cell_gene_mat(self, is_cell: bool, timestamp: str = "last"):
+        """Make a matrix containing counts for each cell.
+
+        Args:
+            is_cell (bool): If False, uses nuclei masks for creation, other wise it uses `timestamp` to chose a directory containing segmented cells outputted by BIDCell which can be in the data directory under `model_outputs`. Defaults to 'last', in which case it uses the folder with the most recent timestamp.
+        """
+        if timestamp == "last":
+            timestamp = get_newest_id(
+                os.path.join(self.config.files.data_dir, "model_outputs")
+            )
+        make_cell_gene_mat(self.config, is_cell, last=timestamp)
 
     def preannotate(self):
         preannotate(self.config)
