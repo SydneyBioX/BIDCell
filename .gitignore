@@ -13,3 +13,4 @@
 !sc_breast_markers_neg.csv
 !sc_breast_markers_pos.csv
 .vscode/settings.json
+data/dataset_xenium_breast1/all_gene_names.txt
