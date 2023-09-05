@@ -50,7 +50,7 @@ class FileParams(BaseModel):
     # directory for cell-gene expression matrices
     dir_cgm: str = "cell_gene_matrices"
     # file name of nuclei expression matrices
-    fp_expr: str = "cell_expr.csv"
+    fp_expr: str = "expr_mat.csv"
     # file name of nuclei annotations
     fp_nuclei_anno: str = "nuclei_cell_type.h5"
     # file name of text file containing selected gene names, e.g. selected_genes.txt
