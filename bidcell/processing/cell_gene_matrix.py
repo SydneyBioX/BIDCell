@@ -90,7 +90,7 @@ def read_expr_csv(fp):
         sys.exit(f"Cannot read {fp}")
 
 
-def make_cell_gene_mat(config: Config, last: str, is_cell: bool):
+def make_cell_gene_mat(config: Config, is_cell: bool, last: str | None = None):
     dir_dataset = config.files.data_dir
     dir_cgm = config.files.dir_cgm
 
