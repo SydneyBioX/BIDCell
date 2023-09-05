@@ -66,6 +66,7 @@ Or, functions in `preprocess` can be called individually:
 
         from bidcell import BIDCellModel
         model = BIDCellModel("xenium_example_config.yaml")
+        # model.stitch_nuclei() # for CosMx if nuclei separated into FOVs
         model.segment_nuclei()
         model.generate_expression_maps()
         model.generate_patches()
