@@ -34,7 +34,7 @@ A small subset of Xenium breast cancer data is provided as a demo. Use the follo
 
 ## Parameters
 
-Parameters are defined in .yaml files. Examples are provided for 4 major platforms, including Xenium, CosMx, MERSCOPE, and Stereo-seq. BIDCell may also be applied to data from other technologies such as MERFISH. To view examples, run: 
+Parameters are defined in .yaml files. Examples are provided for 4 major platforms, including Xenium, CosMx, MERSCOPE, and Stereo-seq. BIDCell may also be applied to data from other technologies such as MERFISH. Run the following to obtain examples: 
 
         from bidcell import BIDCellModel
         BIDCellModel.get_example_config("xenium")
