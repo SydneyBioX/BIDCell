@@ -20,7 +20,7 @@ from .processing.transcripts import generate_expression_maps
 class BIDCellModel:
     """The BIDCellModel class, which provides an interface for preprocessing, training and predicting all the cell types for a datset."""
 
-    def __init__(self, config_file: str, n_processes: Optional[int] = None) -> None:
+        The configuration is validated during construction.
         self.config = load_config(config_file)
 
     def preprocess(self) -> None:
