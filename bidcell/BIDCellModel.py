@@ -70,6 +70,6 @@ class BIDCellModel:
 
         fill_grid(self.config, last)
 
-        postprocess_predictions(self.config)
+        postprocess_predictions(self.config, last)
 
-        # make_cell_gene_mat(self.config, is_cell=True)
+        make_cell_gene_mat(self.config, last, is_cell=True)

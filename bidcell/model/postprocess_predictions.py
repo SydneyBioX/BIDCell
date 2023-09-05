@@ -331,8 +331,8 @@ def process_check_splits(config, dir_id, nuclei_img, seg_final, chunk_ids):
     )
 
 
-def postprocess_predictions(config: Config):
-    dir_id = config.files.data_dir + "/model_outputs/" + get_exp_dir(config.files.data_dir) + "/test_output/"
+def postprocess_predictions(config: Config, dir_id: str):
+    dir_id = config.files.data_dir + "/model_outputs/" + dir_id + "/test_output/"
 
     pred_fp = dir_id + "epoch_%d_step_%d.tif" % (config.testing_params.test_epoch, config.testing_params.test_step)
     output_dir = dir_id + "epoch_%d_step_%d_connected/" % (config.testing_params.test_epoch, config.testing_params.test_step)

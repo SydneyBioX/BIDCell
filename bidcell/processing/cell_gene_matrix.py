@@ -90,14 +90,14 @@ def read_expr_csv(fp):
         sys.exit(f"Cannot read {fp}")
 
 
-def make_cell_gene_mat(config: Config, is_cell: bool):
+def make_cell_gene_mat(config: Config, last: str, is_cell: bool):
     dir_dataset = config.files.data_dir
     dir_cgm = config.files.dir_cgm
 
     if is_cell is False:
         output_dir = os.path.join(dir_dataset, dir_cgm, "nuclei")
     else:
-        output_dir = os.path.join(dir_dataset, dir_cgm, config.experiment_dirs.dir_id)
+        output_dir = os.path.join(dir_dataset, dir_cgm, last)
 
     fp_transcripts_processed = os.path.join(
         dir_dataset, config.files.fp_transcripts_processed
@@ -110,15 +110,15 @@ def make_cell_gene_mat(config: Config, is_cell: bool):
     else:
         fp_seg_name = [
             "epoch_"
-            + config.testing_params.test_epoch
+            + str(config.testing_params.test_epoch)
             + "_step_"
-            + config.testing_params.test_step
+            + str(config.testing_params.test_step)
             + "_connected.tif"
         ]
         fp_seg = os.path.join(
             config.files.data_dir,
             "model_outputs",
-            config.experiment_dirs.dir_id,
+            last,
             config.experiment_dirs.test_output_dir,
             "".join(fp_seg_name),
         )

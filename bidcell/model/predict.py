@@ -251,6 +251,12 @@ def fill_grid(config: Config, dir_id: str):
     )
     expr_fp_ext = ".hdf5"
 
+    dir_id = os.path.join(config.files.data_dir,
+            "model_outputs",
+            dir_id,
+            config.experiment_dirs.test_output_dir
+            )
+
     pred_fp = "%s/epoch_%d_step_%d_seg_shift0.tif" % (
         dir_id,
         config.testing_params.test_epoch,

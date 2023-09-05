@@ -2,7 +2,7 @@ from bidcell import BIDCellModel
 
 model = BIDCellModel("params/params_xenium_breast1.yaml")
 
-# model.preprocess()
+model.preprocess()
 
 # Alternatively
 # model.segment_nuclei()
@@ -11,11 +11,10 @@ model = BIDCellModel("params/params_xenium_breast1.yaml")
 # model.make_cell_gene_mat(is_cell=False)
 # model.preannotate()
 
-# model.train()
+model.train()
 
 model.predict()
 
-# model.make_cell_gene_mat(is_cell=True)
 
 
 # import os 
