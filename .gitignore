@@ -10,6 +10,7 @@
 **/show_cells_by_id.py
 **/check.py
 data/
+dist
 
 !sc_breast.csv
 !sc_breast_markers_neg.csv
