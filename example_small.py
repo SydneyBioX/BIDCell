@@ -1,18 +1,22 @@
 from bidcell import BIDCellModel
 
-model = BIDCellModel("params/params_small.yaml")
+model = BIDCellModel("params_small_example.yaml")
 
-model.preprocess()
+model.get_example_data()
 
-# Alternatively, call individual functions
+model.run_pipeline()
 
-# model.segment_nuclei()
-# model.generate_expression_maps()
-# model.generate_patches()
-# model.make_cell_gene_mat(is_cell=False)
-# model.preannotate()
+# model.preprocess()
 
-model.train()
+# # Alternatively, call individual functions
 
-model.predict()
+# # model.segment_nuclei()
+# # model.generate_expression_maps()
+# # model.generate_patches()
+# # model.make_cell_gene_mat(is_cell=False)
+# # model.preannotate()
+
+# model.train()
+
+# model.predict()
 

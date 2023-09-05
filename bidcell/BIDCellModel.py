@@ -149,7 +149,7 @@ class BIDCellModel:
         if with_config:
             copyfile(
                 root / "example_params" / "params_small_example.yaml",
-                Path().cwd() / "example_data_params.yaml"
+                Path().cwd() / "params_small_example.yaml"
             )
 
     def __check_valid_timestamp(self, timestamp: str) -> None:
