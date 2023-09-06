@@ -123,6 +123,10 @@ def segment_nuclei(config: Config):
             unique_ids = np.unique(patch_nuclei)
             total_n += unique_ids.max()
 
+        # Save resized DAPI
+        fp_rdapi = os.path.join(dir_dataset, config.files.fp_rdapi)
+        tifffile.imwrite(fp_rdapi, rdapi, photometric="minisblack")
+
     else:
         print("Segmenting whole DAPI")
         nuclei = segment_dapi(dapi)
@@ -132,10 +136,6 @@ def segment_nuclei(config: Config):
     # Save nuclei segmentation
     fp_nuclei = os.path.join(dir_dataset, config.files.fp_nuclei)
     tifffile.imwrite(fp_nuclei, nuclei.astype(np.uint32), photometric="minisblack")
-
-    # Save resized DAPI
-    fp_rdapi = os.path.join(dir_dataset, config.files.fp_rdapi)
-    tifffile.imwrite(fp_rdapi, rdapi, photometric="minisblack")
 
 
 if __name__ == "__main__":
