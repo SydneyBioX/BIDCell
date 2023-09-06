@@ -10,7 +10,7 @@ files:
   fp_ref: ./data_large/sc_references/sc_mousebrain.csv # file path of reference data
   fp_pos_markers: ./data_large/sc_references/sc_mousebrain_markers_pos.csv # file path of positive markers
   fp_neg_markers: ./data_large/sc_references/sc_mousebrain_markers_neg.csv # file path of negative markers
-  fp_selected_genes: ./data_large/dataset_stereoseq_mousebrain/stereoseq_mousebrain_genes.txt # file containing names of genes to use
+  fp_selected_genes: ./data_large/dataset_stereoseq_mousebrain/example_mousebrain_genes.txt # file containing names of genes to use
 
 nuclei_fovs:
   stitch_nuclei_fovs: False # set True to stitch separate FOVs of DAPI together in 1 image
