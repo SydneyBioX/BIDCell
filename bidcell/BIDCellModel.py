@@ -3,6 +3,7 @@ import importlib.resources
 import os
 from pathlib import Path
 from shutil import copyfile, copytree
+from typing import Literal
 
 from .config import load_config
 from .model.postprocess_predictions import postprocess_predictions
@@ -24,8 +25,10 @@ class BIDCellModel:
         """Constructs a BIDCellModel instance using the user-supplied config file.\n
         The configuration is validated during construction.
 
-        Args:
-            config_file (str): Path to the YAML configuration file.
+        Parameters
+        ----------
+        config_file : str
+            Path to the YAML configuration file.
         """
         self.config = load_config(config_file)
 
@@ -48,7 +51,7 @@ class BIDCellModel:
 
     def preprocess(self) -> None:
         """Preprocess the dataset for training.
-        """  
+        """
         if self.config.nuclei_fovs.stitch_nuclei_fovs:
             stitch_nuclei(self.config)
         if self.config.nuclei.crop_nuclei_to_ts:
@@ -85,14 +88,18 @@ class BIDCellModel:
     def make_cell_gene_mat(self, is_cell: bool, timestamp: str = "last"):
         """Make a matrix containing counts for each cell. Runs inside preprocess and predict by default.
 
-        Args:
-            is_cell (bool): If False, uses nuclei masks for creation, other wise it uses `timestamp` to chose a directory containing segmented cells outputted by BIDCell which can be in the data directory under `model_outputs`. Defaults to 'last', in which case it uses the folder with the most recent timestamp.
+        Parameters
+        ----------
+        is_cell : bool
+            If False, uses nuclei masks for creation, other wise it uses `timestamp` to chose a directory containing segmented cells outputted by BIDCell.
+        timestamp : str, optional
+            The timestamp corrisponding to the name of a directory in the data directory under `model_outputs`, by default "last", in which case it uses the folder with the most recent timestamp.
         """
-        if is_cell == True and timestamp == "last":
+        if is_cell and timestamp == "last":
             timestamp = get_newest_id(
                 os.path.join(self.config.files.data_dir, "model_outputs")
             )
-        elif is_cell == True:
+        elif is_cell:
             self.__check_valid_timestamp(timestamp)
         make_cell_gene_mat(self.config, is_cell, timestamp=timestamp)
 
@@ -126,13 +133,17 @@ class BIDCellModel:
         make_cell_gene_mat(self.config, is_cell=True, timestamp=timestamp)
 
     @staticmethod
-    def get_example_config(vendor: str) -> None:
+    def get_example_config(vendor: Literal["cosmx", "merscope", "stereoseq", "xenium"]) -> None:
         """Gets an example configuration for a given vendor and places it in the working directory.
 
-        Args:
-            vendor (str): The vendor of the equiptment used to produce the dataset.
+        Parameters
+        ----------
+        vendor : Literal["cosmx", "merscope", "stereoseq", "xenium"]
+            The vendor of the equiptment used to produce the dataset.
         """
-        # TODO: Check if the vendor is valid
+        vendors = ["cosmx", "merscope", "stereoseq", "xenium"]
+        if not any([vendor.lower() == x for x in vendors]):
+            raise ValueError(f"Unknown vendor `{vendor}`\n\tChose one of {*vendors,}")
         params_path = (
             importlib.resources.files("bidcell") / "example_params" / f"{vendor}.yaml"
         )
@@ -142,8 +153,10 @@ class BIDCellModel:
     def get_example_data(with_config: bool = True) -> None:
         """Gets the small example data included in the package and places it in the current working directory.
 
-        Args:
-            with_config (bool, optional): Whether to get the configuration for the example data. Defaults to True.
+        Parameters
+        ----------
+        with_config : bool, optional
+            Whether to get the configuration for the example data, by default True
         """
         root: Path = importlib.resources.files("bidcell")
         data_path = (
