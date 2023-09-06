@@ -32,6 +32,14 @@ A small subset of Xenium breast cancer data is provided as a demo. Use the follo
 ```sh
 python example_small.py
 ```
+Or:
+```py
+from bidcell import BIDCellModel
+BIDCellModel.get_example_data()
+model = BIDCellModel("params_small_example.yaml")
+model.run_pipeline()
+```
+
 ## Parameters
 
 Parameters are defined in .yaml files. Examples are provided for 4 major platforms, including Xenium, CosMx, MERSCOPE, and Stereo-seq. BIDCell may also be applied to data from other technologies such as MERFISH. Run the following to obtain examples: 
