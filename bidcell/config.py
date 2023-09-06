@@ -13,15 +13,9 @@ def validate_path(v: str | None) -> str:
 
     path = Path(v)
 
-    var_name = f'{v=}'.split('=')[0]
     assert (
         path.exists()
-    ), f"Invalid path for {var_name} ({v}): Ensure you have the correct path in your config file."
-
-    if "fp" in var_name:
-        assert path.is_file(), f"Path for {var_name} ({v}) is not a file: Ensure you have the correct path in your config file."
-    else:
-        assert path.is_dir(), f"Path for {var_name} ({v}) is not a directory: Ensure you have the correct path in your config file."
+    ), f"Invalid path {v}: Ensure you have the correct path in your config file."
 
     return str(path.resolve())
 
