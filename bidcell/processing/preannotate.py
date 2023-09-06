@@ -113,7 +113,7 @@ def preannotate(config: Config):
     sc_expr = df_ref.iloc[:, :-3].to_numpy()
     n_atlas_types = sc_expr.shape[0]
     sc_labels = df_ref.iloc[:, -3].to_numpy().astype(int)
-    sc_names = df_ref.iloc[:, -2].to_list()
+    # sc_names = df_ref.iloc[:, -2].to_list()
 
     # Divide the data into chunks for multiprocessing
     n_processes = get_n_processes(config.cpus)

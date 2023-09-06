@@ -79,7 +79,7 @@ model.predict()
 
 BIDCell uses single-cell reference data for improved results. These can be downloaded from public repositories such as TISCH2, Allen Brain Map, and the Human Cell Atlas. 
 
-Please see the provided breast cancer single-cell reference and positive/negative marker files (`sc_breast.csv`, `sc_breast_markers_pos.csv`, and `sc_breast_markers_neg.csv`) as a template. Ensure that the column names (genes) are naturally sorted (e.g., with `natsort()`).
+Please see the provided breast cancer single-cell reference and positive/negative marker files (`sc_breast.csv`, `sc_breast_markers_pos.csv`, and `sc_breast_markers_neg.csv`) as a template.
 
 The reference csv file contains average expressions for all of the genes in the spatial transcriptomic dataset of different cell types. You may choose an appropriate list of cell types to include for your data.
 

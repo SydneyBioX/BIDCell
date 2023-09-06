@@ -44,9 +44,7 @@ class DataProcessing(data.Dataset):
             + str(shift_patches)
         )
 
-        self.nuclei_fp = os.path.join(
-            config.files.data_dir, config.files.fp_nuclei
-        )
+        self.nuclei_fp = os.path.join(config.files.data_dir, config.files.fp_nuclei)
         self.nuclei_types_fp = os.path.join(
             config.files.data_dir, config.files.fp_nuclei_anno
         )
@@ -107,7 +105,7 @@ class DataProcessing(data.Dataset):
         if self.isTraining:
             self.fp_patches = [fp_patches_all[x] for x in train_ids]
             if total_steps is not None:
-                total_steps = total_steps + int(0.05*len(train_ids))
+                total_steps = total_steps + int(0.05 * len(train_ids))
                 if total_steps <= len(train_ids):
                     self.fp_patches = self.fp_patches[:total_steps]
         elif all_patches:
