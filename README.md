@@ -12,36 +12,36 @@ Recent advances in subcellular imaging transcriptomics platforms have enabled sp
 We ran BIDCell on a Linux system with a 12GB NVIDIA GTX Titan V GPU, Intel(R) Core(TM) i9-9900K CPU @ 3.60GHz with 16 threads, and 64GB RAM.
 
 1. Create virtual environment (Python>=3.9,<3.13):
-    
-        conda create --name bidcell python=3.10
-    
+```sh
+conda create --name bidcell python=3.10
+```    
 2. Activate virtual environment:
-    
-        conda activate bidcell
-
-4. Install package:
-    
-        python -m pip install bidcell
-
+```sh
+conda activate bidcell
+```
+3. Install package:
+```sh
+python -m pip install bidcell
+```
 Installation of dependencies typically requires a few minutes. 
 
 
 ## Demo
 
 A small subset of Xenium breast cancer data is provided as a demo. Use the following to run all the steps to verify installation:
-
-        python example_small.py
-
+```sh
+python example_small.py
+```
 ## Parameters
 
 Parameters are defined in .yaml files. Examples are provided for 4 major platforms, including Xenium, CosMx, MERSCOPE, and Stereo-seq. BIDCell may also be applied to data from other technologies such as MERFISH. Run the following to obtain examples: 
-
-        from bidcell import BIDCellModel
-        BIDCellModel.get_example_config("xenium")
-        BIDCellModel.get_example_config("cosmx")
-        BIDCellModel.get_example_config("merscope")
-        BIDCellModel.get_example_config("stereoseq")
-
+```py
+from bidcell import BIDCellModel
+BIDCellModel.get_example_config("xenium")
+BIDCellModel.get_example_config("cosmx")
+BIDCellModel.get_example_config("merscope")
+BIDCellModel.get_example_config("stereoseq")
+```
 This will copy the .yaml for the respective vendor into your working directory, for example `xenium_example_config.yaml`. 
 
 ## Example usage
@@ -49,32 +49,32 @@ This will copy the .yaml for the respective vendor into your working directory, 
 The full dataset (Xenium Output Bundle In Situ Replicate 1) may be downloaded from https://www.10xgenomics.com/products/xenium-in-situ/preview-dataset-human-breast. The breast cancer reference data are provided with this package under `data/sc_references`, or `./example_data/sc_references` if you have run `example_small.py`. Please ensure the correct paths are provided for the parameters under `files` in `xenium_example_config.yaml`, in particular, the paths for the transcripts (`transcripts.csv.gz`) and DAPI (`morphology_mip.ome.tif`) files.
 
 To run the entire pipeline (data processing, training, prediction, and extracting the cell-gene matrix):
-
-        from bidcell import BIDCellModel
-        model = BIDCellModel("xenium_example_config.yaml")
-        model.run_pipeline()
-
+```py
+from bidcell import BIDCellModel
+model = BIDCellModel("xenium_example_config.yaml")
+model.run_pipeline()
+```
 Alternatively, the pipeline can be broken down into 3 main stages:
-
-        from bidcell import BIDCellModel
-        model = BIDCellModel("xenium_example_config.yaml")
-        model.preprocess()
-        model.train()
-        model.predict()
-
+```py
+from bidcell import BIDCellModel
+model = BIDCellModel("xenium_example_config.yaml")
+model.preprocess()
+model.train()
+model.predict()
+```
 Or, functions in `preprocess` can be called individually:
-
-        from bidcell import BIDCellModel
-        model = BIDCellModel("xenium_example_config.yaml")
-        # model.stitch_nuclei() # for when nuclei images are separated into FOVs (e.g., CosMx)
-        model.segment_nuclei()
-        model.generate_expression_maps()
-        model.generate_patches()
-        model.make_cell_gene_mat(is_cell=False)
-        model.preannotate()
-        model.train()
-        model.predict()
-
+```py
+from bidcell import BIDCellModel
+model = BIDCellModel("xenium_example_config.yaml")
+# model.stitch_nuclei() # for when nuclei images are separated into FOVs (e.g., CosMx)
+model.segment_nuclei()
+model.generate_expression_maps()
+model.generate_patches()
+model.make_cell_gene_mat(is_cell=False)
+model.preannotate()
+model.train()
+model.predict()
+```
 ## Single-cell reference and markers
 
 BIDCell uses single-cell reference data for improved results. These can be downloaded from public repositories such as TISCH2, Allen Brain Map, and the Human Cell Atlas. 
