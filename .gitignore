@@ -15,6 +15,7 @@ dist
 params_small_example.yaml
 *_example_config.yaml
 example_large.py
+pypi_token.txt
 
 !morphology_mip_small.tif
 !transcripts_small.csv
