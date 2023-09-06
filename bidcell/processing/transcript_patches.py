@@ -16,9 +16,7 @@ def generate_patches(config: Config):
     Divides transcriptomic maps of all genes into patches for input to the CNN
 
     """
-    dir_dataset = os.path.join(
-        config.files.data_dir, config.files.dir_out_maps
-    )
+    dir_dataset = os.path.join(config.files.data_dir, config.files.dir_out_maps)
 
     patch_size = config.model_params.patch_size
     shift = [0, int(patch_size / 2)]

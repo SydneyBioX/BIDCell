@@ -210,9 +210,14 @@ def combine(config, dir_id, patch_size, nuclei_img):
     Combine the patches previously output by the connect function
     """
 
-    fp_dir = dir_id + "epoch_%d_step_%d_connected" % (config.testing_params.test_epoch, config.testing_params.test_step)
-    fp_unconnected = dir_id + "epoch_%d_step_%d.tif" % (config.testing_params.test_epoch, config.testing_params.test_step)
-    fp_output_seg = fp_dir + ".tif"
+    fp_dir = dir_id + "epoch_%d_step_%d_connected" % (
+        config.testing_params.test_epoch,
+        config.testing_params.test_step,
+    )
+    fp_unconnected = dir_id + "epoch_%d_step_%d.tif" % (
+        config.testing_params.test_epoch,
+        config.testing_params.test_step,
+    )
 
     dl_pred = tifffile.imread(fp_unconnected)
     height = dl_pred.shape[0]
@@ -334,8 +339,14 @@ def process_check_splits(config, dir_id, nuclei_img, seg_final, chunk_ids):
 def postprocess_predictions(config: Config, dir_id: str):
     dir_id = config.files.data_dir + "/model_outputs/" + dir_id + "/test_output/"
 
-    pred_fp = dir_id + "epoch_%d_step_%d.tif" % (config.testing_params.test_epoch, config.testing_params.test_step)
-    output_dir = dir_id + "epoch_%d_step_%d_connected/" % (config.testing_params.test_epoch, config.testing_params.test_step)
+    pred_fp = dir_id + "epoch_%d_step_%d.tif" % (
+        config.testing_params.test_epoch,
+        config.testing_params.test_step,
+    )
+    output_dir = dir_id + "epoch_%d_step_%d_connected/" % (
+        config.testing_params.test_epoch,
+        config.testing_params.test_step,
+    )
 
     nucleus_fp = os.path.join(config.files.data_dir, config.files.fp_nuclei)
     nuclei_img = tifffile.imread(nucleus_fp)
@@ -407,7 +418,10 @@ def postprocess_predictions(config: Config, dir_id: str):
 
     seg_final = np.where(nuclei_img > 0, nuclei_img, seg_final)
 
-    fp_dir = dir_id + "epoch_%d_step_%d_connected" % (config.testing_params.test_epoch, config.testing_params.test_step)
+    fp_dir = dir_id + "epoch_%d_step_%d_connected" % (
+        config.testing_params.test_epoch,
+        config.testing_params.test_step,
+    )
     fp_output_seg = fp_dir + ".tif"
     print("Saved segmentation to %s" % fp_output_seg)
     tifffile.imwrite(
@@ -418,9 +432,7 @@ def postprocess_predictions(config: Config, dir_id: str):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    parser.add_argument(
-        "--config_dir", type=str, help="path to config"
-    )
+    parser.add_argument("--config_dir", type=str, help="path to config")
 
     args = parser.parse_args()
     config = load_config(args.config_dir)

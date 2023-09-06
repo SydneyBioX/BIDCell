@@ -31,7 +31,7 @@ def segment_nuclei(config: Config):
     dir_dataset = config.files.data_dir
 
     print("Reading DAPI image")
-    if config.files.fp_dapi == None:
+    if config.files.fp_dapi is None:
         fp_dapi = os.path.join(dir_dataset, "dapi_stitched.tif")
     else:
         fp_dapi = config.files.fp_dapi

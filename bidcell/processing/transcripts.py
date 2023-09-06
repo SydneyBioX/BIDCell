@@ -256,7 +256,9 @@ def generate_expression_maps(config: Config):
     print(f"Total height {total_height}, width {total_width}")
 
     # Start and end coordinates of patches
-    h_coords, img_height = get_patches_coords(total_height, config.transcripts.max_height)
+    h_coords, img_height = get_patches_coords(
+        total_height, config.transcripts.max_height
+    )
     w_coords, img_width = get_patches_coords(total_width, config.transcripts.max_width)
     hw_coords = [(hs, he, ws, we) for (hs, he) in h_coords for (ws, we) in w_coords]
 
@@ -332,9 +334,7 @@ def generate_expression_maps(config: Config):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    parser.add_argument(
-        "--config_dir", type=str, help="path to config"
-    )
+    parser.add_argument("--config_dir", type=str, help="path to config")
 
     args = parser.parse_args()
     config = load_config(args.config_dir)

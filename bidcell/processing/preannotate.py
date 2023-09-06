@@ -159,9 +159,7 @@ def preannotate(config: Config):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    parser.add_argument(
-        "--config_dir", type=str, help="path to config"
-    )
+    parser.add_argument("--config_dir", type=str, help="path to config")
 
     args = parser.parse_args()
     config = load_config(args.config_dir)

@@ -54,9 +54,9 @@ def train(config: Config):
     experiment_path = os.path.join(config.files.data_dir, "model_outputs", timestamp)
     make_dir(experiment_path + "/" + config.experiment_dirs.model_dir)
     make_dir(experiment_path + "/" + config.experiment_dirs.samples_dir)
-    
+
     if config.training_params.model_freq <= config.testing_params.test_step:
-        model_freq = config.training_params.model_freq  
+        model_freq = config.training_params.model_freq
     else:
         model_freq = config.testing_params.test_step
 

@@ -74,7 +74,9 @@ def stitch_nuclei(config: Config):
     else:
         dir_dapi = config.nuclei_fovs.dir_dapi
 
-    ext_pat = "".join("[%s%s]" % (e.lower(), e.upper()) for e in config.nuclei_fovs.ext_dapi)
+    ext_pat = "".join(
+        "[%s%s]" % (e.lower(), e.upper()) for e in config.nuclei_fovs.ext_dapi
+    )
     fp_dapi_list = glob.glob(os.path.join(dir_dapi, "*." + ext_pat))
     fp_dapi_list = natsort.natsorted(fp_dapi_list)
 
@@ -111,13 +113,13 @@ def stitch_nuclei(config: Config):
     # Locations of each FOV in the whole image
     n_fov = config.nuclei_fovs.n_fov
     if config.nuclei_fovs.row_major:
-        order = np.arange(config.nuclei_fovs.n_fov_h * config.nuclei_fovs.n_fov_w).reshape(
-            (config.nuclei_fovs.n_fov_h, config.nuclei_fovs.n_fov_w)
-        )
+        order = np.arange(
+            config.nuclei_fovs.n_fov_h * config.nuclei_fovs.n_fov_w
+        ).reshape((config.nuclei_fovs.n_fov_h, config.nuclei_fovs.n_fov_w))
     else:
-        order = np.arange(config.nuclei_fovs.n_fov_h * config.nuclei_fovs.n_fov_w).reshape(
-            (config.nuclei_fovs.n_fov_h, config.nuclei_fovs.n_fov_w), order="F"
-        )
+        order = np.arange(
+            config.nuclei_fovs.n_fov_h * config.nuclei_fovs.n_fov_w
+        ).reshape((config.nuclei_fovs.n_fov_h, config.nuclei_fovs.n_fov_w), order="F")
 
     # Arrangement of the FOVs - default is ul
     if config.nuclei_fovs.start_corner == "ur":
@@ -131,7 +133,8 @@ def stitch_nuclei(config: Config):
     print(order)
 
     stitched = np.zeros(
-        (fov_h * config.nuclei_fovs.n_fov_h, fov_w * config.nuclei_fovs.n_fov_w), dtype=fov_dtype
+        (fov_h * config.nuclei_fovs.n_fov_h, fov_w * config.nuclei_fovs.n_fov_w),
+        dtype=fov_dtype,
     )
 
     for i_fov in range(n_fov):
@@ -156,14 +159,18 @@ def stitch_nuclei(config: Config):
             dapi_stack = np.zeros((len(fp_stack_fov), fov_h, fov_w), dtype=fov_dtype)
             for i, fp in enumerate(fp_stack_fov):
                 dapi_stack[i, :, :] = read_dapi(
-                    fp, config.nuclei_fovs.channel_first, config.nuclei_fovs.channel_dapi
+                    fp,
+                    config.nuclei_fovs.channel_first,
+                    config.nuclei_fovs.channel_dapi,
                 )
 
             fov_img = np.max(dapi_stack, axis=0)
 
         else:
             # Find z level slice for FOV
-            pattern_slice = get_string_with_pattern(config.nuclei_fovs.z_level, config.nuclei_fovs.pattern_z)
+            pattern_slice = get_string_with_pattern(
+                config.nuclei_fovs.z_level, config.nuclei_fovs.pattern_z
+            )
             print(pattern_slice)
             found_slice = [check_pattern(s, pattern_slice) for s in fp_stack_fov]
             found_slice_idx = [i for i, x in enumerate(found_slice) if x]
@@ -195,9 +202,7 @@ def stitch_nuclei(config: Config):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    parser.add_argument(
-        "--config_dir", type=str, help="path to config"
-    )
+    parser.add_argument("--config_dir", type=str, help="path to config")
 
     args = parser.parse_args()
     config = load_config(args.config_dir)
