@@ -1,0 +1,83 @@
+# for functions in bidcell/processing
+# NOTE: Commented options default to None
+
+cpus: 16 # number of CPUs for multiprocessing
+
+files:
+  data_dir: ./data_large/dataset_cosmx_nsclc # data directory for processed/output data
+  fp_dapi: # path of DAPI image or path of output stitched DAPI if using stitch_nuclei
+  fp_transcripts: ./data_large/dataset_cosmx_nsclc/Lung5_Rep1_tx_file.csv # path of transcripts file
+  fp_ref: ./data_large/sc_references/sc_nsclc.csv # file path of reference data
+  fp_pos_markers: ./data_large/sc_references/sc_nsclc_markers_pos.csv # file path of positive markers
+  fp_neg_markers: ./data_large/sc_references/sc_nsclc_markers_neg.csv # file path of negative markers
+
+nuclei_fovs:
+  stitch_nuclei_fovs: True # set True to stitch separate FOVs of DAPI together in 1 image
+  dir_dapi: ./data_large/dataset_cosmx_nsclc/Lung5_Rep1-RawMorphologyImages # name of directory containing the DAPI FOV images
+  ext_dapi: tif # extension of the DAPI images
+  pattern_z: Z### # String pattern to find in the file names for the Z number, or None for no Z component
+  pattern_f: F### # String pattern to find in file names for the FOV number
+  channel_first: True # channel axis first (e.g. [5,H,W]) or last (e.g. [H,W,5]) in image volumes
+  channel_dapi: -1 # channel index of the DAPI images in the image volumes
+  n_fov: 30 # total number of FOVs
+  min_fov: 1 # smallest FOV number - usually 0 or 1
+  n_fov_h: 6 # number of FOVs tiled along vertical axis
+  n_fov_w: 5 # number of FOVs tiled along horizontal axis
+  start_corner: ul # position of first FOV - choose from ul, ur, bl, br
+  row_major: True # row major ordering of FOVs
+  z_level: 1 # which z slice to use, or set mip to use MIP
+  mip: False # take the maximum intensity projection across all Z
+  flip_ud: True # flip images up/down before stitching
+
+nuclei:
+  diameter: # estimated diameter of nuclei for Cellpose - or None to automatically compute, default: None
+
+transcripts:
+  shift_to_origin: True # shift to origin, making min(x) and min(y) (0,0)
+  x_col: x_global_px # name of x location column in transcripts file
+  y_col: y_global_px # name of y location column in transcripts file
+  gene_col: target # name of genes column in transcripts file
+  transcripts_to_filter: # genes starting with these strings will be filtered out
+  - NegControlProbe_
+  - antisense_
+  - NegControlCodeword_
+  - BLANK_
+  - Blank-
+  - NegPrb
+
+affine:
+  target_pix_um: 0.5 # microns per pixel to perform segmentation; default: 1.0
+  base_pix_x: 0.18 # convert to microns along width by multiplying the original pixels by base_pix_x microns per pixel
+  base_pix_y: 0.18 # convert to microns along width by multiplying the original pixels by base_pix_y microns per pixel
+  base_ts_x: 0.18 # convert between transcript locations and target pixels along width
+  base_ts_y: 0.18 # convert between transcript locations and target pixels along height
+  global_shift_x: 0 # additional adjustment to align transcripts to DAPI in target pixels along image width; default: 0
+  global_shift_y: 0 # additional adjustment to align transcripts to DAPI in target pixels along image height; default: 0
+
+model_params:
+  name: custom # segmentation model to use: custom for model in model.py or set to a encoder name from segmentation_models_pytorch; default: custom
+  patch_size: 64 # size of transcriptomic image patches for input to DL model
+  elongated: # list of elongated cell types that are in the single-cell reference
+  - Adventitial fibroblasts
+  - Alveolar fibroblasts
+  - Peribronchial fibroblasts
+  - Subpleural fibroblasts
+  - Myofibroblasts
+  - Fibromyocytes
+
+training_params:
+  total_epochs: 1 # number of training epochs; default: 1
+  total_steps: 4000 # number of training steps; default: 4000
+  ne_weight: 1.0 # weight for nuclei encapsulation loss; default: 1.0
+  os_weight: 1.0 # weight for oversegmentation loss; default: 1.0
+  cc_weight: 1.0 # weight for cell-calling loss; default: 1.0
+  ov_weight: 1.0 # weight for oversegmentation loss; default: 1.0
+  pos_weight: 1.0 # weight for positive marker loss; default: 1.0
+  neg_weight: 1.0 # weight for negative marker loss; default: 1.0
+
+testing_params:
+  test_epoch: 1 # epoch to test; default: 1
+  test_step: 4000 # step number to test; default: 4000
+
+experiment_dirs:
+  dir_id: last # specify timestamp of output dir or leave blank to use latest dir, default: last

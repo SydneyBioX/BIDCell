@@ -1,0 +1,45 @@
+[tool.pdm.build]
+includes = ["data"]
+
+[tool.pdm.dev-dependencies]
+test = [
+    "pytest>=7.4.1",
+]
+dev = [
+    "black>=23.7.0",
+    "deptry>=0.12.0",
+    "flake8>=6.1.0",
+    "ipython>=8.15.0",
+]
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+[project]
+name = "bidcell"
+version = "1.0.0"
+description = "Biologically-informed deep learning for cell segmentation of subcelluar spatial transcriptomics data."
+authors = [
+    {name = "Helen Fu", email = "xiaohang.fu@sydney.edu.au"},
+]
+dependencies = [
+    "pandas>=2.1.0",
+    "numpy>=1.24.4",
+    "tifffile>=2023.8.30",
+    "imgaug>=0.4.0",
+    "h5py>=3.9.0",
+    "scipy>=1.11.2",
+    "matplotlib>=3.7.2",
+    "natsort>=8.4.0",
+    "cellpose>=2.2.3",
+    "scikit-image>=0.21.0",
+    "segmentation-models-pytorch>=0.3.3",
+    "opencv-python>=4.8.0.76",
+    "pillow>=10.0.0",
+    "pyyaml>=6.0.1",
+    "pydantic>=2.3.0",
+    "tqdm>=4.66.1",
+]
+requires-python = ">=3.9,<3.13"
+readme = "README.md"
+license = {text = "MIT"}
