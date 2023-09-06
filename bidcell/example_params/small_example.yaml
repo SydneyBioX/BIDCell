@@ -1,7 +1,7 @@
 # for functions in bidcell/processing
 # NOTE: Commented options default to None
 
-cpus: 8 # number of CPUs for multiprocessing
+cpus: 4 # number of CPUs for multiprocessing
 
 files:
   data_dir: ./example_data/dataset_xenium_breast1_small # data directory for processed/output data

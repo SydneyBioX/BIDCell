@@ -25,14 +25,15 @@ python -m pip install bidcell
 ```
 Installation of dependencies typically requires a few minutes. 
 
+> **Note**: We are actively finding and fixing issues. If you encounter `[xcb] Unknown sequence number while processing queue`, try running without a GUI, e.g. through PuTTY. Please let us know any other issues you may find. Thank you.
 
 ## Demo
 
 A small subset of Xenium breast cancer data is provided as a demo. Use the following to run all the steps to verify installation:
-```sh
+<!-- ```sh
 python example_small.py
-```
-Or:
+``` -->
+<!-- Or: -->
 ```py
 from bidcell import BIDCellModel
 BIDCellModel.get_example_data()
@@ -42,7 +43,11 @@ model.run_pipeline()
 
 ## Parameters
 
-Parameters are defined in .yaml files. Examples are provided for 4 major platforms, including Xenium, CosMx, MERSCOPE, and Stereo-seq. BIDCell may also be applied to data from other technologies such as MERFISH. Run the following to obtain examples: 
+Parameters are defined in .yaml files. Examples are provided for 4 major platforms, including Xenium, CosMx, MERSCOPE, and Stereo-seq. BIDCell may also be applied to data from other technologies such as MERFISH. 
+
+> **Note**: **Please modify `cpus` to suit your system. Higher `cpus` allow faster runtimes but may freeze your system.**
+
+Run the following to obtain examples: 
 ```py
 from bidcell import BIDCellModel
 BIDCellModel.get_example_config("xenium")
