@@ -82,7 +82,7 @@ def postprocess_connect(img, nuclei):
             # Rarely, the nucleus is not the largest segment
             for i_part in range(1, len(counts)):
                 if i_part > 1:
-                    no_overlap = True
+                    no_overlap = True  # TODO: Helen, check this!
                 largest = unique[np.argmax(counts[i_part:]) + i_part]
                 connected_mask = np.where(unique_ids == largest, 1, 0)
                 # Break if current largest region overlaps nucleus
