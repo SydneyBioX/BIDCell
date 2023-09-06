@@ -1,5 +1,5 @@
 [tool.pdm.build]
-includes = ["data"]
+includes = ["bidcell", "data"]
 
 [tool.pdm.dev-dependencies]
 test = [
