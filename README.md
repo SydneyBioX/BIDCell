@@ -102,8 +102,10 @@ If you receive the error: ``pickle.UnpicklingError: pickle data was truncated``,
 Performing segmentation at a higher resolution requires a larger patch size, thus more GPU memory.
 
 Expected outputs:
-- .tif file of segmented cells, where the value corresponds to cell IDs
-- .csv file of gene expressions of segmented cells
+- .tif file of segmented cells, where the value corresponds to cell IDs. File name ends in `_connected.tif`
+  - e.g.: `dataset_xenium_breast1_small/model_outputs/2023_09_06_11_55_24/test_output/epoch_1_step_60_connected.tif`
+- `expr_mat.csv` containing gene expressions of segmented cells
+  - e.g.: `dataset_xenium_breast1_small/cell_gene_matrices/2023_09_06_11_55_24/expr_mat.csv`
 
 Expected runtime (based on our system for the Xenium breast cancer dataset):
 - Training: ~10 mins for 4,000 steps
