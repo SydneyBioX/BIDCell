@@ -1,5 +1,5 @@
 [tool.pdm.build]
-includes = []
+includes = ["data"]
 
 [tool.pdm.dev-dependencies]
 test = [
