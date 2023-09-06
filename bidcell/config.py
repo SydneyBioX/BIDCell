@@ -1,7 +1,6 @@
 import os
 from pathlib import Path
-from typing import Literal
-from typing_extensions import Annotated
+from typing import Literal, Annotated
 
 import yaml
 from pydantic import BaseModel, computed_field, model_validator, ConfigDict
