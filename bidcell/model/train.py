@@ -299,11 +299,11 @@ def train(config: Config):
         lrs.append(cur_lr)
 
     # Plot lr scheduler
-    plt.plot(lrs, ".-", label="LambdaLR")
-    plt.xlabel("epoch")
-    plt.ylabel("LR")
-    plt.tight_layout()
-    plt.savefig(experiment_path + "/LR.png", dpi=300)
+    # plt.plot(lrs, ".-", label="LambdaLR")
+    # plt.xlabel("epoch")
+    # plt.ylabel("LR")
+    # plt.tight_layout()
+    # plt.savefig(experiment_path + "/LR.png", dpi=300)
 
     logging.info("Training finished")
 
