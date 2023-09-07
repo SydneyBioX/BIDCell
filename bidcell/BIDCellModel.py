@@ -147,7 +147,8 @@ class BIDCellModel:
         params_path = (
             importlib.resources.files("bidcell") / "example_params" / f"{vendor}.yaml"
         )
-        copyfile(params_path, Path().cwd() / f"{vendor}_example_config.yaml")
+        if not (dest := Path().cwd() / f"{vendor}_example_config.yaml").exists():
+            copyfile(params_path, dest)
 
     @staticmethod
     def get_example_data(with_config: bool = True) -> None:
@@ -162,11 +163,13 @@ class BIDCellModel:
         data_path = (
             root.parent / "data"
         )
-        copytree(data_path, Path().cwd() / "example_data")
-        if with_config:
+        cwd = Path().cwd()
+        if not (cwd / "example_data").exists():
+            copytree(data_path, cwd / "example_data")
+        if with_config and not (cwd / "params_small_example.yaml").exists():
             copyfile(
                 root / "example_params" / "small_example.yaml",
-                Path().cwd() / "params_small_example.yaml"
+                cwd / "params_small_example.yaml"
             )
 
     def __check_valid_timestamp(self, timestamp: str) -> None:
