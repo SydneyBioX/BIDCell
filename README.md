@@ -30,10 +30,10 @@ Installation of dependencies typically requires a few minutes.
 ## Demo
 
 A small subset of Xenium breast cancer data is provided as a demo. Use the following to run all the steps to verify installation:
-<!-- ```sh
+```sh
 python example_small.py
-``` -->
-<!-- Or: -->
+```
+Or:
 ```py
 from bidcell import BIDCellModel
 BIDCellModel.get_example_data()
