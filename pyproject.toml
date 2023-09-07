@@ -17,7 +17,7 @@ build-backend = "pdm.backend"
 
 [project]
 name = "bidcell"
-version = "1.0.2"
+version = "1.0.3"
 description = "Biologically-informed deep learning for cell segmentation of subcelluar spatial transcriptomics data."
 authors = [
     {name = "Helen Fu", email = "xiaohang.fu@sydney.edu.au"},
