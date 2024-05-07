@@ -126,6 +126,18 @@ Expected runtime (based on our system for the Xenium breast cancer dataset):
 - Postprocessing: ~ 30 mins
 
 
+## Xenium Ranger and Xenium Explorer
+
+The BIDCell output .tif segmentation can be used with Xenium Ranger and then viewed in Xenium Explorer. The .tif file needs to be resized to be the same dimensions as the DAPI image (`morphology_mip.ome.tif`):
+
+```py
+cells = cv2.resize(cells.astype('float32'), (w_dapi, h_dapi), interpolation=cv2.INTER_NEAREST)
+cells = cells.astype(np.uint32)
+```
+
+The resized segmentation can then be used as the input file to the `--cells` argument for `xeniumranger import-segmentation`. The same applies to the nuclei from BIDCell.
+
+
 ## Contact us
 
 If you have any enquiries, especially about using BIDCell to segment cells in your data, please contact xiaohang.fu@sydney.edu.au. We are also happy to receive any suggestions and comments.

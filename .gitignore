@@ -25,3 +25,4 @@ pypi_token.txt
 .vscode/settings.json
 data/dataset_xenium_breast1/all_gene_names.txt
 .pdm-python
+get_markers.py
