@@ -100,6 +100,8 @@ The positive and negative markers files contain the respective marker genes for 
 
 Only <1,000 genes are needed to perform segmentation. Specify a selection of genes in a file (see Stero-seq example).
 
+Some example reference data may be found here: https://github.com/SydneyBioX/scClassify?tab=readme-ov-file#pretrained-models
+
 
 ## Segmentation architectures:
 The default is UNet3+ https://arxiv.org/abs/2004.08790, and we have found it to perform well across different technologies and tissue types.
