@@ -6,6 +6,7 @@ Recent advances in subcellular imaging transcriptomics platforms have enabled sp
 
 ![alt text](Figure1.png)
 
+
 ## Installation
 
 > **Note**: A GPU with at least 12GB VRAM is strongly recommended for the deep learning component, and 32GB RAM for data processing.
@@ -27,9 +28,10 @@ Installation of dependencies typically requires a few minutes.
 
 > **Note**: We are actively finding and fixing issues. If you encounter `[xcb] Unknown sequence number while processing queue`, try running without a GUI, e.g. through PuTTY. Please let us know any other issues you may find. Thank you.
 
+
 ## Demo
 
-A small subset of Xenium breast cancer data is provided as a demo. Use the following to run all the steps to verify installation:
+Please download the BIDCell GitHub repository first. A small subset of Xenium breast cancer data is provided as a demo. The example .yaml file can be found in ``bidcell/example_params/small_example.yaml``. Use the following to run all the steps to verify installation:
 ```sh
 python example_small.py
 ```
@@ -40,6 +42,7 @@ BIDCellModel.get_example_data()
 model = BIDCellModel("params_small_example.yaml")
 model.run_pipeline()
 ```
+
 
 ## Parameters
 
@@ -56,6 +59,7 @@ BIDCellModel.get_example_config("merscope")
 BIDCellModel.get_example_config("stereoseq")
 ```
 This will copy the .yaml for the respective vendor into your working directory, for example `xenium_example_config.yaml`. 
+
 
 ## Example usage
 
@@ -88,6 +92,13 @@ model.preannotate()
 model.train()
 model.predict()
 ```
+
+If your machine/server has multiple GPUs, you may select the GPU to use, e.g. for GPU ID 3:
+```sh
+CUDA_VISIBLE_DEVICES=3
+```
+
+
 ## Single-cell reference and markers
 
 BIDCell uses single-cell reference data for improved results. These can be downloaded from public repositories such as TISCH2, Allen Brain Map, and the Human Cell Atlas. 
